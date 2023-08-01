@@ -1,0 +1,7 @@
+<!-- /sections/api-quickview.liquid -->
+{% comment %}
+	This section is used for Quick View only
+{% endcomment %}
+
+{%- assign unique = 'quickview-' | append: section.id -%}
+{%- render 'product', product: product, unique: unique, section: nil, section_type: 'quickview' -%}

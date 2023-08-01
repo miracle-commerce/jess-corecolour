@@ -1,0 +1,148 @@
+{%- liquid
+  assign classes = classes | prepend: ' ' | default: ''
+  assign attributes = attributes | prepend: ' ' | default: ''
+  assign in_header = in_header | default: false
+  assign summary_classes = summary_classes | prepend: ' ' | default: ''
+  assign search_types = search_types | default: ''
+
+  assign has_details = false
+  if in_header
+    assign has_details = true
+  endif
+
+  assign popular_searches_menu = settings.popular_searches_menu
+  assign show_browse_categories_menu = settings.show_browse_categories_menu
+  assign show_popular_searches = false
+  if popular_searches_menu != blank or show_browse_categories_menu
+    assign show_popular_searches = true
+  endif
+
+  capture search_popdown_classes
+    echo 'search-popdown' | append: classes
+    unless in_header
+      echo ' search-popdown--page'
+    endunless
+  endcapture
+
+  capture search_popdown_attributes
+    echo attributes
+    if in_header
+      echo ' data-popdown-in-header'
+    else
+      echo ' data-popdown-in-page'
+    endif
+  endcapture
+
+  capture search_popdown_body_classes
+    echo 'search-popdown__body'
+    if in_header
+      echo ' search-popdown__body--fixed'
+    endif
+    if show_popular_searches
+      echo ' search-popdown__body--has-popular-searches'
+    endif
+  endcapture
+-%}
+
+{%- capture search_popdown_body -%}
+  <div class="{{ search_popdown_body_classes }}"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ 'general.search.search' | t }}"
+    data-popdown-body
+  >
+    <div class="search-popdown__main">
+      {%- if settings.enable_predictive_search -%}
+        <predictive-search>
+      {%- else -%}
+        <search-form>
+      {%- endif -%}
+
+        <form class="search-form" action="{{ routes.search_url }}" method="get" role="search" data-search-form>
+          <input name="options[prefix]" type="hidden" value="last">
+          {%- if search_types != '' or template.name == 'search' -%}
+            <input type="hidden" name="type" value="{{ search_types }}">
+          {%- endif -%}
+
+          <div class="search-form__inner" data-search-form-inner>
+            <div class="search-form__input-holder">
+              <label for="searchInput-{{ unique }}" class="search-form__label">
+                <span class="visually-hidden">{{ 'general.search.title' | t }}</span>
+                {%- render 'icon-search' -%}
+              </label>
+
+              <input type="search"
+                id="searchInput-{{ unique }}"
+                class="search-form__input"
+                name="q"
+                value="{{ search.terms | escape }}"
+                aria-label="{{ 'general.search.placeholder' | t }}"
+                {% if settings.enable_predictive_search %}
+                  role="combobox"
+                  aria-expanded="false"
+                  aria-owns="searchResults-{{ unique }}"
+                  aria-controls="searchResults-{{ unique }}"
+                  aria-haspopup="listbox"
+                  aria-autocomplete="list"
+                  autocorrect="off"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                {% endif %}
+              >
+
+              <button class="search-form__submit visually-hidden" type="submit" tabindex="-1" aria-label="{{ 'general.search.submit' | t }}">
+                {%- render 'icon-search' -%}
+              </button>
+
+              <button type="button" class="search-popdown__close" title="{{ 'general.accessibility.close' | t }}" data-popdown-close>
+                {%- render 'icon-close' -%}
+              </button>
+            </div>
+          </div>
+
+          <div id="searchResults-{{ unique }}" class="search-popdown__results">
+            {%- if settings.enable_predictive_search -%}
+              <div class="predictive-search" data-predictive-search-results data-scroll-lock-scrollable>
+                <div class="predictive-search__loading-state">
+                  <div class="predictive-search__loader loader loader--line"><div class="loader-indeterminate"></div></div>
+                </div>
+              </div>
+
+              <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true" data-predictive-search-status></span>
+            {%- endif -%}
+
+            {%- if show_popular_searches -%}
+              {%- render 'popular-searches',
+                unique: unique,
+                popular_searches_menu: popular_searches_menu,
+                show_browse_categories_menu: show_browse_categories_menu -%}
+            {%- endif -%}
+          </div>
+        </form>
+
+      {%- if settings.enable_predictive_search -%}
+        </predictive-search>
+      {%- else -%}
+        </search-form>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endcapture -%}
+
+<search-popdown class="{{ search_popdown_classes }}" {{ search_popdown_attributes }}>
+  {%- if has_details -%}
+    <details>
+      <summary class="search-popdown__toggle{{ summary_classes }}" aria-haspopup="dialog" data-popdown-toggle title="{{ 'general.accessibility.open_search_bar' | t }}">
+        {%- render 'icon-search' -%}
+        {%- render 'icon-close' -%}
+        <span class="visually-hidden">{{ 'general.accessibility.open_search_bar' | t }}</span>
+      </summary>
+  {%- endif -%}
+
+      {{- search_popdown_body -}}
+
+  {%- if has_details -%}
+    </details>
+  {%- endif -%}
+</search-popdown>

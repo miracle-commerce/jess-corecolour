@@ -1,0 +1,51 @@
+{% comment %}
+  Header block content, used in both mobile header and desktop header.
+  Accepts a block, returns the content to render for that block.
+
+  Required params:
+  * block: the block that should be rendered.
+
+  {% render 'header-block', block: block %}
+
+{% endcomment %}
+
+{%- case block.type -%}
+  {%- when 'image' -%}
+    {%- liquid
+      assign width_class = 'menu__block--narrow'
+      if block.settings.wide_image
+        assign width_class = 'menu__block--wide'
+      endif
+    -%}
+    <div class="{{ width_class }}" {{ block.shopify_attributes }}>
+      <div class="header__dropdown__image">
+        {%- if block.settings.title != blank or block.settings.link_text != blank -%}
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" class="link-over-image">
+          {%- endif -%}
+
+          <div class="hero__content__wrapper align--bottom-left">
+            <div class="hero__content backdrop--radial">
+              {%- if block.settings.title != blank -%}
+                <h2 class="hero__title">
+                  {{ block.settings.title | escape }}
+                </h2>
+              {%- endif -%}
+              {%- if block.settings.link_text != blank -%}
+                <p class="hero__description">
+                  {{ block.settings.link_text | escape }}
+                </p>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if block.settings.link != blank -%}
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- render 'image-fill', img_object: block.settings.image, aspect_ratio: block.settings.aspect_ratio -%}
+      </div>
+    </div>
+
+{%- endcase -%}

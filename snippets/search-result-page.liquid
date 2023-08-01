@@ -1,0 +1,51 @@
+{%- comment -%} /snippets/search-result-page.liquid {%- endcomment -%}
+
+{%- liquid
+  assign item_title = item.title | strip_html | escape
+  assign desktop_width = desktop_width | default: ''
+  assign mobile_width = mobile_width | default: ''
+  assign classes = classes | prepend: ' ' | default: ''
+  assign id = id | default: ''
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = animation_anchor | default: section.id
+  assign animation_delay = animation_delay | default: 150
+
+  capture item_classes
+    echo 'search-result-page'
+    case type
+      when 'all-types'
+        echo ' search-result-page--all-types'
+      when 'results-pages'
+        echo ' search-result-page--results-pages'
+    endcase
+    echo classes
+  endcapture
+
+  capture animations_attr
+    if animations_enabled
+      case type
+        when 'all-types'
+          echo ' data-aos="zoom-out"'
+          echo ' data-aos-easing="ease"'
+          echo ' data-aos-duration="1000"'
+        else
+          echo ' data-aos="fade-up"'
+      endcase
+      echo ' data-aos-anchor="' | append: animation_anchor | append: '"'
+      echo ' data-aos-delay="' | append: animation_delay | append: '" '
+    endif
+  endcapture
+-%}
+
+<a href="{{ item.url }}"
+  {% if id != '' %}id="{{ id }}"{% endif %}
+  class="{{ item_classes }}"
+  title="{{ item_title }}"
+  aria-label="{{ item_title }}"
+  {{ animations_attr }}>
+  <div class="search-result-page__title h3">
+    <span>
+      {{- item_title -}}
+    </span>
+  </div>
+</a>

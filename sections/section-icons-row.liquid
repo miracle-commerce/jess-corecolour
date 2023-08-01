@@ -1,0 +1,472 @@
+{% comment %} Icons row {% endcomment %}
+{%- liquid
+  assign bg_color = section.settings.bg_color
+  assign color_body_bg = settings.color_body_bg
+  assign box_color = section.settings.box_color
+  assign text_color = section.settings.text_color
+  assign alignment = section.settings.alignment
+  assign columns = section.settings.columns
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#IconsRow--' | append: section.id
+  assign animation_delay = 150
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  assign button_text = section.settings.button_text
+  assign button_link = section.settings.button_link | default: '#!'
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign icons_width = section.settings.icons_width
+  assign has_subheading = false
+  assign blocks_size = section.blocks.size
+
+  assign flex = false
+  if columns > blocks_size
+    assign flex = true
+  endif
+
+  assign no_box_color = false
+  if box_color == 'rgba(0,0,0,0)' or box_color == ''
+    assign no_box_color = true
+  endif
+
+  assign boxes = true
+  if box_color == bg_color or no_box_color
+    assign boxes = false
+  elsif bg_color == false and color_body_bg == box_color or no_box_color
+    assign boxes = false
+  endif
+
+  assign blocks_without_text = section.blocks | map: 'settings' | where: 'text', ''
+  if blocks_without_text.size == blocks_size
+    assign has_subheading = true
+  endif
+
+  assign single_block = false
+  if blocks_size == 1 and alignment == 'center' or alignment == 'inline-center'
+    assign single_block = true
+  endif
+
+  assign icon_max_size = icons_width
+  if alignment == 'inline-center' or alignment == 'inline-left' and icons_width >= 50
+    assign icon_max_size = 50
+  endif
+
+  assign mobile_class = ' grid--mobile'
+  assign mobile_item_class = ' grid__item'
+  if section.settings.enable_slider_mobile
+    assign mobile_class = ' carousel--mobile'
+    assign mobile_item_class = ' carousel__item'
+  endif
+-%}
+
+{%- style -%}
+  #IconsRow--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+      --bg: {{ bg_color }};
+      background: {{ bg_color }};
+    {%- endif -%}
+  }
+
+  {%- if box_color != 'rgba(0,0,0,0)' and box_color != '' -%}
+    #IconsRow--{{ section.id }} .icons-row__item--box {
+      --bg: {{ box_color }}
+    }
+  {%- endif -%}
+  {%- if text_color != 'rgba(0,0,0,0)' and text_color != '' -%}
+    #IconsRow--{{ section.id }} {
+      --text: {{ text_color }};
+      --text-lighten: {{ text_color | color_lighten: 20 }};
+    }
+  {%- endif -%}
+  #IconsRow--{{ section.id }} {
+    --icon-size: {{ icons_width }}px;
+    --icon-max-size: {{ icon_max_size }}px;
+  }
+  @media screen and (max-width: 767px) {
+    #IconsRow--{{ section.id }} {
+      --icon-max-size: 40px;
+    }
+  }
+{%- endstyle -%}
+
+<section id="IconsRow--{{ section.id }}" class="section-padding icons-row{%- render 'button-fallback-classes', primary_color: button_color, section_bg_color: bg_color -%}" data-section-id="{{ section.id }}" data-section-type="icons-row">
+  <div class="wrapper">
+    <div class="icons-row__wrapper{% if single_block %} icons-row__wrapper--single-block-center{% endif %} text-{{ alignment }}">
+      {%- if heading != blank or subheading != blank -%}
+        <div class="icons-row__headings">
+          {%- if heading != blank -%}
+            <h2 class="icons-row__heading"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {{- heading | escape -}}
+            </h2>
+          {%- endif -%}
+
+          {%- if subheading != blank -%}
+            <div class="icons-row__subheading"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+              {{- subheading -}}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if blocks_size > 0 -%}
+        <div class="icons-row__slider{{ mobile_class }} text-{{ alignment }}{% if flex %} icons-row__slider--flex{% endif %} items--{{ columns }}" data-slider>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign title = block.settings.title
+              assign text = block.settings.text
+              assign image = block.settings.icon_image
+              assign icon = block.settings.icon_name
+            -%}
+
+            <div class="icons-row__item{{ mobile_item_class }}{% if boxes %} icons-row__item--box{% endif %}{% if has_subheading %} icons-row__item--center{% endif %}"
+              {{ block.shopify_attributes }}
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+
+              {%- if image != blank or icon != 'none' -%}
+                <div class="icons-row__icon icon-stroke">
+                  {%- if image != blank -%}
+                    {%- render 'image-fill', img_object: image, classes: 'icons-row__image' -%}
+                  {%- else -%}
+                    {%- render 'icons', icon: icon -%}
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+
+              {%- if title != blank or text != blank -%}
+                <div class="icons-row__content">
+                  {%- if title != blank -%}
+                    <h3 class="icons-row__title">{{ title }}</h3>
+                  {%- endif -%}
+
+                  {%- if text != blank -%}
+                    <div class="icons-row__text">{{ text }}</div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        {%- render 'no-blocks' -%}
+      {%- endif -%}
+
+      {%- if button_text != blank -%}
+        <div class="icons-row__actions" {{ block.shopify_attributes }}
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+          {% endif %}>
+          <a class="btn {{ button_style }} {{ button_size }} {{ button_color }}" href="{{ button_link }}">{{ button_text }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Icons row",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "label": "Center", "value": "center" },
+        { "label": "Left", "value": "left" },
+        { "label": "Inline center", "value": "inline-center" },
+        { "label": "Inline left", "value": "inline-left" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Icons per row",
+      "default": 3,
+      "min": 2,
+      "max": 4,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "icons_width",
+      "label": "Icons width",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 30,
+      "info": "Max size on mobile is 40px"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading text"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#333"
+    },
+    {
+      "type": "color",
+      "id": "box_color",
+      "label": "Boxes"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "btn--black",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--solid",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--small",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Mobile slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_slider_mobile",
+      "label": "Enable slider",
+      "default": false,
+      "info": "Horizontal slider in mobile layout."
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "clock",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image",
+          "info": "If image set it will override the icon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Feature"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Icons row",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": {
+            "icon_name": "truck",
+            "title": "Free Shipping",
+            "text": "<p>on all order over $99</p>"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "icon_name": "check",
+            "title": "Free Returns",
+            "text": "<p>within 30 days of purchase</p>"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+          "icon_name": "eco-friendly",
+            "title": "1% Donated Annually",
+            "text": "<p>to forest conservation</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside"]
+  }
+}
+{% endschema %}

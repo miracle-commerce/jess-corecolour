@@ -1,0 +1,588 @@
+{%- comment -%} /sections/split-images.liquid {%- endcomment -%}
+
+{%- liquid
+  assign section_width = section.settings.width
+  assign image_height = section.settings.image_height
+  if section.settings.enable_mobile_height
+    assign image_height = image_height | append: ' ' | append: section.settings.mobile_image_height
+  endif
+  assign mobile_layout = section.settings.mobile_layout
+  assign title = section.settings.title
+  assign heading_highlight_type = section.settings.heading_highlight_type
+  assign highlight_color = section.settings.highlight_color
+  assign text = section.settings.text
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign button_text = section.settings.button_text
+  assign button_link = section.settings.button_link | default: '#!'
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
+  assign text_position = section.settings.text_position
+  assign show_text_shadow = settings.show_text_shadow
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#SplitImages--' | append: section.id
+  assign animation_delay = 150
+
+  assign mobile_layout_class = 'split-images__pane--first-block'
+
+  case mobile_layout
+    when 'second-block'
+      if section.blocks.size == 2
+        assign mobile_layout_class = 'split-images__pane--second-block'
+      endif
+    when 'split'
+      assign mobile_layout_class = 'split-images__pane--split'
+    when 'inline'
+      assign mobile_layout_class = 'split-images__pane--inline'
+  endcase
+-%}{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}<section
+  class="split-images-section split-images-section--{{ section.id }} {{ section.settings.text_color }}"
+  id="SplitImages--{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="split-images">
+
+  {%- style -%}
+    #SplitImages--{{ section.id }} {
+      --overlay-opacity: {{ overlay_opacity }};
+
+      {%- if heading_highlight_type != 'highlight' -%}
+        --highlight-color: var(--text);
+      {%- endif -%}
+
+      {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+        --highlight-color: {{ highlight_color }};
+      {%- endif -%}
+    }
+    #SplitImages--{{ section.id }} .main-heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }}); }
+  {%- endstyle -%}
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="split-images__pane {{ image_height }} {{ mobile_layout_class }}"
+      {% if animations_enabled %}
+        data-aos="zoom-out"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        data-aos-duration = "1000"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign image = block.settings.image
+          assign image_mobile = block.settings.image_mobile
+        -%}
+
+        <div class="split-images__scale split-images__scale--{{ forloop.index }}" {{ block.shopify_attributes }}>
+          {%- unless image_mobile == blank -%}
+            {%- render 'image-fill', is_background: true, img_object: image_mobile, classes: 'split-images__bg split-images__bg--mobile' -%}
+          {%- endunless -%}
+
+          {%- unless image == blank -%}
+            {%- render 'image-fill', is_background: true, img_object: image, classes: 'split-images__bg split-images__bg--desktop' -%}
+          {%- else -%}
+            {%- render 'image-fill', is_background: true, img_object: '', classes: 'split-images__bg split-images__bg--placeholder' -%}
+          {%- endunless -%}
+        </div>
+      {%- endfor -%}
+
+      <div class="overlay"></div>
+    </div>
+
+    <div class="split-images__content align--{{ text_position }}">
+      <div class="{{ section_width }} split-images__content-inner{% if show_text_shadow %} backdrop--radial{% endif %}"
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+        {% endif %}>
+        {%- if title != blank -%}
+          <h1 class="split-images__heading main-heading{% if has_text_highlight %} {{ text_highlight_wrapper_class }}{% endif %}">
+            {%- liquid
+              if animations_enabled
+                assign title_lines = title | split: '<p>'
+                for line in title_lines
+                  if line != blank
+                    echo '<span class="text-reveal__cropper"><span data-aos="come-up" data-aos-anchor="' | append: animation_anchor | append: '" data-aos-delay="' | append: animation_delay | append: '">'
+
+                      assign line_with_links = line | split: '<a'
+                      assign line_mod  = ''
+
+                      if line_with_links.size > 1 and has_text_highlight
+                        for link_html_part in line_with_links
+                          if link_html_part != blank
+                            assign link_html_mod = link_html_part
+                            if link_html_part contains ' href='
+                              assign link_html_mod = link_html_part | prepend: '<a'
+                            endif
+
+                            if link_html_part contains 'text-highlight'
+                              assign link_html_mod = link_html_mod | replace_first: '><span class="text-highlight', ' data-has-highlight><span class="text-highlight'
+                            endif
+
+                            assign line_mod = line_mod | append: link_html_mod
+                          endif
+                        endfor
+
+                        echo line_mod | replace: '</p>', ''
+                      else
+                        echo line | replace: '</p>', ''
+                      endif
+
+                    echo '</span></span>'
+
+                    unless forloop.last
+                      assign animation_delay = animation_delay | plus: 150
+                    endunless
+                  endif
+                endfor
+
+                assign animation_delay = animation_delay | plus: 150
+              else
+                echo title | replace: '<p>', '' | replace: '</p>', ''
+              endif
+            -%}
+          </h1>
+        {%- endif -%}
+
+        {%- if text != blank -%}
+          <h2 class="slide__text main-text">
+            {%- liquid
+              if animations_enabled
+                assign text_lines = text | escape | newline_to_br | split: '<br />'
+                for line in text_lines
+                  echo '<span class="text-reveal__cropper"><span data-aos="come-up" data-aos-delay="' | append: animation_delay | append: '">'
+                  echo line
+                  echo '</span></span>'
+
+                  unless forloop.last
+                    assign animation_delay = animation_delay | plus: 150
+                  endunless
+                endfor
+
+                assign animation_delay = animation_delay | plus: 150
+              else
+                echo text | escape | newline_to_br
+              endif
+            -%}
+          </h2>
+        {%- endif -%}
+
+        {%- if button_text != blank -%}
+          <div class="slide__buttons main-buttons">
+            <div class="main-buttons__item"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+              {% endif %}>
+              <a class="slide__btn btn {{ button_style }} {{ button_size }} {{ button_color }}" href="{{ button_link }}">{{ button_text | escape }}</a>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if button_text == blank and button_link != '#!' -%}
+        <a class="split-images__link" href="{{ button_link }}"></a>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+  {
+  "name": "Split images",
+  "class": "supports-transparent-header",
+  "max_blocks": 2,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "label": "Height",
+      "default": "full-height",
+      "options": [
+        { "value": "full-height", "label": "Full screen" },
+        { "value": "three-quarters-height", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height", "label": "Two thirds of screen" },
+        { "value": "one-half-height", "label": "One half of screen" },
+        { "value": "one-third-height", "label": "One third of screen" },
+        { "value": "one-fifth-height", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height", "label": "750px" },
+        { "value": "six-fifty-height", "label": "650px" },
+        { "value": "five-fifty-height", "label": "550px" },
+        { "value": "four-fifty-height", "label": "450px" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_height",
+      "label": "Enable mobile height",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_height",
+      "label": "Mobile height",
+      "default": "five-fifty-height-mobile",
+      "options": [
+        { "value": "full-height-mobile", "label": "Full screen" },
+        { "value": "three-quarters-height-mobile", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height-mobile", "label": "Two thirds of screen" },
+        { "value": "one-half-height-mobile", "label": "One half of screen" },
+        { "value": "one-third-height-mobile", "label": "One third of screen" },
+        { "value": "one-fifth-height-mobile", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height-mobile", "label": "750px" },
+        { "value": "six-fifty-height-mobile", "label": "650px" },
+        { "value": "five-fifty-height-mobile", "label": "550px" },
+        { "value": "four-fifty-height-mobile", "label": "450px" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "default": "split",
+      "info": "When both images are shown on mobile",
+      "options": [
+        { "label": "First block image", "value": "first-block" },
+        { "label": "Second block image", "value": "second-block" },
+        { "label": "Split", "value": "split" },
+        { "label": "Inline", "value": "inline" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Content alignment",
+      "default": "middle-center",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top center" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-center", "label": "Center" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom center" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Text contrast",
+      "info": "Improves readability of text",
+      "min": 0,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--narrow",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" },
+        { "value": "wrapper--narrow", "label": "Page width narrow" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Color",
+      "default": "text-light",
+      "options": [
+        {
+          "value": "text-light",
+          "label": "Light"
+        },
+        {
+          "value": "text-dark",
+          "label": "Dark"
+        }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "<p>Welcome to Palo Alto</p>",
+      "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_type",
+      "label": "Highlight type",
+      "default": "italics",
+      "options": [
+        { "value": "italics", "label": "Italics (no decoration)" },
+        { "value": "highlight", "label": "Highlight" },
+        { "value": "highlight-color", "label": "Text color" },
+        { "value": "underline", "label": "Underline" },
+        { "value": "squiggle", "label": "Squiggle" },
+        { "value": "circle", "label": "Circle" },
+        { "value": "stroke", "label": "Stroke (outlined text)" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#D43747"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": 120,
+      "min": 100,
+      "max": 200,
+      "step": 10,
+      "unit": "%"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Describe in a few words your special products, collection, or brand."
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text",
+      "default":"Learn More",
+      "info": "Leave blank to link entire image"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Color",
+      "default": "btn--white",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--solid-border",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--small",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+        "type": "header",
+        "content": "Mobile"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Image",
+          "info": "Optional"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Split images",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

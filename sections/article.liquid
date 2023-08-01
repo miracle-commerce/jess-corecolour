@@ -1,0 +1,404 @@
+<!-- /sections/article-template.liquid -->
+{%- liquid
+  assign number_of_comments = article.comments_count
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Article--' | append: section.id
+  assign animation_delay = 150
+  assign bg_color_secondary = section.settings.bg_color_secondary
+-%}
+
+{%- style -%}
+  #Article--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{% comment %}
+  If a comment was just submitted and it has no blank fields, we have an extra comment to count.
+{% endcomment %}
+
+{%- if comment and comment.created_at -%}
+  {%- assign number_of_comments = article.comments_count %}
+{%- endif -%}
+
+<div id="Article--{{ section.id }}"
+  class="section-padding section-article{% if bg_color_secondary %} bg-secondary{% endif %}"
+  data-section-type="article"
+  data-section-id="{{ section.id }}">
+  <div class="wrapper--narrow">
+    <article class="article__wrapper">
+
+      <header class="section-header section-header--article">
+        <h1
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>{{ article.title }}</h1>
+        {%- if section.settings.show_author or section.settings.show_date -%}
+          <p class="article__meta"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+            {%- capture author -%}{{ article.author }}{%- endcapture -%}
+            {%- capture date -%}<time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: format: 'month_day_year' }}</time>{%- endcapture -%}
+
+            {%- if section.settings.show_author -%}
+              <small class="light-gray">{{ 'blogs.article.by_author' | t: author: author }}</small>
+            {%- endif -%}
+            {%- if section.settings.show_date -%}
+              <small class="light-gray">{{ date }}</small>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+      </header>
+
+      {%- if article.image -%}
+        <div class="article__image__wrapper"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {%- render 'responsive-image', image: article.image, image_class: 'article__image', image_alt: article.image.alt -%}
+        </div>
+      {%- endif -%}
+
+      <div class="rte"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {{- article.content -}}
+      </div>
+
+      {%- if article.tags.size > 0 and section.settings.show_tags -%}
+        <ul class="inline-list"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {%- render 'tags-article', article: article, blog: blog -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if section.settings.show_share_button -%}
+        {%- render 'share-button',
+          text: section.settings.text,
+          animation_anchor: animation_anchor,
+          animation_delay: animation_delay -%}
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {%- endif -%}
+
+      {%- if blog.comments_enabled? -%}
+        {%- if settings.show_spacer_lines -%}
+          <hr class="hr--full"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+        {%- endif -%}
+        {%- unless number_of_comments == '0' -%}
+          <p
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>{{ 'blogs.comments.comments_with_count' | t: count: number_of_comments }}</p>
+        {%- endunless -%}
+        {% comment %}
+          Just like blog.liquid page, define how many comments should be on each page.
+        {% endcomment %}
+        {%- paginate article.comments by 5 -%}
+          {% comment %}
+            #Comments is required, it is used as an anchor link by Shopify.
+          {% endcomment %}
+          <div id="Comments">
+            {%- if number_of_comments > 0 -%}
+              <ul class="no-bullets">
+                {% comment %}
+                  If a comment was just submitted with no blank field, show it.
+                {% endcomment %}
+                {%- if comment and comment.created_at -%}
+                  {%- assign submitted_comment_id = comment.id -%}
+                  <li id="{{ comment.id }}"
+                    class="comment first{% if article.comments_count == 0 %} last{% endif %}"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                    {%- render 'comment', comment: comment -%}
+                  </li>
+                {%- endif -%}
+
+                {% comment %}
+                  Showing the rest of the comments.
+                {% endcomment %}
+                {%- for comment in article.comments -%}
+                  {%- unless comment.id == submitted_comment_id -%}
+                    <li id="{{ comment.id }}"
+                      class="comment{% unless number_of_comments > article.comments_count %}{% if forloop.first %} first{% endif %}{% endunless %}{% if forloop.last %} last {% endif %}"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>
+                      {%- render 'comment', comment: comment -%}
+                    </li>
+                  {%- endunless -%}
+
+                  {%- unless forloop.last -%}
+                    <li></li>
+                  {%- endunless -%}
+                {% endfor %}
+              </ul>
+
+              {%- if paginate.pages > 1 -%}
+                {%- if settings.show_spacer_lines -%}
+                  <hr class="hr--full"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                {%- endif -%}
+                <div class="pagination"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}>
+                  {{ paginate | default_pagination | replace: '&laquo; Previous', '&larr;' | replace: 'Next &raquo;', '&rarr;' }}
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+
+            {% comment %}
+              Comment submission form
+            {% endcomment %}
+            <div class="form-vertical">
+              {% form 'new_comment', article, id: 'NewComment' %}
+
+              {%- assign post_message = 'blogs.comments.success' -%}
+              {%- if blog.moderated? and comment.status == 'pending' -%}
+                {%- assign post_message = 'blogs.comments.success_moderated' -%}
+              {%- elsif comment.status == 'unapproved' or comment.status == 'spam' -%}
+                {%- assign post_message = 'blogs.comments.unapproved' -%}
+              {%- endif -%}
+
+              {%- if form.posted_successfully? -%}
+                <p class="note form-success">{{ post_message | t }}</p>
+              {%- endif -%}
+
+                {% comment %}
+                  #AddCommentTitle is used simply as an anchor link
+                {% endcomment %}
+                <h3 id="AddCommentTitle"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}>{{ 'blogs.comments.title' | t }}</h3>
+
+                {{ form.errors | default_errors }}
+
+                <div class="comment__wrapper">
+                  <div class="comment__left"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                    <label for="CommentAuthor" class="hidden-label">{{ 'blogs.comments.name' | t }}</label>
+                    <input type="text" name="comment[author]" id="CommentAuthor" class="input--full{% if form.errors contains 'author' %} error{% endif %}" placeholder="{{ 'blogs.comments.name' | t }}" value="{{ form.author }}" autocapitalize="words" required>
+
+                    <label for="CommentEmail" class="hidden-label">{{ 'blogs.comments.email' | t }}</label>
+                    <input type="email" name="comment[email]" id="CommentEmail" class="input--full{% if form.errors contains 'email' %} error{% endif %}" placeholder="{{ 'blogs.comments.email' | t }}" value="{{ form.email }}" autocorrect="off" autocapitalize="off" required>
+                  </div>
+
+                  <div class="comment__right"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                    <label for="CommentBody" class="hidden-label">{{ 'blogs.comments.message' | t }}</label>
+                    <textarea name="comment[body]" id="CommentBody" class="input--full{% if form.errors contains 'body' %} error {% endif %}" placeholder="{{ 'blogs.comments.message' | t }}" required>{{ form.body }}</textarea>
+                  </div>
+                </div>
+
+                {%- if blog.moderated? -%}
+                  <small class = "light-gray">{{ 'blogs.comments.moderated' | t }}</small>
+                {%- endif -%}
+
+                <button type="submit" class="btn btn--primary btn--solid post-comment"
+                  {% if animations_enabled %}
+                    data-aos="fade"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}>{{ 'blogs.comments.post_comment' | t }}</button>
+
+                {%- if form.errors -%}
+                  <script type="text/javascript">theme.settings.newHash = 'AddCommentTitle';</script>
+                {%- endif -%}
+
+                {%- if form.posted_successfully? -%}
+                  <script type="text/javascript">theme.settings.newHash = 'Comments';</script>
+                {%- endif -%}
+
+              {%- endform -%}
+            </div>
+
+          </div>
+        {%- endpaginate -%}
+      {%- endif -%}
+
+    </article>
+
+    {%- for block in section.blocks -%}
+      {%- render block -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "articleBody": {{ article.content | strip_html | json }},
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": {{ shop.url | append: page.url | json }}
+    },
+    "headline": {{ article.title | json }},
+    {% if article.excerpt != blank %}
+      "description": {{ article.excerpt | strip_html | json }},
+    {% endif %}
+    {% if article.image %}
+      {% assign image_size = article.image.width | append: 'x' %}
+      "image": [
+        {{ article | img_url: image_size | prepend: "https:" | json }}
+      ],
+    {% endif %}
+    "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
+    "dateCreated": {{ article.created_at | date: '%Y-%m-%dT%H:%M:%SZ' | json }},
+    "author": {
+      "@type": "Person",
+      "name": {{ article.author | json }}
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }}
+    }
+  }
+</script>
+
+{% schema %}
+  {
+    "name": "Posts",
+    "class": "article-page",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tags",
+        "label": "Show article tags",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Share"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_share_button",
+        "label": "Show share button",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "text",
+        "label": "Text",
+        "default": "Share",
+        "info": "If you include a link in social media posts, the page\’s featured image will be shown as the preview image.[Learn more](https://help.shopify.com/en/manual/online-store/images/showing-social-media-thumbnail-images)"
+      },
+      {
+        "type": "paragraph",
+        "content": "A store title and description are included with the preview image.[Learn more](https://help.shopify.com/en/manual/promoting-marketing/seo/adding-keywords#set-a-title-and-description-for-your-online-store)"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "blocks": [
+      {
+        "type": "@app"
+      }
+    ]
+  }
+{% endschema %}

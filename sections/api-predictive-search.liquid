@@ -1,0 +1,190 @@
+<!-- /section/api-predictive-search.liquid -->
+
+{% comment %}
+  Renders predictive search results
+{% endcomment %}
+
+{%- liquid
+  assign animation_anchor = '#predictiveSearchResults'
+  assign animation_delay = 300
+  assign animation_duration = 200
+
+  comment
+    Get each resource's result count
+  endcomment
+  assign articles_count = predictive_search.resources.articles.size
+  assign collections_count = predictive_search.resources.collections.size
+  assign pages_count = predictive_search.resources.pages.size
+  assign products_count = predictive_search.resources.products.size
+  assign queries_count = predictive_search.resources.queries.size
+  assign total_results = articles_count | plus: collections_count | plus: pages_count | plus: products_count | plus: queries_count
+
+  assign suggest_articles = settings.suggest_articles
+  assign suggest_collections = settings.suggest_collections
+  assign suggest_products = settings.suggest_products
+  assign suggest_pages = settings.suggest_pages
+
+  assign show_queries = false
+  if queries_count > 0
+    assign show_queries = true
+  endif
+
+  assign show_collections = false
+  if collections_count > 0 and suggest_collections
+    assign show_collections = true
+  endif
+
+  assign show_products = false
+  if products_count > 0 and suggest_products
+    assign show_products = true
+  endif
+
+  assign show_articles = false
+  if articles_count > 0 and suggest_articles
+    assign show_articles = true
+  endif
+
+  assign show_pages = false
+  if pages_count > 0 and suggest_pages
+    assign show_pages = true
+  endif
+
+  unless suggest_articles
+    assign total_results = total_results | minus: articles_count
+  endunless
+  unless suggest_collections
+    assign total_results = total_results | minus: collections_count
+  endunless
+  unless suggest_products
+    assign total_results = total_results | minus: products_count
+  endunless
+  unless suggest_pages
+    assign total_results = total_results | minus: pages_count
+  endunless
+-%}
+
+{%- if predictive_search.performed -%}
+  <div class="predictive-search__loading-state">
+    <div class="predictive-search__loader loader loader--line"><div class="loader-indeterminate"></div></div>
+  </div>
+
+  <div id="predictiveSearchResults"
+    class="predictive-search__results"
+    data-search-results-wrapper
+    data-aos="fade"
+    data-aos-delay="{{ animation_delay }}"
+    data-aos-duration="{{ animation_duration }}"
+    data-aos-anchor="{{ animation_anchor }}"
+  >
+    {%- if show_queries or show_collections -%}
+      <div class="predictive-search__group" role="group" aria-labelledby="predictiveSearchSuggestions">
+        <p id="predictiveSearchSuggestions" class="predictive-search__heading">
+          <span>{{ 'general.search.suggestions' | t }}</span>
+        </p>
+
+        <div class="predictive-search__list" role="listbox">
+          {%- if show_queries -%}
+            {%- for query in predictive_search.resources.queries -%}
+              <div class="predictive-search__item" id="predictiveSearchOptionQuery-{{ forloop.index }}" role="option" aria-selected="false">
+                <a class="predictive-search__link" href="{{ query.url }}" tabindex="-1">
+                  <span aria-label="{{ query.text }}">{{ query.styled_text }}</span>
+                </a>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- if show_collections -%}
+            {%- for collection in predictive_search.resources.collections -%}
+              <div class="predictive-search__item" id="predictiveSearchOptionCollection-{{ forloop.index }}" role="option" aria-selected="false">
+                <a class="predictive-search__link" href="{{ collection.url }}" tabindex="-1">{{ collection.title }}</a>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if show_products -%}
+      <div class="predictive-search__group" role="group" aria-labelledby="predictiveSearchProducts">
+        <p id="predictiveSearchProducts" class="predictive-search__heading">
+          <span>{{ 'general.search.products' | t }}</span>
+        </p>
+
+        <div class="predictive-search__list" role="listbox">
+          {%- for product in predictive_search.resources.products -%}
+            <div class="predictive-search__item" id="predictiveSearchOptionProduct-{{ forloop.index }}" role="option" aria-selected="false">
+              {%- render 'search-results-product', product: product -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if show_pages or show_articles -%}
+      <div class="predictive-search__group" role="group" aria-labelledby="predictiveSearchPagesAndBlogPosts">
+        <p id="predictiveSearchPagesAndBlogPosts" class="predictive-search__heading">
+          <span>{{ 'general.search.pages_and_blogs' | t }}</span>
+        </p>
+
+        <div class="predictive-search__list" role="listbox">
+          {%- if show_pages -%}
+            {%- for page in predictive_search.resources.pages -%}
+              <div class="predictive-search__item" id="predictiveSearchOptionPage-{{ forloop.index }}" role="option" aria-selected="false">
+                <a class="predictive-search__link" href="{{ page.url }}" tabindex="-1">{{ page.title | strip_html | truncatewords: 12 }}</a>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+
+          {%- if show_articles -%}
+            {%- for article in predictive_search.resources.articles -%}
+              <div class="predictive-search__item" id="predictiveSearchOptionArticle-{{ forloop.index }}" role="option" aria-selected="false">
+                <a href="{{ article.url }}" class="predictive-search__link" tabindex="-1">{{ article.title | strip_html | truncatewords: 12 }}</a>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="predictive-search__actions" role="group" aria-labelledby="predictiveSearchActions">
+      <p id="predictiveSearchActions" class="visually-hidden">{{ 'general.search.search_actions' | t }}</p>
+
+      <button class="predictive-search__link" tabindex="-1" id="predictiveSearchActionViewAllResults" role="option" aria-selected="false" aria-labelledby="predictiveSearchQuickTip">
+        {{- 'general.search.view_all_results' | t -}}
+      </button>
+
+      <span class="predictive-search__quick-tip hidden-sm" id="predictiveSearchQuickTip">
+        <span class="visually-hidden">{{ 'general.search.view_all_results' | t }}, {{ 'general.accessibility.quick_tip' | t }}:</span>
+        {{- 'general.search.quick_tip' | t -}}
+      </span>
+    </div>
+
+    <span class="hidden" data-predictive-search-live-region-count-value aria-live="polite">
+      {%- liquid
+        if total_results == 0
+          echo 'general.search.no_results' | t: terms: predictive_search.terms
+        else
+          echo 'general.search.results_with_count' | t: count: total_results | append: ': '
+
+          if show_queries or show_collections
+            assign count = queries_count | plus: collections_count
+            unless count == 0
+              echo 'general.search.results_suggestions_with_count' | t: count: count | append: ', '
+            endunless
+          endif
+
+          if show_products
+            echo 'general.search.results_products_with_count' | t: count: products_count | append: ', '
+          endif
+
+          if show_pages or show_articles
+            assign count = pages_count | plus: articles_count
+            unless count == 0
+              echo 'general.search.results_pages_and_blogs_with_count' | t: count: count
+            endunless
+          endif
+        endif
+      -%}
+    </span>
+  </div>
+{%- endif -%}

@@ -1,0 +1,164 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "show_page_title": true,
+        "bg_color_secondary": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "59699d9d-c66c-4bd5-a248-64f1b1587cd5": {
+      "type": "section-banner-image",
+      "blocks": {
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-0": {
+          "type": "subheading",
+          "settings": {
+            "text": "<p>Welcome to<\/p>",
+            "size": 100
+          }
+        },
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>Contact<\/p>",
+            "size": 180,
+            "heading_highlight_type": "italics",
+            "highlight_color": "rgba(0,0,0,0)"
+          }
+        },
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-2": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Share information about your brand, describe a product, share announcements, or welcome customers to your store.<\/p>",
+            "size": 100
+          }
+        },
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-3": {
+          "type": "button",
+          "disabled": true,
+          "settings": {
+            "button_1_text": "Shop All",
+            "button_1_link": "shopify:\/\/collections\/all",
+            "button_1_color": "btn--white",
+            "button_1_style": "btn--solid-border",
+            "button_1_size": "btn--small",
+            "button_2_text": "",
+            "button_2_link": "",
+            "button_2_color": "btn--black",
+            "button_2_style": "btn--solid",
+            "button_2_size": "btn--small"
+          }
+        }
+      },
+      "block_order": [
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-0",
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-1",
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-2",
+        "template--18952593998145__59699d9d-c66c-4bd5-a248-64f1b1587cd5-16831285413c69ee80-3"
+      ],
+      "settings": {
+        "height": "one-third-height",
+        "enable_mobile_height": false,
+        "mobile_height": "four-fifty-height-mobile",
+        "overlay_opacity": 10,
+        "enable_zoom_animation": true,
+        "text_width": "normal",
+        "text_position": "center",
+        "text_color": "text-light"
+      }
+    },
+    "locations": {
+      "type": "section-locations",
+      "blocks": {
+        "locations-0": {
+          "type": "locations",
+          "settings": {
+            "title": "566 Emerson Street Palo Alto, California",
+            "working_time": "<p>Mon - Fri: 8am - 5pm<\/p><p>Sat: Closed<\/p><p>Sun: Closed<\/p>"
+          }
+        },
+        "locations-1": {
+          "type": "locations",
+          "settings": {
+            "title": "566 Emerson Street Palo Alto, California",
+            "working_time": "<p>Mon - Fri: 8am - 5pm<\/p><p>Sat: Closed<\/p><p>Sun: Closed<\/p>"
+          }
+        },
+        "locations-2": {
+          "type": "locations",
+          "settings": {
+            "title": "566 Emerson Street Palo Alto, California",
+            "working_time": "<p>Mon - Fri: 8am - 5pm<\/p><p>Sat: Closed<\/p><p>Sun: Closed<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "locations-0",
+        "locations-1",
+        "locations-2"
+      ],
+      "settings": {
+        "subheading": "Our stores",
+        "title": "Locations & hours",
+        "bg_color_secondary": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "contact-form": {
+      "type": "section-contact-form",
+      "blocks": {
+        "contact-form-0": {
+          "type": "heading",
+          "settings": {
+            "title": "Contact us"
+          }
+        },
+        "contact-form-1": {
+          "type": "text",
+          "settings": {
+            "title": "Name",
+            "required": false
+          }
+        },
+        "contact-form-2": {
+          "type": "email",
+          "settings": {
+            "title": "Email",
+            "required": true
+          }
+        },
+        "contact-form-3": {
+          "type": "body",
+          "settings": {
+            "title": "Message",
+            "required": true
+          }
+        }
+      },
+      "block_order": [
+        "contact-form-0",
+        "contact-form-1",
+        "contact-form-2",
+        "contact-form-3"
+      ],
+      "settings": {
+        "button_color": "btn--black",
+        "button_style": "btn--solid",
+        "button_size": "btn--large",
+        "width": "wrapper--narrow",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "59699d9d-c66c-4bd5-a248-64f1b1587cd5",
+    "locations",
+    "contact-form"
+  ]
+}

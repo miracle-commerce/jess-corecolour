@@ -1,0 +1,97 @@
+{%- liquid
+  assign show_locale = false
+  assign show_currency = false
+
+  if section.settings.show_locale_selector and shop.published_locales.size > 1
+    assign show_locale = true
+  endif
+
+  if section.settings.show_currency_selector and shop.enabled_currencies.size > 1
+    assign show_currency = true
+  endif
+-%}
+
+{%- if show_locale or show_currency -%}
+  {%- form 'localization', class: 'footer__select-popout', id: 'LocalizationForm' -%}
+    {%- if show_locale -%}
+      <div>
+        <h2 class="visually-hidden" id="lang-heading">
+          {{ 'footer.language' | t }}
+        </h2>
+
+        <div class="select-popout" data-popout>
+          <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="lang-list" aria-describedby="lang-heading" data-popout-toggle>
+            {{ localization.language.endonym_name }}
+            {%- render 'icon-select' -%}
+          </button>
+
+          <div id="lang-list" class="select-popout__list" data-popout-list>
+            <ul class="select-popout__list__scroll">
+              {%- for language in localization.available_languages -%}
+                <li class="select-popout__item{% if language == localization.language %} select-popout__item--current{% endif %}">
+                  <a class="select-popout__option" href="#" lang="{{ locale.iso_code }}"{% if locale.iso_code == localization.language %} aria-current="true"{% endif %} data-value="{{ language.iso_code }}" data-popout-option>
+                    <span>{{ language.endonym_name }}</span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+
+          <input type="hidden" name="locale_code" id="LocaleSelector" value="{{ form.current_locale.iso_code }}" data-popout-input>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if show_currency -%}
+      <div>
+        <h2 class="visually-hidden" id="currency-heading">
+          {{ 'footer.currency' | t }}
+        </h2>
+
+        <div class="select-popout" data-popout>
+          {%- if section.settings.currency_type == 'currency' -%}
+            <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="currency-list" aria-describedby="currency-heading" data-popout-toggle>
+              {{ form.current_currency.iso_code }} {%- if form.current_currency.symbol -%}{{ form.current_currency.symbol }}{%- endif -%}
+              {%- render 'icon-select' -%}
+            </button>
+
+            <div id="currency-list" class="select-popout__list" data-popout-list>
+              <ul class="select-popout__list__scroll">
+                {% for currency in form.available_currencies %}
+                  <li class="select-popout__item{% if currency.iso_code == form.current_currency.iso_code %}  select-popout__item--current{% endif %}">
+                    <a class="select-popout__option" href="#"{% if currency.iso_code == form.current_currency.iso_code %} aria-current="true"{% endif %} data-value="{{ currency.iso_code }}" data-popout-option>
+                      <span>{{ currency.iso_code }} {%- if currency.symbol -%}{{ currency.symbol }}{%- endif -%}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+
+            <input type="hidden" name="currency_code" id="CurrencySelector" value="{{ form.current_currency.iso_code }}" data-popout-input>
+          {%- endif -%}
+
+          {%- if section.settings.currency_type == 'country' -%}
+            <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="currency-list" aria-describedby="currency-heading" data-popout-toggle>
+              {{ localization.country }} ({{ localization.country.iso_code }}) - {{ localization.country.currency.symbol }}
+              {%- render 'icon-select' -%}
+            </button>
+
+            <div id="currency-list" class="select-popout__list" data-popout-list>
+              <ul class="select-popout__list__scroll">
+                {%- for country in localization.available_countries -%}
+                  <li class="select-popout__item{% if country == localization.country %} select-popout__item--current{% endif %}">
+                    <a class="select-popout__option" href="#"{% if country == localization.country %} aria-current="true"{% endif %} data-value="{{ country.iso_code }}" data-popout-option>
+                      <span>{{ country.name }} ({{ country.iso_code }}) - {{ country.currency.symbol }}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+
+            <input type="hidden" name="country_code" id="CurrencySelector" value="{{ localization.country.iso_code }}" data-popout-input>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endform -%}
+{%- endif -%}

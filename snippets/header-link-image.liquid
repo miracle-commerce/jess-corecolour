@@ -1,0 +1,19 @@
+{%- liquid
+  comment
+    Show product and collection images in mega menu
+  endcomment
+
+  assign aspect_ratio = aspect_ratio | default: 1
+
+  if enable
+    assign link_image = ''
+    assign link_image_markup = ''
+    if link.type == 'collection_link' or link.type == 'product_link'
+      assign link_image = link.object.featured_image
+
+      if link_image != blank
+        render 'image-fill', img_object: link_image, aspect_ratio: aspect_ratio
+      endif
+    endif
+  endif
+-%}

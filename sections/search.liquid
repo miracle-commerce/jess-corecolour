@@ -1,0 +1,1276 @@
+<!-- /templates/search.liquid -->
+
+{%- liquid
+  comment
+    Global theme settings
+  endcomment
+  assign enable_infinity_scroll = settings.enable_infinity_scroll
+  assign products_per_row_on_desktop = settings.products_per_row_on_desktop | plus: 0
+  assign products_per_row_on_mobile = settings.products_per_row_on_mobile | plus: 0
+  assign animations_enabled = settings.animations_enabled
+  assign nav_font_weight = settings.nav_font_weight
+  assign nav_caps = settings.nav_caps
+
+  comment
+    Section settings
+  endcomment
+  assign enable_filters = section.settings.enable_filters
+  assign filters_layout = section.settings.filters_layout
+  assign enable_sorting = section.settings.enable_sorting
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign show_more = section.settings.show_more
+  assign padding_top = section.settings.padding_top
+  assign padding_bottom = section.settings.padding_bottom
+  assign search_products = section.settings.search_products
+  assign search_articles = section.settings.search_articles
+  assign articles_columns = section.settings.articles_columns | plus: 0
+  assign articles_default_color = section.settings.articles_default_color
+  assign articles_style = section.settings.articles_style
+  assign articles_default_image = section.settings.articles_default_image
+  assign articles_default_color = section.settings.articles_default_color
+  assign articles_show_author = section.settings.articles_show_author
+  assign articles_show_date = section.settings.articles_show_date
+  assign articles_show_tags = section.settings.articles_show_tags
+  assign articles_show_comments_count = section.settings.articles_show_comments_count
+  assign articles_image_aspect_ratio = section.settings.articles_image_aspect_ratio
+  assign search_pages = section.settings.search_pages
+
+  comment
+    Variables
+  endcomment
+  assign section_id = 'SearchPage'
+  assign section_selector_id = '#' | append: section_id
+  assign animation_delay = 150
+  assign animation_anchor = section_selector_id
+  assign min_sticky_bar_gutter = 40
+  assign pagination_limit = products_per_row_on_desktop | times: 12
+  assign columns = products_per_row_on_desktop | plus: 0
+  assign products_count = 0
+  assign articles_count = 0
+  assign pages_count = 0
+
+  if search.performed
+    for item in search.results
+      case item.object_type
+        when 'product'
+          assign products_count = products_count | plus: 1
+        when 'article'
+          assign articles_count = articles_count | plus: 1
+        when 'page'
+          assign pages_count = pages_count | plus: 1
+      endcase
+    endfor
+  endif
+
+  assign no_filters = false
+  if search.filters.size == 0
+    assign no_filters = true
+  endif
+
+  capture section_class
+    echo 'search-page section-padding tabs'
+    unless enable_filters
+      echo ' search-page--filters-disabled'
+    endunless
+    unless enable_sorting
+      echo ' search-page--sorting-disabled'
+    endunless
+    if search_products == false
+     echo ' search-page--products-disabled'
+    endif
+    if bg_color_secondary
+      echo ' bg-secondary'
+    endif
+    if search_articles
+      echo ' blog'
+      if articles_style == 'photo'
+        echo ' blog--photo'
+      else
+        echo ' blog--standard'
+      endif
+    endif
+  endcapture
+
+  capture tabs_nav_class
+    echo 'tabs__nav type-stack-nav'
+    case nav_font_weight
+      when 'normal'
+        echo ' type-stack-nav--normal'
+      when 'bold'
+        echo ' type-stack-nav--bold'
+    endcase
+    if nav_caps
+      echo ' caps'
+    endif
+  endcapture
+
+  capture search_title
+    if search.performed
+      echo 'general.search.results_for' | t: terms: search.terms
+    else
+      echo 'general.search.search' | t
+    endif
+  endcapture
+
+  assign search_options_disabled = false
+  if search_products == false and search_articles == false and search_pages == false
+    assign search_options_disabled = true
+  endif
+
+  assign no_search_results = false
+  if search.performed and search.results_count == 0
+    assign no_search_results = true
+  endif
+
+  assign current_type = 'all'
+  assign search_for_all_types = false
+  if search.types.size > 1
+    assign search_for_all_types = true
+  else
+    assign current_type = search.types[0]
+  endif
+
+  assign search_products_alone = false
+  if search_products and search_pages == false and search_articles == false
+    assign search_products_alone = true
+  endif
+
+  assign next_search_articles = false
+  if search_products == false
+    assign next_search_articles = true
+  endif
+  assign first_search_articles = false
+  if current_type == 'article' and next_search_articles
+    assign first_search_articles = true
+  endif
+
+  assign next_search_pages = false
+  if search_products == false and search_articles == false
+    assign next_search_pages = true
+  endif
+  assign first_search_pages = false
+  if current_type == 'page' and next_search_pages
+    assign first_search_pages = true
+  endif
+
+  capture search_types
+    if search_products
+      echo 'product' | append: ','
+    endif
+    if search_articles
+      echo 'article' | append: ','
+    endif
+    if search_pages
+      echo 'page' | append: ','
+    endif
+  endcapture
+  assign search_types = search_types | replace_last: ',', ''
+  assign search_types_arr = search_types | split: ','
+
+  capture desktop_width
+    case products_per_row_on_desktop
+      when 1
+        echo 'one-whole'
+      when 2
+        echo 'one-half'
+      when 3
+        echo 'one-third'
+      when 4
+        echo 'one-quarter'
+    endcase
+  endcapture
+
+  capture mobile_width
+    case products_per_row_on_mobile
+      when 1
+        echo 'mobile--one-whole'
+      when 2
+        echo 'mobile--one-half'
+    endcase
+  endcapture
+
+  capture grid_item_classes
+    echo desktop_width | append: ' '
+    echo mobile_width
+  endcapture
+
+  case articles_columns
+    when 1
+      assign articles_paginator = 5
+    when 2
+      assign articles_width = 'blog__post--two-col'
+      assign articles_paginator = 10
+    when 3
+      assign articles_width = 'blog__post--three-col'
+      assign articles_paginator = 9
+    else
+      assign articles_width = 'blog__post--four-col'
+      assign articles_paginator = 12
+  endcase
+
+  capture articles_wrapper_classes
+    if articles_columns > 1
+      echo 'wrapper'
+    else
+      echo 'wrapper--narrow'
+    endif
+  endcapture
+
+  case articles_default_color
+    when 'accent'
+      assign articles_default_color = 'blog__post-image--accent'
+    when 'default'
+      assign articles_default_color = 'blog__post-image--default'
+  endcase
+-%}
+
+{%- style -%}
+  .search-page {
+    --PT: {{ padding_top }}px;
+    --PB: {{ padding_bottom }}px;
+    {%- comment -%}
+      Search sticky bar initial height which is dynamically changed on window load/resize.
+    {%- endcomment -%}
+    {% if enable_sorting or enable_filters %}
+      --collection-sticky-bar-height: calc(.75rem * var(--FONT-ADJUST-BODY) + {{ min_sticky_bar_gutter }}px);
+    {% endif %}
+    --image-height: {{ articles_image_aspect_ratio | times: 100 }}%;
+  }
+{%- endstyle -%}
+
+{%- capture search_title_markup -%}
+  <h2 class="search-page__title h2"
+    {% if animations_enabled %}
+      data-aos="fade"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+    {% endif %}>
+    {{- search_title -}}
+  </h2>
+{%- endcapture -%}
+
+{%- capture no_results_markup -%}
+  <div class="search-page__note text-center"
+    {% if animations_enabled %}
+      data-aos="fade"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+    {% endif %}>
+    <p>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+  </div>
+{%- endcapture -%}
+
+<section id="{{ section_id }}"
+  class="{{ section_class }}"
+  data-section-type="search-template"
+  data-section-id="{{ section.id }}"
+  data-enable-filters="{{ enable_filters }}"
+  data-enable-sorting="{{ enable_sorting }}"
+  data-search-performed="{{ search.performed }}"
+  data-all-types="{{ search_for_all_types }}"
+  data-current-type="{{ current_type }}"
+  data-filters-default-state="{{ filters_layout }}"
+  data-collapsible-transition-override
+  data-filter-mode="default">
+  <div class="search-page__head"
+    data-main-input-search
+    {% if animations_enabled %}
+      data-aos="fade"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {% endif %}>
+    {%- render 'search-popdown', unique: section_id, search_types: search_types -%}
+
+    {{- search_title_markup -}}
+  </div>
+
+  {%- if search.performed -%}
+    {%- unless search_options_disabled -%}
+      <div class="search-page__nav{% if search_types_arr.size < 2 %} hidden{% endif %}"
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 100 -%}
+        {% endif %}>
+        <div class="tabs-scrollbar" data-custom-scrollbar-parent>
+          <div class="tabs-scrollbar__holder" data-custom-scrollbar-holder>
+            <ul class="{{ tabs_nav_class }}" data-custom-scrollbar-items>
+              {%- if search_products -%}
+                {%- liquid
+                  capture current_class
+                    unless search_for_all_types
+                      if search_products_alone or search.types[0] == 'product'
+                        echo ' current'
+                      endif
+                    endunless
+                  endcapture
+                -%}
+                <li class="tabs__link{{ current_class }}"
+                  data-tabs-link="resultsProducts"
+                  data-type="product"
+                  tabindex="0">
+                  <noscript>
+                    <a href="{{ routes.search_url }}?q={{ search.terms }}&type=product">
+                      <span>{{ 'general.search.products' | t }}</span>
+                    </a>
+                  </noscript>
+                  <span>{{ 'general.search.products' | t }}</span>
+                </li>
+              {%- endif -%}
+
+              {%- if search_articles -%}
+                {%- liquid
+                  capture current_class
+                    unless search_for_all_types
+                      if first_search_articles or search.types[0] == 'article'
+                        echo ' current'
+                      endif
+                    endunless
+                  endcapture
+                -%}
+                <li class="tabs__link{{ current_class }}"
+                  data-tabs-link="resultsArticles"
+                  data-type="article"
+                  tabindex="0">
+                  <noscript>
+                    <a href="{{ routes.search_url }}?q={{ search.terms }}&type=article">
+                      <span>{{ 'general.search.articles' | t }}</span>
+                    </a>
+                  </noscript>
+                  <span>{{ 'general.search.articles' | t }}</span>
+                </li>
+              {%- endif -%}
+
+              {%- if search_pages -%}
+                {%- liquid
+                  capture current_class
+                    unless search_for_all_types
+                      if first_search_pages or search.types[0] == 'page'
+                        echo ' current'
+                      endif
+                    endunless
+                  endcapture
+                -%}
+                <li class="tabs__link{{ current_class }}"
+                  data-tabs-link="resultsPages"
+                  data-type="page"
+                  tabindex="0">
+                  <noscript>
+                    <a href="{{ routes.search_url }}?q={{ search.terms }}&type=page">
+                      <span>{{ 'general.search.pages' | t }}</span>
+                    </a>
+                  </noscript>
+                  <span>{{ 'general.search.pages' | t }}</span>
+                </li>
+              {%- endif -%}
+            </ul>
+
+            <div class="custom-scrollbar" data-custom-scrollbar>
+              <div class="custom-scrollbar__thumb" data-custom-scrollbar-thumb></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {%- endunless -%}
+
+    <div class="search-page__body tabs__contents" data-tabs-contents>
+      {%- if search_options_disabled -%}
+        {{- no_results_markup -}}
+      {%- else -%}
+        {%- comment -%}Render all types of search results{%- endcomment -%}
+        {%- if search_for_all_types -%}
+          {%- comment -%}Tab containers for render specific types of results{%- endcomment -%}
+          {%- if search_products -%}
+            <div class="tab" data-tab="resultsProducts"></div>
+          {%- endif -%}
+
+          {%- if search_articles -%}
+            <div class="tab" data-tab="resultsArticles"></div>
+          {%- endif -%}
+
+          {%- if search_pages -%}
+            <div class="tab" data-tab="resultsPages"></div>
+          {%- endif -%}
+
+          {%- comment -%}Container that holds 'all types' results{%- endcomment -%}
+          <div class="collection__wrapper" data-collection-wrapper data-all-types-container>
+            <div class="wrapper--full-padded">
+              {%- if search_products and no_filters -%}
+                {{- no_results_markup -}}
+              {%- else -%}
+                <div class="collection__inner">
+                  {%- if enable_filters or enable_sorting -%}
+                    <div class="collection__sticky-bar"
+                      id="CollectionStickyBar"
+                      data-collection-sticky-bar
+                      {% if animations_enabled %}
+                        data-aos="fade"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                      {% endif %}>
+                      {%- if enable_sorting -%}          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort-bar">
+            <button type="button" class="collection__sort__label" data-sort-toggle>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-select' -%}
+            </button>
+
+            <div class="collection__sort__option-wrapper" data-collection-sort-options>
+              <div class="collection__sort__options">
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by_bar" value="{{ option.value }}" id="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" tabindex="0">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>{%- endif -%}
+
+                      <button class="collection__filters__toggle" aria-label="{{ 'products.general.filters' | t }}" data-toggle-filters>
+                        {%- render 'icon-filter' -%}
+                      </button>
+                    </div>{%- liquid
+  assign filters_available = false
+  assign filter_count = 0
+
+  if search.types.size > 1
+    assign current_type = ''
+  else
+    assign current_type = search.types[0]
+  endif
+
+  assign search_param = '?type=' | append: current_type | append: '&q=' | append: search.terms
+  assign heading_style = section.settings.heading_style
+
+  capture sort_param
+    if search.sort_by != search.default_sort_by
+      echo '&sort_by=' | append: search.sort_by
+    endif
+  endcapture
+-%}
+
+{%- if enable_filters -%}
+  {%- capture filters -%}
+    {%- liquid
+      if search.filters != empty
+        assign filters_available = true
+      endif
+
+      for filter in search.filters
+        render 'filter', filter: filter, filters_layout: filters_layout, index: forloop.index, show_more: show_more, heading_style: heading_style
+      endfor
+    -%}
+
+    <noscript>
+      <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.filter_button' | t }}</button>
+    </noscript>
+  {%- endcapture -%}
+
+  {%- capture filter_reset_buttons -%}
+    {%- for filter in search.filters -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove btn btn--secondary" href="{{ filter.url_to_remove }}" data-filter-reset-button>
+            {%- liquid
+              assign min_value = filter.min_value.value | default: 0
+              assign max_value = filter.max_value.value | default: filter.range_max
+              if settings.currency_code_enable
+                assign min_value = min_value | money_with_currency | remove: '.00' | remove: ',00'
+                assign max_value = max_value | money_with_currency | remove: '.00' | remove: ',00'
+              else
+                assign min_value = min_value | money_without_trailing_zeros
+                assign max_value = max_value | money_without_trailing_zeros
+              endif
+              echo min_value | append: ' - ' | append: max_value
+            -%}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endif -%}
+      {%- else -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove btn btn--secondary" href="{{ filter_value.url_to_remove }}" data-filter-reset-button>
+            {{ filter_value.label }}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- if enable_sorting or enable_filters -%}
+  <div class="collection__filters" data-collection-filters data-s="{{ search.sort_by }}" data-s-d="{{ search.default_sort_by }}">
+    <div class="collection__filters-wrapper" data-collection-filters-wrapper>
+      <div class="collection__filters-list">
+        <div class="collection__filters-list__inner" data-collection-filters-list>
+          <form action="{{ routes.search_url }}"
+            data-collection-filters-form
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+            {% endif %}>
+
+            <div class="collection__filters-header">
+              <button class="collection__filters__close" type="button" data-close-filters>
+                <span class="visually-hidden">{{ 'products.general.close' | t }}</span>
+                {%- render 'icon-close' -%}
+              </button>
+
+              <div class="collection__filters__top">
+                <div class="collection__filters__title{% if heading_style == 'body' %} collection__filters__title--body{% endif %}">
+                  {{ 'products.general.filters' | t }}
+                  {%- if filter_count > 0 -%}<span>({{ filter_count }})</span>{%- endif -%}
+                </div>
+
+                {%- if enable_filters -%}
+                  <a href="{{ request.path | append: search_param | append: sort_param }}" class="collection__filters__reset {% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}" data-filter-reset-button>
+                    {{- 'products.general.clear_filters' | t }}
+                  </a>
+                {%- endif -%}
+              </div>
+
+              <div class="collection__filters__clear" data-filters-reset>
+                {{- filter_reset_buttons -}}
+              </div>
+
+              <hr class="hr--full collection__filters__line">
+            </div>
+
+            {%- if enable_sorting -%}          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort">
+            <button type="button" class="collection__sort__label{% if heading_style == 'body' %} collection__sort__label--body{% endif %}" aria-expanded="false" aria-controls="CollectionSorting" data-collapsible-trigger>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-toggle-plus' -%}
+              {%- render 'icon-toggle-minus' -%}
+            </button>
+
+            <div id="CollectionSorting"
+              class="collection__sort__option-wrapper"
+              aria-expanded="false"
+              data-collapsible-container>
+              <div class="collection__sort__options" data-collapsible-content>
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by" value="{{ option.value }}" id="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>{%- endif -%}
+
+            {%- if enable_filters and filters_available -%}
+              {{- filters -}}
+            {%- endif -%}
+
+            <input type="hidden" name="q" value="{{ search.terms | escape }}">
+            <input type="hidden" name="type" value="{{ current_type }}">
+            <input name="options[prefix]" type="hidden" value="last">
+          </form>
+        </div>
+
+        {%- if enable_filters -%}
+          <div class="collection__filters-bottom{% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}">
+            <button class="collection__filters__close-bottom btn btn--primary" type="button" data-close-filters>
+              {{- 'collection.filters.close' | t -}}
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}{%- endif -%}
+
+                  {%- paginate search.results by pagination_limit -%}
+                    <div class="collection__products" data-collection-products>
+                      {%- if search.results_count > 0 -%}
+                        <div class="grid"{% if enable_infinity_scroll %} id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}--allTypes"{% endif %}>
+                          {%- liquid
+                            for item in search.results
+                              assign animation_delay = forloop.index0 | modulo: columns | times: 1
+                              assign item_delay = animation_delay | times: 150
+
+                              if item.object_type == 'product'
+                                render 'product-grid-item', product: item, animation_delay: animation_delay
+                              endif
+
+                              if item.object_type == 'article'
+                                capture anchor
+                                  echo animation_anchor | append: '--searchResultArticle' | append: '-' | append: forloop.index0
+                                endcapture
+                                assign id = anchor | replace: '#', ''
+                                render 'blog-post-grid-item', article: item, id: id, classes: grid_item_classes, animation_anchor: anchor, animation_delay: item_delay, type: 'all-types', article_style: articles_style, default_color: articles_default_color, default_image: articles_default_image, show_author: articles_show_author, show_date: articles_show_date, show_tags: articles_show_tags, show_comments_count: articles_show_comments_count
+                              endif
+
+                              if item.object_type == 'page'
+                                capture anchor
+                                  echo animation_anchor | append: '--searchResultPage' | append: '-' | append: forloop.index0
+                                endcapture
+                                assign id = anchor | replace: '#', ''
+                                render 'search-result-page', type: 'all-types', item: item, id: id, animation_anchor: anchor, animation_delay: item_delay, classes: grid_item_classes
+                              endif
+                            endfor
+                          -%}
+                        </div>
+                      {%- else -%}
+                        {{- no_results_markup -}}
+                      {%- endif -%}
+
+                      {%- if enable_infinity_scroll -%}
+                        <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}--allTypes">
+                          {%- if paginate.next -%}
+                            <div class="pagination__loading">
+                              <a href="{{ paginate.next.url }}"></a>
+                            </div>
+                          {%- endif -%}
+                        </div>
+
+                        {%- if paginate.pages > 1 -%}
+                          <noscript>
+                            {%- render 'pagination', paginate: paginate -%}
+                          </noscript>
+                        {%- endif -%}
+                      {%- else -%}
+                        {%- if paginate.pages > 1 -%}
+                          {%- render 'pagination', paginate: paginate -%}
+                        {%- endif -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endpaginate -%}
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- else -%}
+          {%- comment -%}Products{%- endcomment -%}
+          {%- if search_products -%}
+            {%- liquid
+              capture current_class
+                if search_products_alone or search.types[0] == 'product'
+                  echo ' current'
+                endif
+              endcapture
+            -%}
+            <div class="tab{{ current_class }}" data-tab="resultsProducts">
+              <div class="collection__wrapper" data-collection-wrapper>
+                <div class="wrapper--full-padded">
+                  {%- if no_filters -%}
+                    {{- no_results_markup -}}
+                  {%- else -%}
+                    <div class="collection__inner">
+                      {%- if enable_filters or enable_sorting -%}
+                        <div class="collection__sticky-bar"
+                          id="CollectionStickyBar"
+                          data-collection-sticky-bar
+                          {% if animations_enabled %}
+                            data-aos="fade"
+                            data-aos-anchor="{{ animation_anchor }}"
+                            data-aos-delay="{{ animation_delay }}"
+                          {% endif %}>
+                          {%- if enable_sorting -%}          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort-bar">
+            <button type="button" class="collection__sort__label" data-sort-toggle>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-select' -%}
+            </button>
+
+            <div class="collection__sort__option-wrapper" data-collection-sort-options>
+              <div class="collection__sort__options">
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by_bar" value="{{ option.value }}" id="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-bar-{{ option.name | handle | append: option.value | handle | append: section.id }}" tabindex="0">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>{%- endif -%}
+
+                          <button class="collection__filters__toggle" aria-label="{{ 'products.general.filters' | t }}" data-toggle-filters>
+                            {%- render 'icon-filter' -%}
+                          </button>
+                        </div>{%- liquid
+  assign filters_available = false
+  assign filter_count = 0
+
+  if search.types.size > 1
+    assign current_type = ''
+  else
+    assign current_type = search.types[0]
+  endif
+
+  assign search_param = '?type=' | append: current_type | append: '&q=' | append: search.terms
+  assign heading_style = section.settings.heading_style
+
+  capture sort_param
+    if search.sort_by != search.default_sort_by
+      echo '&sort_by=' | append: search.sort_by
+    endif
+  endcapture
+-%}
+
+{%- if enable_filters -%}
+  {%- capture filters -%}
+    {%- liquid
+      if search.filters != empty
+        assign filters_available = true
+      endif
+
+      for filter in search.filters
+        render 'filter', filter: filter, filters_layout: filters_layout, index: forloop.index, show_more: show_more, heading_style: heading_style
+      endfor
+    -%}
+
+    <noscript>
+      <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.filter_button' | t }}</button>
+    </noscript>
+  {%- endcapture -%}
+
+  {%- capture filter_reset_buttons -%}
+    {%- for filter in search.filters -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove btn btn--secondary" href="{{ filter.url_to_remove }}" data-filter-reset-button>
+            {%- liquid
+              assign min_value = filter.min_value.value | default: 0
+              assign max_value = filter.max_value.value | default: filter.range_max
+              if settings.currency_code_enable
+                assign min_value = min_value | money_with_currency | remove: '.00' | remove: ',00'
+                assign max_value = max_value | money_with_currency | remove: '.00' | remove: ',00'
+              else
+                assign min_value = min_value | money_without_trailing_zeros
+                assign max_value = max_value | money_without_trailing_zeros
+              endif
+              echo min_value | append: ' - ' | append: max_value
+            -%}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endif -%}
+      {%- else -%}
+        {%- for filter_value in filter.active_values -%}
+          {%- assign filter_count = filter_count | plus: 1 -%}
+          <a class="filter__active__remove btn btn--secondary" href="{{ filter_value.url_to_remove }}" data-filter-reset-button>
+            {{ filter_value.label }}
+            <span class="filter__x">✕</span>
+          </a>
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- if enable_sorting or enable_filters -%}
+  <div class="collection__filters" data-collection-filters data-s="{{ search.sort_by }}" data-s-d="{{ search.default_sort_by }}">
+    <div class="collection__filters-wrapper" data-collection-filters-wrapper>
+      <div class="collection__filters-list">
+        <div class="collection__filters-list__inner" data-collection-filters-list>
+          <form action="{{ routes.search_url }}"
+            data-collection-filters-form
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+            {% endif %}>
+
+            <div class="collection__filters-header">
+              <button class="collection__filters__close" type="button" data-close-filters>
+                <span class="visually-hidden">{{ 'products.general.close' | t }}</span>
+                {%- render 'icon-close' -%}
+              </button>
+
+              <div class="collection__filters__top">
+                <div class="collection__filters__title{% if heading_style == 'body' %} collection__filters__title--body{% endif %}">
+                  {{ 'products.general.filters' | t }}
+                  {%- if filter_count > 0 -%}<span>({{ filter_count }})</span>{%- endif -%}
+                </div>
+
+                {%- if enable_filters -%}
+                  <a href="{{ request.path | append: search_param | append: sort_param }}" class="collection__filters__reset {% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}" data-filter-reset-button>
+                    {{- 'products.general.clear_filters' | t }}
+                  </a>
+                {%- endif -%}
+              </div>
+
+              <div class="collection__filters__clear" data-filters-reset>
+                {{- filter_reset_buttons -}}
+              </div>
+
+              <hr class="hr--full collection__filters__line">
+            </div>
+
+            {%- if enable_sorting -%}          {%- assign sort_by = search.sort_by | default: collection.sort_by | default: collection.default_sort_by -%}
+          {%- assign sort_options = search.sort_options | default: collection.sort_options -%}
+
+          <div class="collection__sort">
+            <button type="button" class="collection__sort__label{% if heading_style == 'body' %} collection__sort__label--body{% endif %}" aria-expanded="false" aria-controls="CollectionSorting" data-collapsible-trigger>
+              {{ 'collections.sorting.title' | t }}
+              {%- render 'icon-toggle-plus' -%}
+              {%- render 'icon-toggle-minus' -%}
+            </button>
+
+            <div id="CollectionSorting"
+              class="collection__sort__option-wrapper"
+              aria-expanded="false"
+              data-collapsible-container>
+              <div class="collection__sort__options" data-collapsible-content>
+                <ul class="collection__filter-tags collection__filter-tags--default" collection-sort-by="{{ sort_by }}">
+                  {%- for option in sort_options -%}
+                    <li class="collection__filter-tag">
+                      <input class="collection__sort__input" type="radio" name="sort_by" value="{{ option.value }}" id="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}" data-input-sort{% if option.value == sort_by %} checked{% endif %}>
+                      <label class="collection__sort__button" for="filter-{{ option.name | handle | append: option.value | handle | append: section.id }}">
+                        {{- option.name -}}
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+
+                <noscript>
+                  <button type="submit" class="btn btn--primary btn--solid">{{ 'collection.filters.sort_button' | t }}</button>
+                </noscript>
+              </div>
+            </div>
+          </div>{%- endif -%}
+
+            {%- if enable_filters and filters_available -%}
+              {{- filters -}}
+            {%- endif -%}
+
+            <input type="hidden" name="q" value="{{ search.terms | escape }}">
+            <input type="hidden" name="type" value="{{ current_type }}">
+            <input name="options[prefix]" type="hidden" value="last">
+          </form>
+        </div>
+
+        {%- if enable_filters -%}
+          <div class="collection__filters-bottom{% if current_tags != blank or filter_count > 0 %} is-visible{% endif %}">
+            <button class="collection__filters__close-bottom btn btn--primary" type="button" data-close-filters>
+              {{- 'collection.filters.close' | t -}}
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}{%- endif -%}
+
+                      {%- paginate search.results by pagination_limit -%}
+                        {%- liquid
+                          capture current_page_attr
+                            if current_type == 'product' and paginate.pages > 1
+                              echo 'data-current-page="' | append: paginate.current_page | append: '"'
+                            endif
+                          endcapture
+                        -%}
+                        <div class="collection__products" data-collection-products>
+                          {%- if search.results_count > 0 -%}
+                            <div class="grid"{% if enable_infinity_scroll %} id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}--resultsProducts"{% endif %} {{ current_page_attr }}>
+                              {%- liquid
+                                for item in search.results
+                                  assign animation_delay = forloop.index0 | modulo: columns | times: 1
+                                  if item.object_type == 'product'
+                                    render 'product-grid-item', product: item, animation_delay: animation_delay
+                                  endif
+                                endfor
+                              -%}
+                            </div>
+                          {%- else -%}
+                            <div class="collection--no-results"
+                              {% if animations_enabled %}
+                                data-aos="fade"
+                                data-aos-anchor="{{ animation_anchor }}"
+                                data-aos-delay="{{ animation_delay }}"
+                              {% endif %}>
+                              <p class="no-matches">{{ 'collections.general.no_matches_by_filter' | t : products_count: 0 }}</p>
+                            </div>
+                          {%- endif -%}
+
+                          {%- if enable_infinity_scroll -%}
+                            <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}--resultsProducts">
+                              {%- if paginate.next -%}
+                                <div class="pagination__loading">
+                                  <a href="{{ paginate.next.url }}"></a>
+                                </div>
+                              {%- endif -%}
+                            </div>
+
+                            {%- if paginate.pages > 1 -%}
+                              <noscript>
+                                {%- render 'pagination', paginate: paginate -%}
+                              </noscript>
+                            {%- endif -%}
+                          {%- else -%}
+                            {%- if paginate.pages > 1 -%}
+                              {%- render 'pagination', paginate: paginate -%}
+                            {%- endif -%}
+                          {%- endif -%}
+                        </div>
+                      {%- endpaginate -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%}Articles{%- endcomment -%}
+          {%- if search_articles -%}
+            {%- liquid
+              capture current_class
+                if first_search_articles or search.types[0] == 'article'
+                  echo ' current'
+                endif
+              endcapture
+            -%}
+            <div class="tab{{ current_class }}" data-tab="resultsArticles">
+              <div class="{{ articles_wrapper_classes }}">
+                {%- paginate search.results by articles_paginator -%}
+                  {%- liquid
+                    capture current_page_attr
+                      if current_type == 'article' and paginate.pages > 1
+                        echo 'data-current-page="' | append: paginate.current_page | append: '"'
+                      endif
+                    endcapture
+                  -%}
+                  {%- if search.results_count > 0 -%}
+                    <div class="blog__post {{ articles_width }}"
+                      {% if enable_infinity_scroll %}
+                        id="AjaxinateLoop"
+                        data-ajaxinate-id="{{ section.id }}--resultsArticles"
+                      {% endif %}
+                      {{ current_page_attr }}>
+                      {%- liquid
+                        for item in search.results
+                          if item.object_type == 'article'
+                            assign animation_delay = forloop.index0 | modulo: articles_columns | times: 1
+                            assign item_delay = animation_delay | times: 150
+                            capture anchor
+                              echo animation_anchor | append: '--searchResultArticle' | append: '-' | append: forloop.index0
+                            endcapture
+                            assign id = anchor | replace: '#', ''
+                            render 'blog-post-grid-item', article: item, id: id, classes: grid_item_classes, animation_anchor: anchor, animation_delay: item_delay, article_style: articles_style, default_color: articles_default_color, default_image: articles_default_image, show_author: articles_show_author, show_date: articles_show_date, show_tags: articles_show_tags, show_comments_count: articles_show_comments_count
+                          endif
+                        endfor
+                      -%}
+                    </div>
+                  {%- else -%}
+                    {{- no_results_markup -}}
+                  {%- endif -%}
+
+                  {%- if enable_infinity_scroll -%}
+                    <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}--resultsArticles">
+                      {%- if paginate.next -%}
+                        <div class="pagination__loading">
+                          <a href="{{ paginate.next.url }}"></a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+
+                    {%- if paginate.pages > 1 -%}
+                      <noscript>
+                        {%- render 'pagination', paginate: paginate -%}
+                      </noscript>
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- if paginate.pages > 1 -%}
+                      {%- render 'pagination', paginate: paginate -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endpaginate -%}
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%}Pages{%- endcomment -%}
+          {%- if search_pages -%}
+            {%- liquid
+              capture current_class
+                if first_search_pages or search.types[0] == 'page'
+                  echo ' current'
+                endif
+              endcapture
+            -%}
+            <div class="tab{{ current_class }}" data-tab="resultsPages">
+              <div class="wrapper--full-padded">
+                {%- paginate search.results by pagination_limit -%}
+                  {%- liquid
+                    capture current_page_attr
+                      if current_type == 'page' and paginate.pages > 1
+                        echo 'data-current-page="' | append: paginate.current_page | append: '"'
+                      endif
+                    endcapture
+                  -%}
+                  {%- if search.results_count > 0 -%}
+                    <div class="grid--center"{% if enable_infinity_scroll %} id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}--resultsPages"{% endif %} {{ current_page_attr }}>
+                      {%- liquid
+                        for item in search.results
+                          assign animation_delay = forloop.index0 | modulo: columns | times: 1
+                          assign item_delay = animation_delay | times: 150
+                          capture anchor
+                            echo animation_anchor | append: '--searchResultPage' | append: '-' | append: forloop.index0
+                          endcapture
+                          assign id = anchor | replace: '#', ''
+                          if item.object_type == 'page'
+                            render 'search-result-page', type: 'results-pages', item: item, id: id, animation_delay: item_delay, animation_anchor: anchor, classes: 'grid__item'
+                          endif
+                        endfor
+                      -%}
+                    </div>
+                  {%- else -%}
+                    {{- no_results_markup -}}
+                  {%- endif -%}
+
+                  {%- if enable_infinity_scroll -%}
+                    <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}--resultsPages">
+                      {%- if paginate.next -%}
+                        <div class="pagination__loading">
+                          <a href="{{ paginate.next.url }}"></a>
+                        </div>
+                      {%- endif -%}
+                    </div>
+
+                    {%- if paginate.pages > 1 -%}
+                      <noscript>
+                        {%- render 'pagination', paginate: paginate -%}
+                      </noscript>
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- if paginate.pages > 1 -%}
+                      {%- render 'pagination', paginate: paginate -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endpaginate -%}
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+  {
+    "name": "Search pages",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Search options",
+        "info": "Note: Shopify cannot index section content or search for collections"
+      },
+      {
+        "type": "header",
+        "content": "Product search"
+      },
+      {
+        "type": "checkbox",
+        "id": "search_products",
+        "label": "Search products",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_sorting",
+        "label": "Enable sorting",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_filters",
+        "label": "Enable filters",
+        "default": true
+      },
+      {
+        "type": "select",
+        "label": "Default filter layout",
+        "id": "filters_layout",
+        "info": "Desktop only",
+        "default": "open",
+        "options": [
+          { "label": "All filters open", "value": "open" },
+          { "label": "All filters closed", "value": "closed" },
+          { "label": "First filter open", "value": "first-open" }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "show_more",
+        "label": "Show a subset of filters from each group",
+        "info": "Check this setting if you have a large number of filters, and want them to take up less space",
+        "default": true
+      },
+      {
+        "type": "select",
+        "label": "Filters heading style",
+        "id": "heading_style",
+        "default": "body",
+        "options": [
+          { "label": "Heading", "value": "heading" },
+          { "label": "Body", "value": "body" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Article search"
+      },
+      {
+        "type": "checkbox",
+        "id": "search_articles",
+        "label": "Search articles",
+        "default": true
+      },
+      {
+        "type": "image_picker",
+        "id": "articles_default_image",
+        "label": "Default post image",
+        "info": "Applies if the post has no featured image"
+      },
+      {
+        "type": "select",
+        "id": "articles_default_color",
+        "label": "Image replacement color",
+        "info": "Applies if the post has no image set",
+        "options": [
+          { "value": "accent", "label": "Accent color" },
+          { "value": "default", "label": "Default color" },
+          { "value": "none", "label": "None" }
+        ],
+        "default": "accent"
+      },
+      {
+        "type": "select",
+        "id": "articles_style",
+        "label": "Posts style",
+        "options": [
+          { "value": "standard", "label": "Standard" },
+          { "value": "photo", "label": "Photo background" }
+        ],
+        "default": "photo"
+      },
+      {
+        "type": "range",
+        "id": "articles_columns",
+        "label": "Posts per row",
+        "info": "Desktop only",
+        "min": 1,
+        "max": 4,
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "articles_image_aspect_ratio",
+        "label": "Image aspect ratio",
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1,
+        "unit": ":1",
+        "default": 1.3
+      },
+      {
+        "type": "checkbox",
+        "id": "articles_show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "articles_show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "articles_show_tags",
+        "label": "Show tags",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "articles_show_comments_count",
+        "label": "Show comment count",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Page search"
+      },
+      {
+        "type": "checkbox",
+        "id": "search_pages",
+        "label": "Search pages",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ]
+  }
+{% endschema %}

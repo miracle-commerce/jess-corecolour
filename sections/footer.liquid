@@ -1,0 +1,486 @@
+<!-- /sections/footer.liquid -->
+{%- liquid
+  assign section_width = section.settings.width
+  assign blocks_size = section.blocks.size
+  assign color_text = section.settings.color_text
+  assign color_bg = section.settings.color_bg
+  assign color_border = section.settings.color_border
+  assign footer_wave = section.settings.show_footer_wave
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#SiteFooter'
+  assign animation_delay = 150
+
+  assign show_follow_on_shop = false
+  if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop
+    assign show_follow_on_shop = true
+  endif
+-%}
+
+{%- style -%}
+  {%- if color_bg != 'rgba(0,0,0,0)' and color_bg != '' -%}
+    .site-footer { --bg: {{ color_bg }}; }
+  {%- endif -%}
+
+  {%- if color_text != 'rgba(0,0,0,0)' and color_text != '' -%}
+    .site-footer {
+      --text: {{ color_text }};
+      --text-alpha-15: {{ color_text | color_modify: 'alpha', 0.15 }};
+      --text-alpha-50: {{ color_text | color_modify: 'alpha', 0.60 }};
+      --text-alpha-85: {{ color_text | color_modify: 'alpha', 0.85 }};
+    }
+  {%- endif -%}
+
+  {%- if color_border != 'rgba(0,0,0,0)' and color_border != '' -%}
+    .site-footer { --border: {{ color_border }}; }
+  {%- endif -%}
+
+  {%- if footer_wave -%}
+    .shopify-section:last-child .section-padding { padding-bottom: max(50px, var(--padding-bottom)); }
+
+    @media screen and (min-width: 768px) {
+      .slideshow:last-child .slider--has-arrow .flickity-page-dots { margin-bottom: 45px; }
+      .slideshow:last-child .slider__scroll-down { bottom: 10px; }
+    }
+  {%- endif -%}
+  .footer-block { --items-count: {{ blocks_size }}; }
+{%- endstyle -%}
+
+<footer id="SiteFooter"
+  class="site-footer{% if footer_wave %} site-footer--wavy{% endif %}"
+  role="contentinfo"
+  data-section-id="{{ section.id }}"
+  data-section-type="footer">
+  {%- if footer_wave -%}
+    {%- render 'footer-svg' -%}
+  {%- endif -%}
+  <div class="footer-content {{ section_width }}">
+    <div class="footer-blocks">
+      {%- for block in section.blocks -%}
+        {%- assign title = block.settings.title -%}
+
+        {%- case block.type -%}
+
+          {%- when 'logo' -%}
+            {%- assign logo_width = block.settings.logo_width -%}
+            {%- style -%}
+              .footer-block--logo { min-width: calc({{ logo_width }}px + calc(var(--gutter) / 2)); }
+              .footer-block__logo-image { width: {{ logo_width }}px; }
+            {%- endstyle -%}
+            <div class="footer-block footer-block--logo"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+              {%- if block.settings.image != blank -%}
+                <a href="{{ routes.root_url }}" class="footer-block__logo-image">
+                  {%- assign image_alt = block.settings.image.alt | strip_html | escape | default: shop.name -%}
+
+                  {%- render 'image-fill', img_object: block.settings.image, classes: 'logo--footer', alt: image_alt -%}
+                </a>
+              {%- endif -%}
+
+              {%- if block.settings.show_shop_name -%}
+                <a class="footer-block__shop-name h4" href="{{ routes.root_url }}">{{ shop.name }}</a>
+              {%- endif -%}
+
+              {%- if block.settings.text != blank -%}
+                <div class="rte">{{- block.settings.text -}}</div>
+              {%- endif -%}
+            </div>
+
+          {%- when 'link' -%}
+            {%- assign menu_links = linklists[block.settings.menu].links -%}
+            <div class="footer-block footer-block--menu"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+              {%- if title != blank -%}
+                <p class="footer-title footer-title--links">
+                  <button class="footer-title__button h5" aria-controls="FooterMenu--{{ title | handle }}-{{ forloop.index0 }}" data-collapsible-trigger data-collapsible-trigger-mobile aria-expanded="false">
+                    {{- title -}}
+                    {%- render 'icon-toggle-plus' -%}
+                    {%- render 'icon-toggle-minus' -%}
+                  </button>
+                </p>
+              {%- endif -%}
+
+              {%- if menu_links != empty -%}
+                <div class="footer-links__wrapper"{% if title != blank %} id="FooterMenu--{{ title | handle }}-{{ forloop.index0 }}" data-collapsible-container-mobile{% endif %}>
+                  <ul class="footer-links"{% if title != blank %} data-collapsible-content{% endif %}>
+                    {%- for link in menu_links -%}
+                      <li><a class="footer-link" href="{{ link.url }}">{{ link.title }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {%- endif -%}
+            </div>
+
+          {%- when 'blog' -%}
+            {%- assign blog = blogs[block.settings.blog] | default: false -%}
+            {%- assign layout = block.settings.layout -%}
+
+            <div class="footer-block footer-block--blog"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+              {%- if title != blank -%}
+                <p class="footer-title h5">{{ title }}</p>
+              {%- endif -%}
+
+              {%- if blog -%}
+                {%- if layout == 'articles' -%}
+                  <ul class="footer-articles-list">
+                    {%- for article in blog.articles limit: 3 -%}
+                      <li><a href="{{ article.url }}" class="footer-article-title footer-link" title="{{ article.title }}"> {{ article.title | strip_html | truncatewords: 5 }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- else -%}
+                  {%- assign tags = blog.all_tags | default: false -%}
+                  {%- if tags -%}
+                    <ul class="footer-tags-list">
+                      {%- for tag in tags -%}
+                        {%- unless tag contains 'time_' -%}
+                          <li><a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="footer-link footer-link--tags">{{ tag }}</a></li>
+                        {%- endunless -%}
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- else -%}
+                {% comment %} Onboarding content if no blog selected {% endcomment %}
+                {%- if layout == 'articles' -%}
+                  <ul class="footer-articles-list">
+                    {%- for i in (1..3) -%}
+                      <li><a href="#!" class="footer-article-title footer-link">{{ 'homepage.onboarding.blog.title' | t }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- else -%}
+                  <ul class="footer-tags-list">
+                    {%- for i in (1..3) -%}
+                      <li><a href="#!" class="footer-link">{{ 'homepage.onboarding.blog.tag' | t }}</a></li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+
+          {%- when 'newsletter' -%}
+            <div class="footer-block footer-block--newsletter"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+              {%- if title != blank -%}
+                <div class="footer-title h5">{{ title }}</div>
+              {%- endif -%}
+
+              {%- if block.settings.text != blank -%}
+                <div class="rte">{{- block.settings.text -}}</div>
+              {%- endif -%}
+
+              {%- render 'newsletter-form', unique: block.id -%}
+            </div>
+
+          {%- when 'text' -%}
+            {%- assign footer_text = block.settings.footer_text -%}
+
+            <div class="footer-block footer-block--text"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+              {%- if title != blank -%}
+                <p class="footer-title h5">{{ title }}</p>
+              {%- endif -%}
+
+              <div class="rte">
+                {{- footer_text -}}
+              </div>
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <div class="footer-bottom {{ section_width }}"
+    {% if animations_enabled %}
+      data-aos="fade-up"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 150 -%}
+    {% endif %}>
+
+    {%- render 'cc-custom-change-country' -%}
+    
+    {%- render 'cross-border' -%}
+
+    {%- if section.settings.show_social_links -%}
+      {%- render 'footer-social', show_follow_on_shop: show_follow_on_shop -%}
+    {%- endif -%}
+
+    {%- render 'footer-copyright' -%}
+
+    {%- if section.settings.show_payment_icons -%}
+      {%- render 'footer-payment' -%}
+    {%- endif -%}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_footer_wave",
+      "label": "Show footer wave",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Bottom bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_links",
+      "label": "Show social icons",
+      "info": "Edit your social settings and accounts in [Theme settings](/admin/themes/current/editor?context=theme)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_follow_on_shop",
+      "default": true,
+      "label": "Enable Follow on Shop",
+      "info": "Display follow button for your storefront on the Shop app. [Learn more](https://help.shopify.com/manual/online-store/themes/customizing-themes/follow-on-shop)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show payment icons",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "bottom_menu",
+      "label": "Menu"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "color_border",
+      "label": "Border",
+      "default": "#fff"
+    },
+    {
+      "type": "header",
+      "content": "language selector",
+      "info": "To add a language, go to your [language settings.](/admin/settings/languages)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_locale_selector",
+      "label": "Show language selector",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Currency selector",
+      "info": "To add a currency, go to your [currency settings.](/admin/settings/payments)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_currency_selector",
+      "label": "Show currency selector",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "currency_type",
+      "label": "Type",
+      "options": [
+        {
+          "value": "currency",
+          "label": "Currency"
+        },
+        {
+          "value": "country",
+          "label": "Country"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Logo",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Select an image"
+        },
+        {
+          "type": "range",
+          "id": "logo_width",
+          "label": "Custom logo width (in pixels)",
+          "min":30,
+          "max":250,
+          "default": 100,
+          "step":10,
+          "unit":"px"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_shop_name",
+          "label": "Show shop name",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "link",
+      "name": "Link list",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Link list",
+          "default": "main-menu",
+          "info":"This menu won't show dropdown items"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Shop"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Our Mission"
+        },
+        {
+          "type": "richtext",
+          "id": "footer_text",
+          "label": "Text",
+          "default": "<p>Leave your customers with a final message about your brand in this rich text block.</p>"
+        }
+      ]
+    },
+    {
+      "type": "blog",
+      "name": "Blog",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Our Blog"
+        },
+        {
+          "type": "blog",
+          "id": "blog",
+          "label": "Choose blog to show recent article excerpts."
+        },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "default": "articles",
+          "options": [
+            { "label": "Show recent articles", "value": "articles" },
+            { "label": "Show article tags", "value": "tags" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Subscribers are added in the Customers section of your site admin."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Newsletter"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Stay up to date with the new collections, products and exclusive offers.</p>"
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": ["footer"]
+  }
+}
+{% endschema %}

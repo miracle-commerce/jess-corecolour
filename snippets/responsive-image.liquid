@@ -1,0 +1,51 @@
+{%- comment -%}
+  Wraps an image inside a container and makes it responsive
+
+  Usage:
+  {%- render 'reponsive-image',
+    image: image,
+    image_class: image_class,
+    image_size: image_size,
+    image_attributes: image_attributes,
+    image_alt: image.alt,
+    aspect_ratio: aspect_ratio,
+    container_class: container_class,
+    container_attributes: container_attributes -%}
+
+   Accepts:
+    - image: {Object} image
+    - image_class: {String} Add class to the image tag
+    - image_size: {String} Custom image size for no JS. Default: 2048x2048
+    - image_attributes: {String} Custom image tag attribuges
+    - image_alt: {String} Custom image alt text
+    - aspect_ratio: {Number} Override image aspect ratio
+    - container_class: {String} Custom image container class
+    - container_attributes: {String} Custom image container tag attributes
+{%- endcomment -%}
+
+{%- unless image == blank -%}
+  {%- liquid
+    assign image_alt = image_alt | default: image.alt
+    assign image_size = image_size | default: '2048x2048'
+    assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+    assign image_widths = "[180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048, 2450, 2700, 3000, 3350, 3750, 4100]"
+    assign image_aspect_ratio = 1 | divided_by: image.aspect_ratio
+    assign aspect_ratio = aspect_ratio | default: image_aspect_ratio
+  -%}
+
+  <div class="responsive-image{% if container_class != blank %} {{ container_class }}{% endif %}"
+    style="padding-top: {{ aspect_ratio | times: 100 | round: 2 }}%"
+    {{ container_attributes }}>
+    <img class="{{ image_class }} lazyload"
+      src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+      data-src="{{ image_url_pattern }}"
+      data-widths="{{ image_widths }}"
+      data-aspectratio="{{ image_aspect_ratio }}"
+      data-sizes="auto"
+      alt="{{ image_alt | escape }}"
+      {{ image_attributes }}>
+    <noscript>
+      <img src="{{ image | img_url: image_size }}" alt="{{ image_alt | escape }}" class="{{ image_class }}">
+    </noscript>
+  </div>
+{%- endunless -%}

@@ -1,0 +1,25 @@
+{
+  "sections": {
+    "main": {
+      "type": "cart",
+      "settings": {
+        "bg_color_secondary": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "1687240050a5e067d9": {
+      "type": "apps",
+      "settings": {
+        "bg_color": "",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "1687240050a5e067d9"
+  ]
+}

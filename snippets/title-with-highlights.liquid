@@ -1,0 +1,49 @@
+{% comment %}
+  Enhanced text decorations options - Render title with highlights
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Boolean - `has_text_highlight` variable from `title-text-highlights.liquid`
+{% endcomment %}
+
+{% if has_text_highlight %}
+  {%- liquid
+    assign title_lines = title | split: '<p>'
+    for line in title_lines
+      if line != blank
+        echo '<span class="text-highlight__break">'
+        
+          assign line_with_links = line | split: '<a'
+          assign line_mod  = ''
+
+          if line_with_links.size > 1
+            for link_html_part in line_with_links
+              if link_html_part != blank
+                assign link_html_mod = link_html_part
+                if link_html_part contains ' href='
+                  assign link_html_mod = link_html_part | prepend: '<a'
+                endif
+
+                if link_html_part contains 'text-highlight'
+                  assign link_html_mod = link_html_mod | replace_first: '><span class="text-highlight', ' data-has-highlight><span class="text-highlight'
+                endif
+
+                assign line_mod = line_mod | append: link_html_mod
+              endif
+            endfor
+            
+            echo line_mod | replace: '</p>', '</span>' | replace: '<br/>', ''
+          else
+            echo line | replace: '</p>', '</span>' | replace: '<br/>', ''
+          endif
+
+        echo '</span>'
+      endif
+    endfor
+  -%}
+{% else %}
+  {{- title 
+    | replace: '<p>', '<span class="text-highlight__break">' 
+    | replace: '</p>', '</span>'
+    | replace: '<br/>', '' -}}
+{% endif %}

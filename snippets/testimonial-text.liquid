@@ -1,0 +1,32 @@
+{%- assign testimonial_text_class = 'testimonial__text' -%}
+{%- if text_size > 1.5 -%}
+  {%- assign testimonial_text_class = 'testimonial__text testimonial__text--large' -%}
+{%- endif -%}
+
+{%- style -%}
+  #Testimonials--{{ section.id }} .testimonial__item--{{ block_id }} .testimonial__text { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size }}); }
+  #Testimonials--{{ section.id }} .testimonial__item--{{ block_id }} .testimonial__item__inner { background: {{ block_color }}; }
+{%- endstyle -%}
+
+{%- unless heading == blank and subheading == blank -%}
+  <div class="testimonial__item testimonial__item--slide__text testimonial__item--{{ block_id }} {{ text_color }} {{ text_alignment }}"
+    data-item
+    {{ block_shopify_attributes }}>
+    <div class="testimonial__item__inner"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      <div class="testimonial__item__content">
+
+        <div class="{{ testimonial_text_class }}">{{ heading }}</div>
+
+        {%- if subheading != blank -%}
+          <div>{{ subheading }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endunless -%}

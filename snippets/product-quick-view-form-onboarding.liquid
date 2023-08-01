@@ -1,0 +1,343 @@
+<div class="{{ quickview_form_classes | append: ' popup-quick-view__form--onboarding' }}">
+  <div class="popup-quick-view__wrapper product__form__wrapper{{ hide_labels_class }}" data-scroll-lock-scrollable>
+    <div class="popup-quick-view__body" data-scroll-lock-scrollable>
+      {%- if quick_view_nav != '' -%}
+        {{- quick_view_nav -}}
+      {%- endif -%}
+
+      <div class="popup-quick-view__body__inner">
+        <div class="popup-quick-view__content">
+          <a href="#" title="{{ 'general.accessibility.close' | t }} (Esc)" class="popup-quick-view__close" data-popup-close>
+            {%- render 'icon-close' -%}
+          </a>
+
+          <h1 class="popup-quick-view__title">
+            <a href="{{ product_url }}" title="{{ product_title }}">{{ product_title }}</a>
+          </h1>{%- assign currency_code_enable = settings.currency_code_enable -%}
+
+<div class="product__block product__price-and-badge"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+    {%- assign animation_delay = animation_delay | plus: 150 -%}
+  {% endif %}
+  {{ block_style }}>
+  <div class="product__price-and-rating">
+    <div class="product__price" data-price-wrapper>
+      {%- unless product == blank -%}
+        <span data-product-price class="product__price--regular{% if current_variant.compare_at_price > current_variant.price %} product__price--sale{% endif %}">
+          {%- liquid
+            if current_variant.price == 0
+              echo 'products.product.free' | t
+            elsif currency_code_enable
+              echo current_variant.price | money_with_currency
+            else
+              echo current_variant.price | money
+            endif
+          -%}
+        </span>
+      {%- else -%}
+        <span id="ProductPrice">
+          {%- liquid
+            if currency_code_enable
+              echo 1999 | money_with_currency
+            else
+              echo 1999 | money
+            endif
+          -%}
+        </span>
+      {%- endunless -%}
+
+      <s data-compare-price class="product__price--compare">
+        {%- liquid
+          if current_variant.compare_at_price
+            if currency_code_enable
+              echo current_variant.compare_at_price | money_with_currency
+            else
+              echo current_variant.compare_at_price | money
+            endif
+          endif
+        -%}
+      </s>
+
+      {%- liquid
+        assign units = product.variants | map: 'unit_price' | compact
+        if units[0]
+          assign has_units = true
+        else
+          assign has_units = false
+        endif
+      -%}
+
+      {%- if has_units -%}
+        {%- assign current_variant_unit_price = current_variant.unit_price -%}
+        {%- capture show_units -%}
+          {%- unless current_variant_unit_price -%}style="display: none;"{%- endunless -%}
+        {%- endcapture -%}
+
+        {%- capture unit_price_separator -%}
+          <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+        {%- endcapture -%}
+
+        {%- capture unit_price_base_unit -%}
+          <span>
+            {%- if current_variant.unit_price_measurement -%}
+              {% if current_variant.unit_price_measurement.reference_value != 1 %}
+                {{ current_variant.unit_price_measurement.reference_value }}
+              {% endif %}
+              {{ current_variant.unit_price_measurement.reference_unit }}
+            {%- endif -%}
+          </span>
+        {%- endcapture -%}
+
+        <span class="product__unit-price">
+          <span data-product-unit class="product__price--unit{% unless current_variant_unit_price %} hidden{% endunless %}">
+            <span class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</span>
+            <span data-product-unit-price id="unit-price-{{ section.id }}">{{ current_variant_unit_price | money }}</span>
+            {{ unit_price_separator }}
+            <span data-product-base id="unit-price-base-{{ section.id }}">{{ unit_price_base_unit }}</span>
+          </span>
+        </span>
+      {%- endif -%}
+      {% if section_type != 'quickview' %}
+        <span data-price-off class="product__price--off hidden">
+          <span data-price-off-type>{{ 'products.product.sale' | t }}</span>
+          <em>•</em>
+          {{ 'products.product.save' | t }}
+          <span data-price-off-amount></span>
+        </span>
+      {% endif %}
+    </div>
+
+    {%- if block.settings.show_rating or settings.show_rating and section_type == 'quickview' -%}
+      {%- unless product == blank -%}
+        {%- render 'rating', show_rating_count: block.settings.show_rating_count, single_star: true, reviews: product.metafields.reviews -%}
+      {%- else -%}
+        {%- render 'rating', show_rating_count: block.settings.show_rating_count, single_star: true, onboarding: true -%}
+      {%- endunless -%}
+    {%- endif -%}
+  </div>
+
+  {% if section_type == 'quickview' %}
+    <span data-price-off class="product__price--off hidden">
+      <span data-price-off-type>{{ 'products.product.sale' | t }}</span>
+      <em>•</em>
+      {{ 'products.product.save' | t }}
+      <span data-price-off-amount></span>
+    </span>
+  {% endif %}
+</div></div>
+
+        <div class="popup-quick-view__gallery">
+          {{- product_gallery -}}
+        </div>
+      </div>
+
+      <div>
+        {%- comment -%} Product Form Variants {%- endcomment -%}
+        {%- liquid
+          assign enable_color_swatches = settings.enable_color_swatches_product
+          assign variants_style = settings.variants_style
+
+          assign enable_variant_boxes = false
+          if variants_style == 'boxes' or variants_style == 'auto'
+            assign enable_variant_boxes = true
+          endif
+
+          capture selector_wrapper_class
+            echo 'selector-wrapper'
+            if enable_variant_boxes
+              echo ' selector-wrapper--boxes'
+            endif
+
+            if enable_color_swatches
+              echo ' selector-wrapper--swatches'
+            endif
+          endcapture
+        -%}
+
+        {%- capture form_fields -%}
+          <div class="product__selectors">
+            <div class="{{ selector_wrapper_class }}"
+              data-option-position="1"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {%- if enable_variant_boxes or enable_color_swatches -%}
+                <fieldset class="radio__fieldset">
+                  <legend class="radio__legend">
+                    <span class="radio__legend__label">{{- 'homepage.onboarding.color' | t -}}</span>
+                  </legend>
+
+                  {%- if enable_color_swatches -%}
+                    {%- for i in (1..3) -%}
+                      {%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+                      <span class="swatch__button swatch__button--{{ settings.color_swatches_product_style }}">
+                        <input type="radio"
+                          class="swatch__input"
+                          data-single-option-selector
+                          data-index="option1"
+                          name="color--{{ unique }}"
+                          value="{{ value | escape_once }}"
+                          id="option-{{ value }}-0-{{ unique }}"
+                          {% if forloop.index == 1 %}checked{% endif %}>
+                        <label for="option-{{ value }}-0-{{ unique }}" class="swatch__label" data-swatch="{{ value | escape_once }}" data-tooltip="{{ value | escape_once | capitalize }}">
+                          <span class="visually-hidden">{{ value | escape_once }}</span>
+                          {%- if settings.color_swatches_product_style == 'circle' -%}
+                            <span class="icon icon-check"></span>
+                          {%- endif -%}
+                        </label>
+                      </span>
+                    {%- endfor -%}
+                  {%- else -%}
+                    {%- for i in (1..3) -%}
+                      {%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+                      <span class="radio__button">
+                        <input
+                          type="radio"
+                          class="radio__input"
+                          data-single-option-selector
+                          data-index="option1"
+                          name="color--{{ unique }}"
+                          value="{{ value | escape_once }}"
+                          id="option-{{ value }}-0-{{ unique }}"
+                          {% if forloop.index == 1 %}checked{% endif %}>
+                        <label for="option-{{ value }}-0-{{ unique }}" class="radio__label">
+                          <span>{{ value | escape_once }}</span>
+                        </label>
+                      </span>
+                    {%- endfor -%}
+                  {%- endif -%}
+                </fieldset>
+              {%- else -%}
+                <div class="select__fieldset">
+                  <span class="radio__legend">
+                    <span class="radio__legend__label" id="onboarding-{{ unique }}-option-0-label">{{- 'homepage.onboarding.color' | t -}}</span>
+                  </span>
+
+                  <div class="select-popout" data-popout data-popout-prevent="true">
+                    <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="onboarding-{{ unique }}-option-0-list" aria-labelledby="onboarding-{{ unique }}-option-0-label" data-popout-toggle>
+                      <span class="select-popout__value" data-popout-text>White</span>
+                      {%- render 'icon-select' -%}
+                    </button>
+
+                    <div id="onboarding-{{ unique }}-option-0-list" class="select-popout__list" data-popout-list>
+                      <ul class="select-popout__list__scroll">
+                        {%- for i in (1..3) -%}
+                          {%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+                          <li class="select-popout__item{% if forloop.index == 1 %} select-popout__item--current{% endif %}">
+                            <a class="select-popout__option" href="#"{% if forloop.index == 1 %} aria-current="true"{% endif %} data-value="{{ value | escape_once }}" data-popout-option>
+                              <span>
+                                {{ value | escape_once }}
+                              </span>
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                    <input type="hidden" name="options[Color]" id="onboarding-{{ unique }}-option-0" value="White" data-popout-input data-single-option-selector data-index="option1"/>
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="{{ selector_wrapper_class }}"
+              data-option-position="2"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {%- if enable_variant_boxes -%}
+                <fieldset class="radio__fieldset">
+                  <legend class="radio__legend">
+                    <span class="radio__legend__label">{{- 'homepage.onboarding.size' | t -}}</span>
+                  </legend>
+
+                  {%- for i in (1..3) -%}
+                    {%- capture value -%}{%- cycle 'Small', 'Medium', 'Large' -%}{%- endcapture -%}
+                    <span class="radio__button">
+                      <input
+                        type="radio"
+                        class="radio__input"
+                        data-single-option-selector
+                        data-index="option2"
+                        name="size--{{ unique }}"
+                        value="{{ value | escape_once }}"
+                        id="option-{{ value }}-1-{{ unique }}"
+                        {% if forloop.index == 1 %}checked{% endif %}>
+                      <label for="option-{{ value }}-1-{{ unique }}" class="radio__label">
+                        <span>{{ value | escape_once }}</span>
+                      </label>
+                    </span>
+                  {%- endfor -%}
+                </fieldset>
+              {%- else -%}
+                <div class="select__fieldset">
+                  <span class="radio__legend">
+                    <span class="radio__legend__label" id="onboarding-{{ unique }}-option-1-label">{{- 'homepage.onboarding.size' | t -}}</span>
+                  </span>
+
+                  <div class="select-popout" data-popout data-popout-prevent="true">
+                    <button type="button" class="select-popout__toggle" aria-expanded="false" aria-controls="onboarding-{{ unique }}-option-1-list" aria-labelledby="onboarding-{{ unique }}-option-1-label" data-popout-toggle>
+                      <span class="select-popout__value" data-popout-text>Small</span>
+                      {%- render 'icon-select' -%}
+                    </button>
+
+                    <div id="onboarding-{{ unique }}-option-1-list" class="select-popout__list" data-popout-list>
+                      <ul class="select-popout__list__scroll">
+                        {%- for i in (1..3) -%}
+                          {%- capture value -%}{%- cycle 'Small', 'Medium', 'Large' -%}{%- endcapture -%}
+                          <li class="select-popout__item{% if forloop.index == 1 %} select-popout__item--current{% endif %}">
+                            <a class="select-popout__option" href="#"{% if forloop.index == 1 %} aria-current="true"{% endif %} data-value="{{ value | escape_once }}" data-popout-option>
+                              <span>
+                                {{ value | escape_once }}
+                              </span>
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                    <input type="hidden" name="options[Size]" id="onboarding-{{ unique }}-option-1" value="White" data-popout-input data-single-option-selector data-index="option2"/>
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endcapture -%}
+
+        <div class="product__form product__form--onboarding">
+          {{- form_fields -}}
+        </div>
+      </div>
+    </div>
+
+    <div class="popup-quick-view__foot">
+      <div class="popup-quick-view__foot__inner" data-quick-view-foot-inner>
+        {%- comment -%} Product Form Buttons {%- endcomment -%}
+        <div class="product__submit__holder">
+          <div class="product__submit__buttons">
+            <div class="product__submit__item"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              <button type="button" class="btn {{ atc_button_color }} {{ atc_button_style }} btn--large btn--submit product__submit__add">
+                <span>{{ 'products.product.add_to_cart' | t }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <a class="popup-quick-view__view-button popup-quick-view__view-button--desktop" href="{{ product_url }}">{{ 'products.general.view_all_details' | t }}</a>
+      </div>
+    </div>
+  </div>
+</div>

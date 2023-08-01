@@ -1,0 +1,69 @@
+{%- comment -%} /templates/customers/login.liquid {%- endcomment -%}
+<section class="page-customer" data-account-form>
+  <div class="wrapper">
+    <div class="form-vertical-wrapper">
+      <p class="text-left is-hidden" data-recover-success-text>{{ 'customer.recover_password.success' | t }}</p>
+
+      <div id="CustomerLoginForm" class="form-vertical is-hidden" data-login-form>
+        {% form 'customer_login', id: 'CustomerLogin' %}
+          <div class="note form-success" id="ResetSuccess" {% unless form.posted_successfully? %}style="display:none;"{% endunless %}>
+            {{ 'customer.recover_password.success' | t }}
+          </div>
+          <div class="section__header">
+            <h2 class="section__heading account__heading--small">{{ 'customer.login.title' | t }}</h2>
+            {%- if settings.show_spacer_lines -%}
+              <hr class="section__heading-line">
+            {%- endif -%}
+            <p class="account__subheading">{{ 'customer.login.create_account_prompt' | t }} <a href="{{ routes.account_register_url }}">{{ 'customer.login.create_account_cta' | t }}</a></p>
+          </div>
+          {{ form.errors | default_errors }}
+          <label for="CustomerEmail" class="hidden-label">{{ 'customer.login.email' | t }}</label>
+          <input type="email" name="customer[email]" id="CustomerEmail" class="input--full{% if form.errors contains 'email' %} error{% endif %}" placeholder="{{ 'customer.login.email' | t }}" autocorrect="off" autocapitalize="off" autofocus required>
+          {% if form.password_needed %}
+            <label for="CustomerPassword" class="hidden-label">{{ 'customer.login.password' | t }}</label>
+            <input type="password" value="" name="customer[password]" id="CustomerPassword" class="input--full{% if form.errors contains 'password' %} error{% endif %}" placeholder="{{ 'customer.login.password' | t }}" required>
+          {% endif %}
+          <button type="submit" class="btn btn--primary btn--solid">{{ 'customer.login.sign_in' | t }}</button>
+          <div class = "return light-gray">
+            {% if form.password_needed %}
+              <p><a href="#RecoverPasswordForm" id="RecoverPassword" data-show-reset>{{ 'customer.login.forgot_password' | t }}</a></p>
+            {% endif %}
+          </div>
+        {% endform %}
+      </div>
+
+      <div id="RecoverPasswordForm" class="text-left is-hidden" data-recover-password>
+        <h2 class="account__heading account__heading--small">{{ 'customer.recover_password.title' | t }}</h2>
+        <div class="form-vertical">
+          {% form 'recover_customer_password', id: 'RecoverCustomerPassword' %}
+            {{ form.errors | default_errors }}
+
+            {% if form.posted_successfully? %}
+              <div data-recover-success></div>
+            {% else %}
+              <p class="light-gray">{{ 'customer.recover_password.subtext' | t }}</p>
+            {% endif %}
+
+            <label for="RecoverEmail" class="hidden-label">{{ 'customer.recover_password.email' | t }}</label>
+            <input type="email" value="" name="email" id="RecoverEmail" class="input--full" placeholder="{{ 'customer.recover_password.email' | t }}" autocorrect="off" autocapitalize="off" required>
+            <button type="submit" class="btn btn--primary btn--solid">{{ 'customer.recover_password.submit' | t }}</button>
+            <a href = "#CustomerLoginForm" type="button" id="HideRecoverPasswordLink" class="return light-gray" data-hide-reset>{{ 'customer.recover_password.cancel' | t }}</a>
+          {% endform %}
+        </div>
+      </div>
+      {% comment %}
+      If accounts are set as optional, the following will be shown as an option
+      during checkout, not on the default /login page.
+      {% endcomment %}
+      {% if shop.checkout.guest_login %}
+        {%- if settings.show_spacer_lines -%}
+          <hr class="section__heading-line">
+        {%- endif -%}
+        <h2>{{ 'customer.login.guest_title' | t }}</h2>
+        {% form 'guest_login', id: 'GuestLogin' %}
+          <button type="submit" class="btn btn--primary btn--solid">{{ 'customer.login.guest_continue' | t }}</button>
+        {% endform %}
+      {% endif %}
+    </div>
+  </div>
+</section>

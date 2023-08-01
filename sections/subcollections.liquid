@@ -1,0 +1,272 @@
+<!-- /sections/subcollections.liquid -->
+
+{%- liquid
+  assign subcollections = section.settings.subcollections
+  assign collection_limit = section.settings.limit
+
+  assign layout = section.settings.layout
+  assign carousel = false
+  if layout == 'carousel'
+    assign carousel = true
+  endif
+  assign bg_color = section.settings.bg_color
+  assign text_color = section.settings.text_color
+  assign overlay_opacity = section.settings.image_overlay_opacity | times: 0.01
+
+  if text_color == 'text-light'
+    assign text_color = '#fff'
+  else
+    assign text_color = '#000'
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Subcollection--' | append: section.id
+  assign animation_delay = 150
+
+  assign columns = subcollections.count | at_most: 4
+  assign size_mobile = 'mobile--one-whole'
+
+  case columns
+    when 1
+      assign size_desktop = 'one-whole'
+    when 2
+      assign size_desktop = 'one-half'
+    when 3
+      assign size_desktop = 'one-third'
+    when 4
+      assign size_desktop = 'one-quarter'
+  endcase
+-%}
+
+{%- capture subcollections_markup -%}
+   {%- if subcollections.count > 0 -%}
+      {% for subcollection in subcollections limit: collection_limit %}
+        {%- liquid
+          assign first_product_image = subcollection.products.first.featured_media.preview_image
+
+          if section.settings.image_source == 'product' and first_product_image != blank or subcollection.image == blank
+            assign subcollection_image = first_product_image
+          elsif subcollection.image
+            assign subcollection_image = subcollection.image
+          else
+            assign subcollection_image = false
+          endif
+        -%}
+
+        <div class="subcollection {{ size_desktop }} {{ size_mobile }} {% if carousel %}carousel__item{% else %}grid__item{% endif %}"
+          {% if carousel %}
+            data-slide
+          {% endif %}>
+          <div class="subcollection__outer"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+
+            <a href="{{ subcollection.url }}" title="{{ subcollection.title | strip_html | escape }}" class="subcollection__image{% if subcollection_image %} lazyload{% endif %}"{% if subcollection_image %} data-bgset="{% render 'bgset', image: subcollection_image %}" data-sizes="auto" data-parent-fit="cover"{% endif %}>
+              <h3 class="subcollection__title h4"><span>{{ subcollection.title }}</span></h3>
+
+              {%- unless subcollection_image -%}
+                {%- assign image_url_pattern = subcollection.products.first.featured_image | img_url: '540x' | replace: '_540x.', '_{width}x.' -%}
+                {%- assign image_widths = "[180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048, 2450, 2700, 3000, 3350, 3750, 4100]" -%}
+                <div class="placeholder-svg--overlayed">
+                  <img
+                    class="no-image-placeholder placeholder-svg--overlayed lazyload"
+                    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                    data-src="{{ image_url_pattern }}"
+                    data-widths= "{{ image_widths }}"
+                    data-aspectratio="1"
+                    data-sizes="auto"
+                    width="540"
+                    height="540"
+                    alt="{{ subcollection.title | strip_html | escape }}">
+                </div>
+              {%- endunless -%}
+            </a>
+            <noscript>
+              <a href="{{ subcollection.url }}" title="{{ subcollection.title | strip_html | escape }}" class="subcollection__image"{% unless subcollection_image == 'blank' %} style="background-image: url({{ subcollection_image | img_url: '1024x' }});"{% endunless %}>
+                <h3 class="subcollection__title"><span>{{ subcollection.title }}</span></h3>
+
+                {%- unless subcollection.image -%}
+                  <div class="placeholder-svg--overlayed">
+                    <img
+                      class="no-image-placeholder"
+                      src="{{ subcollection.products.first.featured_image | img_url: '1024x' }}"
+                      width="1024"
+                      height="1024"
+                      alt="{{ subcollection.title | strip_html | escape }}">
+                  </div>
+                {%- endunless -%}
+              </a>
+            </noscript>
+          </div>
+        </div>
+      {% endfor %}
+    {%- endif -%}
+{%- endcapture -%}
+
+{%- if subcollections_markup != blank -%}
+  {%- style -%}
+    #Subcollection--{{ section.id }} {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+    }
+
+    {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+      #Subcollection--{{ section.id }} {
+        background-color: {{ bg_color }};
+      }
+    {%- endif -%}
+
+    #Subcollection--{{ section.id }} { --overlay-opacity: {{ overlay_opacity }}; }
+    #Subcollection--{{ section.id }} .subcollection {
+      --text: {{ text_color }};
+      --collection-image-padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }};
+    }
+  {%- endstyle -%}
+
+  <div
+    id="Subcollection--{{ section.id }}"
+    class="subcollections section-padding"
+    data-section-type="subcollections"
+    data-section-id="{{ section.id }}"
+    data-columns="{{ columns }}"
+    data-subcollections>
+    <div class="wrapper--full-padded">
+      <div class="{% if carousel %}carousel__container{% else %}grid__container{% endif %}">
+        <div class="{% if carousel %}carousel{% else %}grid{% endif %} carousel--mobile"{% if carousel %} data-slider data-slider-id="slider--{{ section.id }}"{% endif %}>
+          {{- subcollections_markup -}}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Subcollections",
+    "templates": ["collection"],
+    "settings": [
+      {
+        "type": "collection_list",
+        "id": "subcollections",
+        "label": "Subcollections"
+      },
+      {
+        "type": "range",
+        "id": "limit",
+        "min": 1,
+        "max": 8,
+        "step": 1,
+        "label": "Collection limit",
+        "default": 8
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "label": "Layout",
+        "info": "Desktop only",
+        "options": [
+          {
+            "value": "grid",
+            "label": "Grid"
+          },
+          {
+            "value": "carousel",
+            "label": "Carousel"
+          }
+        ],
+        "default": "grid"
+      },
+      {
+        "type": "select",
+        "id": "image_source",
+        "label": "Image source",
+        "options": [
+          {
+            "value": "collection",
+            "label": "Use collection image"
+          },
+          {
+            "value": "product",
+            "label": "Use first product image"
+          }
+        ],
+        "default": "collection"
+      },
+      {
+        "type": "range",
+        "id": "image_aspect_ratio",
+        "label": "Image height ratio",
+        "info": "Wide to tall",
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1,
+        "unit": ":1",
+        "default": 0.6
+      },
+      {
+        "type": "range",
+        "id": "image_overlay_opacity",
+        "label": "Text contrast",
+        "info": "Improves readability of text",
+        "min": 0,
+        "max": 95,
+        "step": 5,
+        "unit": "%",
+        "default": 10
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "label": "Text color",
+        "default": "text-light",
+        "options": [
+          {
+            "value": "text-light",
+            "label": "Light"
+          },
+          {
+            "value": "text-dark",
+            "label": "Dark"
+          }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 30
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 30
+      }
+    ]
+  }
+{% endschema %}

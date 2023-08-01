@@ -1,0 +1,322 @@
+{
+  "sections": {
+    "main": {
+      "type": "product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "subheading": "vendor",
+            "show_rating": true,
+            "show_rating_count": false,
+            "padding_bottom": 20
+          }
+        },
+        "2d6546d6-f7c0-4aea-a7f4-9796a1b507ed": {
+          "type": "shopify:\/\/apps\/yotpo-product-photo-reviews\/blocks\/star-rating\/eb7dfd7d-db44-4334-bc49-c893b51b36cf",
+          "settings": {
+            "product": "{{product}}"
+          }
+        },
+        "inventory_countdown": {
+          "type": "inventory_countdown",
+          "settings": {
+            "max_inventory": 10,
+            "hide_inventory_count": true,
+            "padding_bottom": 20
+          }
+        },
+        "7ddd2db6-1d92-43ee-a7d9-e786662f9ced": {
+          "type": "icon",
+          "settings": {
+            "icon_name": "truck",
+            "icon_color": "#000000",
+            "icon_width": 20,
+            "icon_text": "Same day dispatch for orders placed before 1pm AEST. Excludes weekends & public holidays.",
+            "text_size": 90,
+            "width": "full",
+            "text_alignment": "left",
+            "bg_color": "",
+            "padding_bottom": 20
+          }
+        },
+        "0986e434-0614-4e8b-a3d4-6143e9537e76": {
+          "type": "custom_code",
+          "settings": {
+            "custom_code": "{% if product.metafields.custom.variation_products.value != blank%}\n<div class=\"cc-custom-variation-header\">Select Device<\/div>\n<select class=\"cc-custom-variation\">\n{% for item in product.metafields.custom.variation_products.value %}\n  {% assign ccselected = '' %}\n  {% if item.metafields.custom.variation_value.value != blank%}\n  \t{% if item.title == product.title %}\n      {% assign ccselected = 'selected' %}\n  \t{% endif %}\n    <option {{ ccselected }} data-url=\"{{ item.url }}\">{{ item.metafields.custom.variation_value.value }}<\/option>\n  {% endif %}\n{% endfor %}\n<\/select>\n\n<script>\nconst ccCustomVariations = document.querySelectorAll('.cc-custom-variation');\nccCustomVariations.forEach((ccCustomVariation) => {\n    ccCustomVariation.addEventListener('change', function() {\n        const selectedOption = this.options[this.selectedIndex];\n        location.href = selectedOption.getAttribute('data-url');\n    });\n});\n<\/script>\n<style>\n.cc-custom-variation-header { \n  font-size: calc(.875rem * var(--adjust-body)); \n  margin-bottom: 8px; \n}\n.cc-custom-variation { \n  -webkit-appearance: none;\n  -moz-appearance: none;\n  background: var(--input-bg); \n  background-image: url(data:image\/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Ctitle%3Edown-arrow%3C%2Ftitle%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10.293%2C3.293%2C6%2C7.586%2C1.707%2C3.293A1%2C1%2C0%2C0%2C0%2C.293%2C4.707l5%2C5a1%2C1%2C0%2C0%2C0%2C1.414%2C0l5-5a1%2C1%2C0%2C1%2C0-1.414-1.414Z%22%20fill%3D%22%23727272%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E);\n  background-position: top 50% right 10%;\n  background-repeat: no-repeat;\n  background-size: 0.6rem;\n  border: var(--BORDER-WIDTH) solid var(--text); \n  border-radius: var(--RADIUS); \n  color: var(--text); \n  display: block; \n  font-size: calc(.875rem * var(--adjust-body)); \n  font-family: var(--FONT-STACK-BODY); \n  line-height: 1;\n  padding: 13px 40px 13px 20px;\n}\n@media only screen and (max-width: 767px) {\n  .cc-custom-variation-header { \n    font-size: calc(.75rem * var(--adjust-body)); \n  }\n}\n<\/style>\n{% endif %}",
+            "padding_bottom": 20
+          }
+        },
+        "form": {
+          "type": "form",
+          "settings": {
+            "show_labels": true,
+            "show_quantity": true,
+            "show_payment_button": true,
+            "enable_subscriptions_selectors": true,
+            "padding_bottom": 20
+          }
+        },
+        "a42f4e7d-6a8d-42a4-80af-29ec3b3b52d9": {
+          "type": "feature",
+          "disabled": true,
+          "settings": {
+            "icon_name": "support",
+            "icon_width": 25,
+            "title": "Need help with sizing?",
+            "text": "<p>This content type will accept <strong>rich text<\/strong> to help with adding styles and links to additional pages or content. Use this to add supplementary information to help your buyers.<\/p>",
+            "bg_color": "#f7f9fa",
+            "text_color": "#000000",
+            "padding_bottom": 20
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "padding_bottom": 20
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "2d6546d6-f7c0-4aea-a7f4-9796a1b507ed",
+        "inventory_countdown",
+        "7ddd2db6-1d92-43ee-a7d9-e786662f9ced",
+        "0986e434-0614-4e8b-a3d4-6143e9537e76",
+        "form",
+        "a42f4e7d-6a8d-42a4-80af-29ec3b3b52d9",
+        "description"
+      ],
+      "settings": {
+        "product_sticky_enable": true,
+        "image_layout": "carousel",
+        "image_width": "standard",
+        "product_image_aspect_ratio": true,
+        "enable_zoom": false,
+        "enable_video_looping": false,
+        "bg_color": "",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "limit": 4,
+        "product_recommendations_heading": "You May Also Like",
+        "bg_color": "",
+        "width": "wrapper--full-padded",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    },
+    "icons": {
+      "type": "section-icons-row",
+      "blocks": {
+        "icon-0": {
+          "type": "text",
+          "settings": {
+            "icon_name": "lock",
+            "title": "MagSafe Option",
+            "text": "<p>MagSafe compatible for iPhone 12-14 series.<\/p>"
+          }
+        },
+        "icon-1": {
+          "type": "text",
+          "settings": {
+            "icon_name": "check",
+            "title": "Scratch-Resistant Surface",
+            "text": "<p>Scratch-free back cover<\/p>"
+          }
+        },
+        "icon-2": {
+          "type": "text",
+          "settings": {
+            "icon_name": "eco-friendly",
+            "title": "Eco-Friendly Ink",
+            "text": "<p>Dyed with non-toxic ink. <\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "icon-0",
+        "icon-1",
+        "icon-2"
+      ],
+      "settings": {
+        "alignment": "center",
+        "columns": 4,
+        "icons_width": 30,
+        "heading": "What's so special about our leather phone case?",
+        "subheading": "",
+        "bg_color": "",
+        "text_color": "#333333",
+        "box_color": "",
+        "button_text": "",
+        "button_link": "",
+        "button_color": "btn--black",
+        "button_style": "btn--solid",
+        "button_size": "btn--small",
+        "enable_slider_mobile": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "d49146ed-2eff-441c-b711-f4dba3071e17": {
+      "type": "section-image",
+      "settings": {
+        "image": "shopify:\/\/shop_images\/PC-LC-C01-IP.jpg",
+        "height": "full-height",
+        "enable_mobile_height": true,
+        "mobile_height": "original-height-mobile",
+        "enable_stretch": false,
+        "image_position": "center",
+        "bg_color_secondary": false,
+        "width": "wrapper--full",
+        "padding_top": 50,
+        "padding_bottom": 50
+      }
+    },
+    "eb124a0c-6961-4461-bba9-ee408d9b56a4": {
+      "type": "section-text",
+      "blocks": {
+        "template--19407994257686__eb124a0c-6961-4461-bba9-ee408d9b56a4-16872456510faf7956-0": {
+          "type": "subheading",
+          "settings": {
+            "text": "<h5>Premium meets durability<\/h5>",
+            "size": 120,
+            "margin_bottom": 16
+          }
+        },
+        "68e4979c-0931-48b1-8006-39100524b37a": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>Unique Leather Cases <\/p>",
+            "size": 100,
+            "heading_highlight_type": "italics",
+            "highlight_color": "#d43747"
+          }
+        },
+        "8ce8db89-c7cf-407d-8708-1f98b52a80ec": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Experience a phone case range where luxury meets durability. Not to also mention that it is Eco-Friendly. <\/p>",
+            "size": 100
+          }
+        }
+      },
+      "block_order": [
+        "template--19407994257686__eb124a0c-6961-4461-bba9-ee408d9b56a4-16872456510faf7956-0",
+        "68e4979c-0931-48b1-8006-39100524b37a",
+        "8ce8db89-c7cf-407d-8708-1f98b52a80ec"
+      ],
+      "settings": {
+        "text_position": "center",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper--narrow",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "513efdf1-28ed-4ba2-a94c-f1108382a969": {
+      "type": "section-image",
+      "settings": {
+        "image": "shopify:\/\/shop_images\/PC-LC-C02-IP_6f059018-465d-4a3a-9821-24d892c19d00.jpg",
+        "height": "full-height",
+        "enable_mobile_height": true,
+        "mobile_height": "original-height-mobile",
+        "enable_stretch": false,
+        "image_position": "center",
+        "bg_color_secondary": false,
+        "width": "wrapper--full",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "1687913281728f2ed6": {
+      "type": "apps",
+      "blocks": {
+        "5f31893e-f64c-476a-8ad9-1e705487d215": {
+          "type": "shopify:\/\/apps\/yotpo-product-photo-reviews\/blocks\/reviews\/eb7dfd7d-db44-4334-bc49-c893b51b36cf",
+          "settings": {
+            "product": "{{product}}"
+          }
+        }
+      },
+      "block_order": [
+        "5f31893e-f64c-476a-8ad9-1e705487d215"
+      ],
+      "settings": {
+        "bg_color": "",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "tabs": {
+      "type": "section-accordions",
+      "disabled": true,
+      "blocks": {
+        "acordion-0": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "acordion-1": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "acordion-2": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "d0defd0d-94c3-403c-bd36-dc2f140a104f": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "acordion-0",
+        "acordion-1",
+        "acordion-2",
+        "d0defd0d-94c3-403c-bd36-dc2f140a104f"
+      ],
+      "settings": {
+        "layout": "two-columns",
+        "show_accordion_divider": false,
+        "title": "Frequently Asked Questions",
+        "subheading": "",
+        "text": "",
+        "tabs_bg_color": "#fafafa",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "related",
+    "icons",
+    "d49146ed-2eff-441c-b711-f4dba3071e17",
+    "eb124a0c-6961-4461-bba9-ee408d9b56a4",
+    "513efdf1-28ed-4ba2-a94c-f1108382a969",
+    "1687913281728f2ed6",
+    "tabs"
+  ]
+}

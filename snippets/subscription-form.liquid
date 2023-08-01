@@ -1,0 +1,64 @@
+<div class="product__subs__wrap"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+  {% endif %}>
+  <fieldset class="product__subs" data-subscription-selectors>
+    {% comment %} The input with name="selling_plan" submits to cart
+      <input type="hidden" name="selling_plan" value="{{ product.selected_selling_plan.id }}" />
+    {% endcomment %}
+    <legend class="visually-hidden">{{ 'products.product.subscription' | t }}</legend>
+
+    {% unless product.requires_selling_plan %}
+      <div class="product__subs__group">
+        <label class="product__subs__option">
+          <input
+            type="radio"
+            name="selling-plan-group"
+            value=""
+            data-toggles-group
+            {% unless product.selected_selling_plan %}
+              checked
+            {% endunless %}
+            />
+          <span>{{ 'products.product.one_time_purchase' | t }}</span>
+        </label>
+      </div>
+    {% endunless %}
+
+    {% for selling_plan_group in product.selling_plan_groups %}
+      <div class="product__subs__group">
+        <label class="product__subs__option">
+          <input type="radio"
+            data-toggles-group
+            name="selling-plan-group"
+            value="{{ selling_plan_group.id }}"
+            {% if selling_plan_group.selling_plan_selected %}
+              checked
+            {% endif %}/>
+          <span>{{ selling_plan_group.name }}</span>
+        </label>
+
+        <div class="product__subs__plans{% unless selling_plan_group.selling_plan_selected %} hidden{% endunless %}" data-group-toggle="{{ selling_plan_group.id }}">
+          {% for plan in selling_plan_group.selling_plans %}
+            <label class="product__subs__option">
+              <input type="radio"
+                name="selling_plan"
+                value="{{ plan.id }}"
+                {% if plan.selected %}
+                  checked
+                {% endif %}/>
+              <span>{{ plan.name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+
+
+      </div>
+    {% endfor %}
+  </fieldset>
+  <p data-plan-description class="product__subs__description{% unless product.selected_selling_plan %} hidden{% endunless %}">
+    {{ product.selected_selling_plan.description }}
+  </p>
+</div>

@@ -1,0 +1,85 @@
+{%- liquid
+  assign section_width = section.settings.width
+  assign id = 'CustomCode--' | append: section.id
+  assign selector_id = '#' | append: id
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = selector_id
+  assign animation_delay = 150
+-%}
+
+{%- style -%}
+  {{ selector_id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section id="{{ id }}" class="section-padding"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+  {% endif %}>
+  <div class="{{ section_width }}">
+    {{ section.settings.custom_code }}
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Custom code",
+    "settings": [
+      {
+        "type": "liquid",
+        "id": "custom_code",
+        "label": "Custom code",
+        "info": "HTML added here will render on the screen. Add app snippets or other Liquid code to create advanced customizations."
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper",
+        "options": [
+          { "value": "wrapper--full", "label": "Full width" },
+          { "value": "wrapper--full-padded", "label": "Full width padded" },
+          { "value": "wrapper", "label": "Page width" },
+          { "value": "wrapper--narrow", "label": "Page width narrow" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "presets": [
+      {
+        "name": "Custom code",
+        "category": "Text"
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside"]
+    }
+  }
+  {% endschema %}

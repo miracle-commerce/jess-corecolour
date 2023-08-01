@@ -1,0 +1,1496 @@
+{%- comment -%} /sections/product-template {%- endcomment -%}
+{%- liquid
+  assign bg_color = section.settings.bg_color
+  assign section_width = section.settings.width
+-%}
+
+{%- style -%}
+  #ProductTemplate--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+
+  {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+    #ProductTemplate--{{ section.id }} { background: {{ bg_color }}; }
+    .shop-pay-terms { --payment-terms-background-color: {{ bg_color }} }
+  {%- endif -%}
+{%- endstyle -%}
+
+<section id="ProductTemplate--{{ section.id }}"
+  class="section-padding product-single{%- render 'button-fallback-classes', primary_color: settings.atc_button_color, secondary_color: settings.buynow_btn_color, section_bg_color: bg_color -%}"
+  data-enable-history-state="true"
+  data-section-type="product-template"
+  data-section-id="{{ section.id }}"
+  data-sticky-enabled="{{ section.settings.product_sticky_enable }}"
+  data-tall-layout="{% if section.settings.image_layout == 'carousel' %}false{% else %}true{% endif %}">
+  <div class="{{ section_width }}">
+    {%- render 'product' section: section, unique: section.id -%}
+  </div>
+</section>
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org/",
+  "@type": "Product",
+  "name": {{ product.title | strip_html | json }},
+  "url": {{ shop.url | append: product.url | json }},
+  {%- if product.featured_media -%}
+    {%- assign media_size = product.featured_media.preview_image.width | append: 'x' -%}
+    "image": [
+      {{ product.featured_media | img_url: media_size | prepend: "https:" | json }}
+    ],
+  {%- endif -%}
+  "description": {{ product.description | strip_html | json }},
+  {%- if current_variant.sku != blank -%}
+    "sku": {{ current_variant.sku | json }},
+  {%- endif -%}
+  "brand": {
+    "@type": "Thing",
+    "name": {{ product.vendor | json }}
+  },
+  {%- if current_variant.barcode -%}
+    "gtin8": "{{ product.variants.first.barcode }}",
+  {%- endif -%}
+  {%- if current_variant.barcode.size == 12 -%}
+    "gtin12": "{{ product.variants.first.barcode }}",
+  {%- endif -%}
+  {%- if current_variant.barcode.size == 13 -%}
+    "gtin13": "{{ product.variants.first.barcode }}",
+  {%- endif -%}
+  {%- if current_variant.barcode.size == 14 -%}
+    "gtin14": "{{ product.variants.first.barcode }}",
+  {%- endif -%}
+  "offers": [
+    {%- for variant in product.variants -%}
+      {
+        "@type" : "Offer",
+        {%- if variant.sku != blank -%}
+          "sku": {{ variant.sku | json }},
+        {%- endif -%}
+        "availability" : "http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+        "price" : {{ variant.price | divided_by: 100.00 | json }},
+        "priceCurrency" : {{ cart.currency.iso_code | json }},
+        "url" : {{ shop.url | append: variant.url | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+{% schema %}
+{
+  "name": "Product pages",
+  "class": "shopify-section--product",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product description"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_sticky_enable",
+      "label": "Enable sticky form",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_layout",
+      "label": "Desktop layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "stacked", "label": "Stacked" },
+        { "value": "carousel", "label": "Carousel with thumbnails" }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "select",
+      "id": "image_width",
+      "label": "Image width",
+      "options": [
+        { "value": "standard", "label": "Standard" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_image_aspect_ratio",
+      "label": "Equal image aspect ratio",
+      "default": false,
+      "info": "Set products in the ‘Grid’ layout to the same aspect ratio"
+    },
+    {
+      "type": "header",
+      "content": "Media",
+      "info": "Learn more about [media types](https://help.shopify.com/manual/products/product-media)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_zoom",
+      "label": "Enable zoom",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "label": "Enable video looping",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background"
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "title",
+      "name": "Title and price",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "subheading",
+          "label": "Navigation",
+          "default": "breadcrumbs",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "breadcrumbs", "label": "Breadcrumbs" },
+            { "value": "collection", "label": "Collection" },
+            { "value": "vendor", "label": "Vendor" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Star rating",
+          "info": "Requires an app to set the metafield value for reviews.rating"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rating",
+          "label": "Show star rating",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rating_count",
+          "label": "Show rating count",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Form",
+      "type": "form",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Form elements"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_labels",
+          "label": "Show variant labels",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_quantity",
+          "label": "Show quantity selector",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_payment_button",
+          "label": "Show dynamic checkout buttons",
+          "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https://help.shopify.com/en/manual/online-store/os/dynamic-checkout)",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Size chart",
+          "info": "Navigate to \"Theme Settings → Size chart\" to configure"
+        },
+        {
+          "type": "header",
+          "content": "Gift card",
+          "info": "Enable recipient information form for gift card products in \"Theme settings → Product form → Gift card\""
+        },
+        {
+          "type": "header",
+          "content": "Subscriptions",
+          "info": "Learn more about [subscriptions](https://help.shopify.com/en/manual/products/subscriptions)"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_subscriptions_selectors",
+          "label": "Enable subscription selectors",
+          "info": "Shown on products with subscription options",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Product description",
+      "type": "description",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "cutline",
+      "name": "Cutline",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Use the metafield 'theme.cutline' to show a short description under product titles. [Learn more](https://presidiocreative.com/link/palo-alto/docs/cutline)"
+        },
+        {
+          "type": "select",
+          "id": "cutline_color",
+          "label": "Color",
+          "default": "body",
+          "options": [
+            { "value": "body", "label": "Body text" },
+            { "value": "accent", "label": "Accent" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Accordion",
+      "type": "product_accordion",
+      "settings": [
+        {
+          "type": "text",
+          "id": "accordion_heading",
+          "label": "Heading",
+          "default": "Materials and specs"
+        },
+        {
+          "type": "richtext",
+          "id": "accordion_text",
+          "label": "Text",
+            "default": "<p>Use this accordion to add info such as Materials, Sizing, Features, Shipping and Returns policies</p>"
+        },
+        {
+          "type": "page",
+          "id": "accordion_page",
+          "label": "Page",
+          "info": "Example: Size chart"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "upsell",
+      "name": "Upsell",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Upsell is best as a one-click add to cart, so upsell products should have no variants. [Learn more](https://presidiocreative.com/link/palo-alto/docs/section-blocks/upsell)"
+        },
+        {
+          "type": "product_list",
+          "id": "product_list",
+          "label": "Product list",
+          "info": "Show a slider of upsell products. Use a metafield called 'theme.upsell_list'",
+          "limit": 3
+        },
+        {
+          "type": "header",
+          "content": "Cart"
+        },
+        {
+          "type": "paragraph",
+          "content": "Use a dynamic source with the metafield 'theme.upsell' or 'theme.upsell_list' to allow product upsells to follow users into the cart. Use any other name to limit this feature to the product page. [Learn more](https://palo-alto.presidiocreative.com/cart/upsell)"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Share button",
+      "type": "share-button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Share",
+          "info": "If you include a link in social media posts, the page\’s featured image will be shown as the preview image.[Learn more](https://help.shopify.com/en/manual/online-store/images/showing-social-media-thumbnail-images)"
+        },
+        {
+          "type": "paragraph",
+          "content": "A store title and description are included with the preview image.[Learn more](https://help.shopify.com/en/manual/promoting-marketing/seo/adding-keywords#set-a-title-and-description-for-your-online-store)"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Pickup availability",
+      "type": "pickup",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Show customers where they can pick up the product. [Learn more](https://help.shopify.com/en/manual/shipping/setting-up-and-managing-your-shipping/local-methods/local-pickup#show-pickup-availability-to-your-customers)"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "name": "Custom code",
+      "type": "custom_code",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "custom_code",
+          "label": "Custom code",
+          "info": "HTML added here will render on the screen. Add app snippets or other Liquid code to create advanced customizations."
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Text",
+          "default": "<p>Give more details about the product</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            { "label": "Center", "value": "center" },
+            { "label": "Left", "value": "left" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "icon",
+      "name": "Icon",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Select an icon",
+          "default": "check",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "icon_text",
+          "label": "Heading",
+          "default": "Free shipping over $99"
+        },
+        {
+          "type": "range",
+          "id": "text_size",
+          "label": "Size",
+          "default": 90,
+          "min": 50,
+          "max": 125,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Width",
+          "default": "full",
+          "options": [
+            { "label": "Wide", "value": "full" },
+            { "label": "Half", "value": "half" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            { "label": "Center", "value": "center" },
+            { "label": "Left", "value": "left" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background color"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "icon_row",
+      "name": "Icon row",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Icon 1"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_1",
+          "label": "Select an icon",
+          "default": "truck",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_1",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_1",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_1",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_1",
+          "label": "Heading",
+          "default": "Free shipping"
+        },
+        {
+          "type": "header",
+          "content": "Icon 2"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_2",
+          "label": "Select an icon",
+          "default": "check",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_2",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_2",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_2",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_2",
+          "label": "Heading",
+          "default": "Free Returns"
+        },
+        {
+          "type": "header",
+          "content": "Icon 3"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_3",
+          "label": "Select an icon",
+          "default": "heart",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_3",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_3",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_3",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_3",
+          "label": "Heading",
+          "default": "1% Donated Annually"
+        },
+        {
+          "type": "header",
+          "content": "Icon 4"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_4",
+          "label": "Select an icon",
+          "default": "clock",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_4",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_4",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_4",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_4",
+          "label": "Heading",
+          "default": "Feature"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "left",
+          "options": [
+            { "label": "Center", "value": "center" },
+            { "label": "Left", "value": "left" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background color",
+          "default": "#ffffff"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "siblings",
+      "name": "Siblings",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Siblings allow you to split colors into separate products."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Label",
+          "default": "Color"
+        },
+        {
+          "type": "product_list",
+          "id": "siblings_product_list",
+          "label": "Product siblings list",
+          "info": "Pro tip: use [metaobjects](/admin/content/entries?selectedView=all) to avoid repetitive metafields. [Learn more](https://presidiocreative.com/link/palo-alto/docs/siblings/metaobject)"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_siblings_images",
+          "label": "Show images",
+          "info": "Display either product images or [swatches colors](https:\/\/presidiocreative.com\/link\/palo-alto\/docs\/swatches).",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "inventory_countdown",
+      "name": "Inventory countdown",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "max_inventory",
+          "label": "Low inventory threshold",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_inventory_count",
+          "label": "Hide inventory count",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "popup_text",
+      "name": "Popup text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Read more"
+        },
+        {
+          "type": "page",
+          "id": "popup_page",
+          "label": "Page"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "line_item_property",
+      "name": "Line item property",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Use the line item property to collect custom information from your buyers. It will be added to the product order."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Your label"
+        },
+        {
+          "type": "select",
+          "id": "type",
+          "label": "Type",
+          "default": "text",
+          "options": [
+            { "value": "text", "label": "Text" },
+            { "value": "checkbox", "label": "Checkbox" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "paragraph",
+          "content": "Only if Type is set to Text"
+        },
+        {
+          "type": "checkbox",
+          "id": "allow_long_text",
+          "label": "Allow long text",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Checkbox"
+        },
+        {
+          "type": "paragraph",
+          "content": "Only if Type is set to Checkbox"
+        },
+        {
+          "type": "text",
+          "id": "checked_value",
+          "label": "Checked value",
+          "default": "Yes"
+        },
+        {
+          "type": "text",
+          "id": "unchecked_value",
+          "label": "Unchecked value",
+          "default": "No"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "name": "Divider",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_line",
+          "label": "Show line",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Select an icon",
+          "default": "support",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 5,
+          "unit": "px",
+          "default": 25
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Need help with sizing?"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>This content type will accept <strong>rich text</strong> to help with adding styles and links to additional pages or content. Use this to add supplementary information to help your buyers.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background color",
+          "default": "#F7F9FA"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#000"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "complementary-products",
+      "name": "Complementary products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "To select complementary products, add the Search & Discovery app. [Learn more](https://help.shopify.com/manual/online-store/search-and-discovery/product-recommendations)"
+        },
+        {
+          "type": "header",
+          "content": "Block spacing"
+        },
+        {
+          "type": "range",
+          "id": "padding_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "unit": "px",
+          "label": "Padding bottom",
+          "default": 20
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

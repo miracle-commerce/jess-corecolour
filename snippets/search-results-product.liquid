@@ -1,0 +1,38 @@
+{% comment %}
+    Renders a product search result in predictive search
+
+    Accepts:
+    - product: {Object} product (required)
+    - additional_classes: {String} Additional classes (optional)
+    - focusable: {Boolean} Default: false
+
+    Usage:
+    {% render 'search-results-product', product: product, animation_delay: animation_delay, animation_duration: animation_duration, animation_anchor: animation_anchor, additional_classes: additional_classes %}
+{% endcomment %}
+
+{%- liquid
+  assign featured_image = product.featured_media.preview_image
+  assign render_image_width = 60
+  assign image_widths = '30, 60'
+  assign additional_classes = additional_classes | prepend: ' ' | default: ''
+  assign focusable = focusable | default: false
+-%}
+
+<a href="{{ product.url }}"
+  class="predictive-search__product{{ additional_classes }}"
+  aria-label="{{ product.title | strip_html | escape }}"
+  {% unless focusable %} tabindex="-1"{% endunless %}
+>
+  <div class="predictive-search__product-image">
+    {%- render 'image',
+      image: featured_image,
+      width: render_image_width,
+      widths: image_widths,
+      sizes: 'auto',
+      classes: 'lazypreload img-object-cover' -%}
+  </div>
+
+  <p class="predictive-search__product-title">
+    {{ product.title | strip_html }}
+  </p>
+</a>

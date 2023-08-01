@@ -1,0 +1,691 @@
+{% comment %} /sections/slideshow.liquid {% endcomment %}
+
+{%- liquid
+  assign transition = section.settings.transition
+  assign autoplay = section.settings.autoplay
+  assign duration = section.settings.duration | times: 1000
+  assign enable_zoom_animation = section.settings.enable_zoom_animation
+  assign slide_height = section.settings.slide_height
+  assign enable_mobile_height = section.settings.enable_mobile_height
+  assign mobile_slide_height = section.settings.mobile_slide_height
+  assign slides_count = section.blocks.size
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Slideshow--' | append: section.id
+  assign show_text_shadow = settings.show_text_shadow
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign current_style = section.blocks[0].text_color | default: 'text-light'
+-%}
+
+{%- style -%}
+  #Slideshow--{{ section.id }} .slide__heading {
+    --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }});
+  }
+{%- endstyle -%}
+
+<div class="slider slider--{{ transition }}{% if section.settings.show_arrow_down %} slider--has-arrow{% endif %}{% if section.settings.show_nav_dots %} slider--has-dots{% endif %}{% unless animations_enabled %} slider--no-animation{% endunless %}"
+  id="Slideshow--{{ section.id }}"
+  data-slider
+  data-section-type="slider"
+  data-section-id="{{ section.id }}"
+  data-slides-count="{{ section.blocks.size }}"
+  data-current-style="{{ current_style }}"
+  data-autoplay="{{ autoplay }}"
+  data-duration="{{ duration }}"
+  data-image-height="{{ slide_height }}"
+  data-page-dots="{{ section.settings.show_nav_dots }}"
+  data-nav-arrows="{{ section.settings.show_nav_arrows }}"
+  data-zoom-animation="{{ enable_zoom_animation }}"
+  data-slides="{{ slides_count }}"
+  {% if animations_enabled and transition == 'fade' %}
+    data-aos="fade-in"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+  {% endif %}>
+
+  {%- if section.blocks.size > 0 -%}
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign image = block.settings.image
+        assign image_aspect_ratio = image.aspect_ratio | default: 2.63
+        assign image_mobile = block.settings.image_mobile
+        assign image_mobile_aspect_ratio = image_mobile.aspect_ratio | default: 0.66
+        assign subheading = block.settings.subheading
+        assign title = block.settings.title
+        assign text = block.settings.text
+        assign text_color = block.settings.text_color
+        assign text_position = block.settings.text_position
+        assign text_width = block.settings.text_width
+        assign button_1_text = block.settings.button_1_text
+        assign button_1_link = block.settings.button_1_link
+        assign button_1_color = block.settings.button_1_color
+        assign button_1_style = block.settings.button_1_style
+        assign button_1_size = block.settings.button_1_size
+        assign button_2_text = block.settings.button_2_text
+        assign button_2_link =  block.settings.button_2_link
+        assign button_2_color = block.settings.button_2_color
+        assign button_2_style = block.settings.button_2_style
+        assign button_2_size = block.settings.button_2_size
+        assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+        assign video_text = block.settings.video_text
+        assign video_link = block.settings.video_link
+        assign unique = block.id
+
+        case text_position
+          when 'left'
+            assign text_position = 'item--left'
+          when 'center'
+            assign text_position = 'item--center'
+          when 'right'
+            assign text_position = 'item--right'
+          when 'bottom-left'
+            assign text_position = 'item--bottom-left'
+          when 'bottom-right'
+            assign text_position = 'item--bottom-right'
+          when 'top-left'
+            assign text_position = 'item--top-left'
+          when 'top-right'
+            assign text_position = 'item--top-right'
+        endcase
+
+        assign animation_delay = 150
+        case transition
+          when 'slide'
+            assign animation_delay = 400
+          when 'fade'
+            assign animation_delay = 250
+          when 'zoom-out'
+            assign animation_delay = 250
+          when 'wipe'
+            assign animation_delay = 500
+        endcase
+
+        assign image_link = false
+        if button_1_link != blank and button_1_text == blank and button_2_text == blank and video_text == blank and video_link == blank
+          assign image_link = true
+        endif
+      -%}
+
+      {%- style -%}
+        #Slideshow--{{ section.id }} .item--{{ block.id }} {
+          --overlay-opacity: {{ overlay_opacity }};
+        }
+        {%- if slide_height == 'original-height' and enable_mobile_height -%}
+          @media screen and (min-width: 768px) {
+            .item--{{ unique }} .slide__image__container--desktop { padding-top: {{ 100 | divided_by: image_aspect_ratio | append: '%' }} }
+          }
+        {%- elsif slide_height == 'original-height' -%}
+          .item--{{ unique }} .slide__image__container--desktop { padding-top: {{ 100 | divided_by: image_aspect_ratio | append: '%' }} }
+          .item--{{ unique }} .slide__image__container--mobile { padding-top: {{ 100 | divided_by: image_mobile_aspect_ratio | append: '%' }} }
+        {%- endif -%}
+        {%- if enable_mobile_height and mobile_slide_height == 'original-height-mobile' -%}
+          @media screen and (max-width: 767px) {
+            .item--{{ unique }} .slide__image__container--desktop { padding-top: {{ 100 | divided_by: image_aspect_ratio | append: '%' }} }
+            .item--{{ unique }} .slide__image__container--mobile { padding-top: {{ 100 | divided_by: image_mobile_aspect_ratio | append: '%' }} }
+          }
+        {%- endif -%}
+      {%- endstyle -%}
+
+      <div class="item item--{{ unique }} {{ text_position }} {{ text_color }} {{ slide_height }}{% if enable_mobile_height %} {{ mobile_slide_height }}{% endif %}{% if forloop.first %} is-selected{% endif %}"
+        {{ block.shopify_attributes }}
+        data-slide
+        data-slide-position="{{ forloop.index }}"
+        data-style="{{ text_color }}">
+        <div class="overlay"></div>
+
+        {%- if image_link -%}
+          <a class="slide__link" href="{{ button_1_link }}" aria-label="{{ title | strip_html | escape }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %}>
+        {%- endif -%}
+
+        {%- if image_mobile != blank -%}
+          <div class="slide__image__container slide__image__container--mobile">
+            <div class="slide__image__inner">
+              {%- render 'image-fill', is_background: true, img_object: image_mobile, classes: 'slide__image' -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div class="slide__image__container slide__image__container--desktop{% unless image %} slide__image__container--placeholder{% endunless %}">
+          <div class="slide__image__inner">
+            {%- if image != blank -%}
+              {%- render 'image-fill', is_background: true, img_object: image, classes: 'slide__image' -%}
+            {%- else -%}
+              <div class="slide__image slide__image--desktop slide__image--placeholder background-size-cover">
+                <div class="slide__image__svg">
+                  {%- capture index -%}{% cycle 1, 2 %}{%- endcapture -%}
+                  {{- 'lifestyle-' | append: index | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="slide__text__container">
+          <div class="slide__text__wrapper slide__text__wrapper--{{ text_width }}{% if show_text_shadow %} backdrop--radial{% endif %}">
+            {%- if video_link != blank or video_text != blank -%}
+              <div class="slide__buttons main-buttons main-buttons--video">{%- liquid
+  assign video_link_downcase = video_link | downcase
+  assign video_type = ''
+  assign video_id = ''
+  assign video_parent_id = 'item-video-' | append: unique
+
+  if video_link contains "vimeo.com"
+    assign video_type = "vimeo"
+  elsif video_link contains "youtube.com"
+    assign video_type = "youtube"
+  elsif video_link contains "youtu.be"
+    assign video_type = "youtube"
+    assign youtubeShortlink = true
+  elsif video_link_downcase contains ".mp4"
+    assign video_type = "native"
+  endif
+
+  assign link_array = video_link | split: '/'
+  assign id_with_params = link_array | last
+
+  if video_type == "vimeo" or youtubeShortlink
+  comment
+    https://vimeo.com/[ID]?foo=bar&baz=boo
+    https://youtu.be/[ID]?foo=bar&baz=boo
+  endcomment
+    assign starts_with_id = id_with_params | split: '?'
+    assign video_id = starts_with_id | first
+  elsif video_type == "youtube" 
+  comment
+    https://youtube.com/watch?v=[ID]?foo=bar&baz=boo
+  endcomment
+    assign first_param = id_with_params | split: '&' | first
+    assign watch_then_id = first_param | split: '?'
+    assign equals_id = watch_then_id[1]
+    assign ends_with_id = equals_id | split: '='
+    assign video_id = ends_with_id | last
+  endif
+
+  if video_type == 'youtube'
+    capture video_link
+      echo 'https://www.youtube.com/watch?v=' | append: video_id
+    endcapture
+  elsif video_type == 'vimeo'
+    capture video_link
+      echo 'https://vimeo.com/' | append: video_id
+    endcapture
+  endif
+-%}<div class="main-buttons__item"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                  {% endif %}>
+                  <a class="slide__btn video-text-link" href="{{ video_link | default: '#!' }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %}
+                    {% unless video_link == blank %}
+                    data-video-play="{%- render 'photoswipe-video-html' item_link: video_link , item_link_type: video_type, item_link_id: video_id, item_id: video_parent_id -%}"
+                    {% endunless %}>
+                    {%- render 'icon-play' -%}
+
+                    {%- if video_text != blank -%}
+                      <span>{{ video_text }}</span>
+                    {%- endif -%}
+                  </a>
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- if subheading != blank -%}
+              <div class="slide__subheading"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}>
+                <p class="subheading-text">{{ subheading }}</p>
+              </div>
+            {%- endif -%}
+
+            {%- if title != blank -%}
+              <h1 class="slide__heading main-heading">
+                {%- liquid
+                  if animations_enabled
+                    assign title_lines = title | escape | newline_to_br | split: '<br />'
+                    for line in title_lines
+                      echo '<span class="text-reveal__cropper"><span data-aos="fade-up" data-aos-anchor="' | append: animation_anchor | append: '" data-aos-delay="' | append: animation_delay | append: '">'
+                      echo line
+                      echo '</span></span>'
+
+                      unless forloop.last
+                        assign animation_delay = animation_delay | plus: 150
+                      endunless
+                    endfor
+
+                    assign animation_delay = animation_delay | plus: 150
+                  else
+                    echo title | escape
+                  endif
+                -%}
+              </h1>
+            {%- endif -%}
+
+            {%- if text != blank -%}
+              <h2 class="slide__text main-text">
+                {%- liquid
+                  if animations_enabled
+                    assign text_lines = text | escape | newline_to_br | split: '<br />'
+                    for line in text_lines
+                      echo '<span class="text-reveal__cropper"><span data-aos="fade-up" data-aos-anchor="' | append: animation_anchor | append: '" data-aos-delay="' | append: animation_delay | append: '">'
+                      echo line
+                      echo '</span></span>'
+
+                      unless forloop.last
+                        assign animation_delay = animation_delay | plus: 150
+                      endunless
+                    endfor
+
+                    assign animation_delay = animation_delay | plus: 150
+                  else
+                    echo text | escape | newline_to_br
+                  endif
+                -%}
+              </h2>
+            {%- endif -%}
+
+            {%- if button_1_text != blank or button_2_text != blank -%}
+              <div class="slide__buttons main-buttons">
+                {%- if button_1_text != blank -%}
+                  <div class="main-buttons__item"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                    <a class="slide__btn btn {{ button_1_color }} {{ button_1_style }} {{ button_1_size }}" href="{{ button_1_link }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %}>{{ button_1_text | escape }}</a>
+                  </div>
+                {%- endif -%}
+
+                {%- if button_2_text != blank -%}
+                  <div class="main-buttons__item"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}>
+                    <a class="slide__btn btn {{ button_2_color }} {{ button_2_style }} {{ button_2_size }}" href="{{ button_2_link }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %}>{{ button_2_text | escape }}</a>
+                  </div>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- if image_link -%}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+
+  {%- if section.settings.show_arrow_down -%}
+    <a href="#" class="slider__scroll-down" title="{{ 'slideshow.scroll_down' | t }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %} data-scroll-down>
+      {%- render 'icon-arrow-right' -%}
+    </a>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "max_blocks": 10,
+  "class": "slideshow supports-transparent-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "layout"
+    },
+    {
+      "type": "select",
+      "id": "slide_height",
+      "label": "Height",
+      "default": "full-height",
+      "options": [
+        { "value": "full-height", "label": "Full screen" },
+        { "value": "three-quarters-height", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height", "label": "Two thirds of screen" },
+        { "value": "one-half-height", "label": "One half of screen" },
+        { "value": "one-third-height", "label": "One third of screen" },
+        { "value": "one-fifth-height", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height", "label": "750px" },
+        { "value": "six-fifty-height", "label": "650px" },
+        { "value": "five-fifty-height", "label": "550px" },
+        { "value": "four-fifty-height", "label": "450px" },
+        { "value": "original-height", "label": "Image height" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_height",
+      "label": "Enable mobile height",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "mobile_slide_height",
+      "label": "Mobile height",
+      "default": "five-fifty-height-mobile",
+      "options": [
+        { "value": "full-height-mobile", "label": "Full screen" },
+        { "value": "three-quarters-height-mobile", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height-mobile", "label": "Two thirds of screen" },
+        { "value": "one-half-height-mobile", "label": "One half of screen" },
+        { "value": "one-third-height-mobile", "label": "One third of screen" },
+        { "value": "one-fifth-height-mobile", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height-mobile", "label": "750px" },
+        { "value": "six-fifty-height-mobile", "label": "650px" },
+        { "value": "five-fifty-height-mobile", "label": "550px" },
+        { "value": "four-fifty-height-mobile", "label": "450px" },
+        { "value": "original-height-mobile", "label": "Image height" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav_dots",
+      "label": "Show slide navigation dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav_arrows",
+      "label": "Show slide navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow_down",
+      "label": "Show down arrow",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay slideshow",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "unit": "sec",
+      "label": "Change slides every",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Transition"
+    },
+    {
+      "type": "select",
+      "id": "transition",
+      "label": "Style",
+      "default": "wipe",
+      "options": [
+        { "label": "Slide", "value": "slide" },
+        { "label": "Fade", "value": "fade" },
+        { "label": "Zoom out", "value": "zoom-out" },
+        { "label": "Wipe", "value": "wipe" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_zoom_animation",
+      "label": "Enable zoom animation on scroll",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "default": 120,
+      "min": 100,
+      "max": 200,
+      "step": 10,
+      "unit": "%"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "2048px width recommended"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile image",
+          "info": "Optional"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Text contrast",
+          "info": "Improves readability of text",
+          "min": 0,
+          "max": 95,
+          "step": 5,
+          "unit": "%",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_width",
+          "label": "Width",
+          "default": "normal",
+          "options": [
+            { "label": "Narrow", "value": "narrow" },
+            { "label": "Normal", "value": "normal" },
+            { "label": "Wide", "value": "wide" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Position",
+          "default": "center",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-right", "label": "Bottom right" },
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-right", "label": "Top right" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Color",
+          "default": "text-light",
+          "options": [
+            { "value": "text-light", "label": "Light" },
+            { "value": "text-dark", "label": "Dark" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Welcome to Palo Alto"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Add more info or delete this text"
+        },
+        {
+          "type": "header",
+          "content": "Button 1"
+        },
+        {
+          "type": "text",
+          "id": "button_1_text",
+          "label": "Text",
+          "info": "Leave blank to link entire image",
+          "default": "Shop All"
+        },
+        {
+          "type": "url",
+          "id": "button_1_link",
+          "label": "Link",
+          "default": "/collections/all"
+        },
+        {
+          "type": "select",
+          "id": "button_1_color",
+          "label": "Color",
+          "default": "btn--white",
+          "options": [
+            { "label": "Primary", "value": "btn--primary" },
+            { "label": "Secondary", "value": "btn--secondary" },
+            { "label": "White", "value": "btn--white" },
+            { "label": "Black", "value": "btn--black" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_1_style",
+          "label": "Style",
+          "default": "btn--solid-border",
+          "options": [
+            { "label": "Solid", "value": "btn--solid" },
+            { "label": "Outline", "value": "btn--outline" },
+            { "label": "Solid with borders", "value": "btn--solid-border" },
+            { "label": "Text", "value": "btn--text" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_1_size",
+          "label": "Size",
+          "default": "btn--large",
+          "options": [
+            { "label": "Large", "value": "btn--large" },
+            { "label": "Medium", "value": "btn--medium" },
+            { "label": "Small", "value": "btn--small" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Button 2"
+        },
+        {
+          "type": "text",
+          "id": "button_2_text",
+          "label": "Text"
+        },
+        {
+          "type": "url",
+          "id": "button_2_link",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "button_2_color",
+          "label": "Color",
+          "default": "btn--black",
+          "options": [
+            { "label": "Primary", "value": "btn--primary" },
+            { "label": "Secondary", "value": "btn--secondary" },
+            { "label": "White", "value": "btn--white" },
+            { "label": "Black", "value": "btn--black" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_2_style",
+          "label": "Style",
+          "default": "btn--solid",
+          "options": [
+            { "label": "Solid", "value": "btn--solid" },
+            { "label": "Outline", "value": "btn--outline" },
+            { "label": "Solid with borders", "value": "btn--solid-border" },
+            { "label": "Text", "value": "btn--text" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_2_size",
+          "label": "Size",
+          "default": "btn--large",
+          "options": [
+            { "label": "Large", "value": "btn--large" },
+            { "label": "Medium", "value": "btn--medium" },
+            { "label": "Small", "value": "btn--small" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Video Button"
+        },
+        {
+          "type": "text",
+          "id": "video_text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "video_link",
+          "label": "Video popup link",
+          "info": "Video links from YouTube, Vimeo or MP4 video link from [files](/admin/content/files?selectedView=all&media_type=VIDEO)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

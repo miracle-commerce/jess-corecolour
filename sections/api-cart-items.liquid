@@ -1,0 +1,70 @@
+<div data-api-content>
+  {%- if cart.item_count > 0 -%}
+    <div data-api-line-items>
+      {%- render 'cart-line-items', part: 'line-items' -%}
+    </div>
+    <div data-api-upsell-items>
+      {%- render 'cart-line-items', part: 'upsell-items' -%}
+    </div>
+  {%- endif -%}
+
+  <div data-api-cart-price>
+    {%- liquid
+  assign subtotal = cart.total_price | plus: 0
+  assign cart_discount_size = cart.cart_level_discount_applications.size
+  assign original_subtotal = cart.original_total_price | plus: 0
+  assign currency_code_enable = settings.currency_code_enable
+
+  if currency_code_enable
+    assign original_subtotal_formatted = original_subtotal | money_with_currency
+  else
+    assign original_subtotal_formatted = original_subtotal | money
+  endif
+
+  if original_subtotal < subtotal or cart_discount_size == 0
+    assign cart_total_hidden = true
+  endif
+
+  if cart_discount_size == 0
+    assign cart_total_discount_hidden = true
+  endif
+-%}
+
+<div class="cart__total{% if cart_total_hidden %} hidden{% endif %}">
+  <span>{{- 'cart.general.subtotal_items' | t -}}</span>
+
+  <span data-cart-total="{{ subtotal }}">
+    {%- liquid
+      if original_subtotal == 0
+        echo 'products.product.free' | t
+      else
+        echo original_subtotal | money_with_currency
+      endif
+    -%}
+  </span>
+</div>
+
+<div class="cart__discounts{% if cart_total_discount_hidden %} hidden{% endif %}">
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    {%- for discount in cart.cart_level_discount_applications -%}
+      {%- liquid
+        if currency_code_enable
+          assign total_allocated_discount = discount.total_allocated_amount | money_with_currency
+        else
+          assign total_allocated_discount = discount.total_allocated_amount | money
+        endif
+      -%}
+      <div class="cart__total">
+        <span>
+          {{- discount.title -}}
+        </span>
+
+        <span>
+          -{{- total_allocated_discount -}}
+        </span>
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+</div>
+  </div>
+</div>

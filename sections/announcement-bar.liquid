@@ -1,0 +1,788 @@
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    assign bar_markup = ''
+    assign is_top = true
+    assign layout = section.settings.layout
+    assign bg_color = section.settings.bg_color
+    assign text_color = section.settings.color
+    assign text_size = section.settings.text_size | times: 0.01
+    assign padding = section.settings.padding | append: 'px'
+    assign message_spacing = section.settings.message_spacing | append: 'px'
+    assign animation_anchor = '#Announcement--' | append: section.id
+    assign animation_delay = 150
+  -%}
+
+  {%- for block in section.blocks -%}
+    {%- liquid
+      comment
+        Disable animations for blocks only
+      endcomment
+      assign animations_enabled = false
+      assign classes = ''
+      assign target_device_enable = false
+      assign target_url = block.settings.target_url
+      assign target_url_enabled = block.settings.target_url_enabled
+      assign target_referrer = block.settings.target_referrer
+      assign target_referrer_enabled = block.settings.target_referrer_enabled
+      assign page_type = request.page_type
+
+      if layout == 'slider'
+        assign classes = 'top-bar__slide'
+      else
+        assign classes = 'top-bar__ticker'
+      endif
+
+      if block.settings.target_device_enabled
+        assign target_device_enable = true
+
+        if block.settings.target_device == 'mobile'
+          assign classes = classes | append: ' mobile'
+        endif
+
+        if block.settings.target_device == 'desktop'
+          assign classes = classes | append: ' desktop'
+        endif
+      endif
+
+      assign show_bar = true
+
+      if target_url_enabled or target_referrer_enabled
+        assign show_bar = false
+      endif
+
+      if target_url_enabled and target_url != blank
+        if target_url == routes.all_products_collection_url
+          if page_type == 'product'
+            assign show_bar = true
+          elsif page_type == 'collection'
+            assign show_bar = false
+          endif
+        elsif target_url == routes.collections_url
+          if page_type == 'collection'
+            assign show_bar = true
+          else
+            assign show_bar = false
+          endif
+        elsif target_url == request.path
+          assign show_bar = true
+        endif
+    endif
+    -%}
+
+    {%- if target_referrer_enabled and target_referrer != blank -%}
+      {%- capture target_referrer_attribute -%}
+        data-target-referrer="{{ target_referrer }}"
+      {%- endcapture -%}
+
+      {%- assign show_bar = true -%}
+    {%- endif -%}
+
+    {%- if request.design_mode -%}
+      {%- assign show_bar = true -%}
+    {%- endif -%}
+
+    {%- capture block_attributes -%}
+      data-slide="{{ block.id }}"
+      data-slide-index="{{ forloop.index0 }}"
+      data-block-id="{{ block.id }}"
+      {{ target_referrer_attribute }}
+      {%- if target_device_enable -%}
+        data-target-device="true"
+      {%- endif -%}
+      {%- if classes != '' -%}
+        class="{{ classes }}"
+      {%- endif -%}
+      {{ block.shopify_attributes }}
+    {%- endcapture -%}
+
+    {%- if show_bar -%}
+      {%- capture bar_html -%}
+        {%- case block.type -%}
+          {%- when 'text' -%}
+            {%- if block.settings.text != blank -%}
+              {%- liquid
+                assign icon_image = block.settings.icon_image
+                assign icon_name = block.settings.icon_name
+                assign icon_width = block.settings.icon_width
+                assign icon_color = block.settings.icon_color
+              -%}
+
+              {%- capture styles -%}
+                width: {{ icon_width }}px;
+
+                {%- if icon_image -%}
+                  padding-top: {{ icon_width | divided_by: icon_image.aspect_ratio | round: 2 }}px;
+                {%- endif -%}
+
+                {%- if icon_color != '' and icon_color != 'rgba(0,0,0,0)' and icon_image == blank -%}
+                  --text: {{ icon_color }};
+                {%- endif -%}
+              {%- endcapture -%}
+
+              {%- capture icon -%}
+                {%- if icon_image != blank -%}
+                  {%- render 'image-fill', img_object: icon_image, classes: 'top-bar__icon', styles: styles -%}
+                {%- elsif icon_name != 'none' -%}
+                  <div class="top-bar__icon icon-stroke" style="{{ styles }}">
+                    {%- render 'icons', icon: icon_name -%}
+                  </div>
+                {%- endif -%}
+              {%- endcapture -%}
+
+              {%- if layout == 'slider' -%}
+                <div {{ block_attributes }}>
+                  <div data-ticker-frame class="top-bar__message">
+                    <div data-ticker-scale class="top-bar__scale">
+                      <div data-ticker-text class="top-bar__text">
+                        {{ icon }}
+                        {{ block.settings.text | replace: '|', '<span class="top-bar__divider"></span>' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- if layout == 'marquee' -%}
+                <div {{ block_attributes }}>
+                  {{ icon }}
+                  {{ block.settings.text | replace: '|', '<span class="top-bar__divider"></span>' }}
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+
+          {%- when 'message' -%}
+            {%- if block.settings.message -%}
+              {%- if layout == 'slider' -%}
+                <div {{ block_attributes }}>
+                  <div data-ticker-frame class="top-bar__message">
+                    <div data-ticker-scale class="top-bar__scale">
+                      <div data-ticker-text class="top-bar__text">{%- liquid
+  assign free_shipping_text = block.settings.message | default: settings.message
+  assign is_enable = false
+
+  if block.settings.message != blank
+    assign is_enable = true
+  endif
+
+  if settings.show_free_shipping_message and settings.free_shipping_limit != blank and free_shipping_text != blank
+    assign is_enable = true
+  endif
+-%}
+
+{%- if is_enable -%}
+  {%- liquid
+    assign limit = settings.free_shipping_limit | plus: 0
+    assign limit_currency = limit | times: 100
+    assign cart_total_price = cart.total_price
+    assign subtotal_without_currency = cart_total_price | plus: 0 | divided_by: 100
+  -%}
+
+  {%- capture left_to_spend -%}
+    <span data-left-to-spend>
+      {%- if settings.currency_code_enable -%}
+        {{- limit_currency | minus: cart_total_price | money_with_currency | remove: '.00' | remove: ',00' -}}
+      {%- else -%}
+        {{- limit_currency | minus: cart_total_price | money_without_trailing_zeros -}}
+      {%- endif -%}
+    </span>
+  {%- endcapture -%}
+
+  {%- liquid
+    assign free_shipping_message = free_shipping_text | replace: '||amount||', left_to_spend
+    assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
+    assign class_message = ''
+
+    if subtotal_without_currency >= limit
+      if qualified_shipping_message != blank
+        assign class_message = ' is-success'
+        assign is_default_message_hidden = ' is-hidden'
+      else
+        assign class_message = ' is-hidden'
+      endif
+    elsif subtotal_without_currency == 0
+      assign class_message = ' is-hidden'
+    endif
+
+    assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
+    assign percent = 100 | minus: percent
+  -%}
+
+  <p class="{% unless template.name == 'cart' or section.id == 'announcement-bar' %}cart-drawer__message {% endunless %}cart__message{{ class_message }}"
+    data-cart-message="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
+    data-limit="{{ limit }}"
+    {% if animations_enabled %}
+      data-aos="fade-up"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {% endif %}>
+    <span class="cart__message__default{{ is_default_message_hidden }}" data-message-default>{{ free_shipping_message }}</span>
+
+    {%- if qualified_shipping_message != blank -%}
+      <span class="cart__message__success">{{ qualified_shipping_message }}</span>
+    {%- endif -%}
+
+    {%- unless is_top -%}
+      <span class="cart__message__progress__holder">
+        <progress class="cart__message__progress" data-cart-message-progress value="{{ percent }}" max="100" style="--progress-width: {{ percent }}%;"></progress>
+        {%- comment -%}Second progress bar shows only on Firefox{%- endcomment -%}
+        <progress class="cart__message__progress" data-cart-message-progress max="100" style="--progress-width: {{ percent }}%;"></progress>
+      </span>
+    {%- endunless -%}
+  </p>
+{%- endif -%}</div>
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- if layout == 'marquee' -%}
+                <div {{ block_attributes }}>{%- liquid
+  assign free_shipping_text = block.settings.message | default: settings.message
+  assign is_enable = false
+
+  if block.settings.message != blank
+    assign is_enable = true
+  endif
+
+  if settings.show_free_shipping_message and settings.free_shipping_limit != blank and free_shipping_text != blank
+    assign is_enable = true
+  endif
+-%}
+
+{%- if is_enable -%}
+  {%- liquid
+    assign limit = settings.free_shipping_limit | plus: 0
+    assign limit_currency = limit | times: 100
+    assign cart_total_price = cart.total_price
+    assign subtotal_without_currency = cart_total_price | plus: 0 | divided_by: 100
+  -%}
+
+  {%- capture left_to_spend -%}
+    <span data-left-to-spend>
+      {%- if settings.currency_code_enable -%}
+        {{- limit_currency | minus: cart_total_price | money_with_currency | remove: '.00' | remove: ',00' -}}
+      {%- else -%}
+        {{- limit_currency | minus: cart_total_price | money_without_trailing_zeros -}}
+      {%- endif -%}
+    </span>
+  {%- endcapture -%}
+
+  {%- liquid
+    assign free_shipping_message = free_shipping_text | replace: '||amount||', left_to_spend
+    assign qualified_shipping_message = 'cart.general.qualified_shipping_message' | t
+    assign class_message = ''
+
+    if subtotal_without_currency >= limit
+      if qualified_shipping_message != blank
+        assign class_message = ' is-success'
+        assign is_default_message_hidden = ' is-hidden'
+      else
+        assign class_message = ' is-hidden'
+      endif
+    elsif subtotal_without_currency == 0
+      assign class_message = ' is-hidden'
+    endif
+
+    assign percent = limit | minus: subtotal_without_currency | times: 100 | divided_by: limit
+    assign percent = 100 | minus: percent
+  -%}
+
+  <p class="{% unless template.name == 'cart' or section.id == 'announcement-bar' %}cart-drawer__message {% endunless %}cart__message{{ class_message }}"
+    data-cart-message="{% if qualified_shipping_message != blank %}true{% else %}false{% endif %}"
+    data-limit="{{ limit }}"
+    {% if animations_enabled %}
+      data-aos="fade-up"
+      data-aos-delay="{{ animation_delay }}"
+      {%- assign animation_delay = animation_delay | plus: 100 -%}
+    {% endif %}>
+    <span class="cart__message__default{{ is_default_message_hidden }}" data-message-default>{{ free_shipping_message }}</span>
+
+    {%- if qualified_shipping_message != blank -%}
+      <span class="cart__message__success">{{ qualified_shipping_message }}</span>
+    {%- endif -%}
+
+    {%- unless is_top -%}
+      <span class="cart__message__progress__holder">
+        <progress class="cart__message__progress" data-cart-message-progress value="{{ percent }}" max="100" style="--progress-width: {{ percent }}%;"></progress>
+        {%- comment -%}Second progress bar shows only on Firefox{%- endcomment -%}
+        <progress class="cart__message__progress" data-cart-message-progress max="100" style="--progress-width: {{ percent }}%;"></progress>
+      </span>
+    {%- endunless -%}
+  </p>
+{%- endif -%}</div>
+              {%- endif -%}
+            {%- endif -%}
+          {%- when 'custom' -%}
+            {%- if block.settings.text != blank -%}
+              {%- if layout == 'slider' -%}
+                <div {{ block_attributes }}>
+                  <div data-ticker-frame class="top-bar__message">
+                    <div data-ticker-scale class="top-bar__scale">
+                      <div data-ticker-text class="top-bar__text">
+                        <span>{{ block.settings.text }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if layout == 'marquee' -%}
+              <div {{ block_attributes }}>
+                <span>{{ block.settings.text }}</span>
+              </div>
+            {%- endif -%}
+        {%- endcase -%}
+      {%- endcapture -%}
+
+      {%- assign bar_markup = bar_markup | append: bar_html -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+<div data-announcement-bar>
+  <div id="Announcement--{{ section.id }}"
+    data-section-type="announcement-bar"
+    data-section-id="{{ section.id }}"
+    data-announcement-wrapper
+    {% if settings.animations_enabled %}
+      data-aos="fade"
+      data-aos-anchor="{{ animation_anchor }}"
+      data-aos-delay="{{ animation_delay }}"
+    {% endif %}>
+    <div class="ie11-error-message">
+      <p>{{- 'general.ie11_support_message' | t -}}</p>
+    </div>
+
+    {%- if bar_markup != blank -%}
+      {%- style -%}
+        #Announcement--{{ section.id }} .top-bar {
+          --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size }});
+          --padding: {{ padding }};
+
+          {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+            --bg: {{ bg_color }};
+          {%- endif -%}
+
+          {%- if text_color != 'rgba(0,0,0,0)' and text_color != '' -%}
+            --text: {{ text_color }};
+          {%- endif -%}
+        }
+        #Announcement--{{ section.id }} .flickity-enabled .ticker--animated,
+        #Announcement--{{ section.id }} .top-bar__ticker { padding: 0 {{ message_spacing }}; }
+
+        /* Prevent CLS on page load */
+        :root { --announcement-height: calc(.75rem * var(--FONT-ADJUST-BODY) * {{ text_size }} * 1.5 + calc({{ padding }} * 2)); }
+      {%- endstyle -%}
+
+      <div class="top-bar" data-bar>
+        {%- if layout == 'slider' -%}
+          <div class="top-bar__slider"
+            data-slider
+            data-slider-speed="{{ section.settings.slider_speed | times: 1000 }}">
+              {{ bar_markup }}
+          </div>
+        {%- endif -%}
+
+        {%- if layout == 'marquee' -%}
+          <div class="top-bar__slider">
+            <div class="top-bar__slide" data-top-bar-slide>
+              <div data-ticker-frame data-marquee-speed="{{ section.settings.marquee_speed }}" class="top-bar__message">
+                <div data-ticker-scale class="ticker--unloaded top-bar__scale">
+                  <div data-ticker-text class="top-bar__text">
+                    {{ bar_markup }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "class": "announcement-bar-static",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#f7f7f7"
+    },
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Text",
+      "default": "#545454"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "slider",
+      "options": [
+        {
+          "value": "slider",
+          "label": "Slider"
+        },
+        {
+          "value": "marquee",
+          "label": "Marquee"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "default": 10,
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "range",
+      "id": "slider_speed",
+      "label": "Autoplay speed",
+      "unit": "sec",
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "default": 7
+    },
+    {
+      "type": "header",
+      "content": "Marquee"
+    },
+    {
+      "type": "range",
+      "id": "marquee_speed",
+      "label": "Autoplay speed",
+      "unit": "%",
+      "min": 50,
+      "max": 300,
+      "step": 25,
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Size",
+      "default": 100,
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "message_spacing",
+      "label": "Space between messages",
+      "info": "Marquee only",
+      "default": 25,
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>New customers save 10% with code WELCOME10</p>"
+        },
+        {
+          "type": "header",
+          "content": "Icon"
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "none",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Image",
+          "info": "If image set it will override the icon"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "label": "Width",
+          "min": 20,
+          "max": 60,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "header",
+          "content": "Target page"
+        },
+        {
+          "id": "target_url_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific page"
+        },
+        {
+          "id": "target_url",
+          "type": "url",
+          "label": "Targeted page"
+        },
+        {
+          "type": "header",
+          "content": "Target referrer"
+        },
+        {
+          "id": "target_referrer_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific referrer path"
+        },
+        {
+          "id": "target_referrer",
+          "type": "text",
+          "label": "Targeted referrer"
+        },
+        {
+          "type": "header",
+          "content": "Target device"
+        },
+        {
+          "id": "target_device_enabled",
+          "type": "checkbox",
+          "label": "Limit to desktop or mobile"
+        },
+        {
+          "type": "select",
+          "id": "target_device",
+          "label": "Device ",
+          "default": "mobile",
+          "options": [
+            {"value": "mobile", "label": "Only show on mobile" },
+            {"value": "desktop", "label": "Only show on desktop" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "name": "Free shipping message",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "message",
+          "label": "Message",
+          "info": "Use ||amount|| to display progress towards free shipping.",
+          "default": "Spend ||amount|| more for FREE shipping."
+        },
+        {
+          "type": "paragraph",
+          "content": "Navigate to \"Theme settings -> Cart -> Free shipping message\" to set the amount."
+        },
+        {
+          "type": "header",
+          "content": "Target page"
+        },
+        {
+          "id": "target_url_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific page"
+        },
+        {
+          "id": "target_url",
+          "type": "url",
+          "label": "Targeted page"
+        },
+        {
+          "type": "header",
+          "content": "Target referrer"
+        },
+        {
+          "id": "target_referrer_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific referrer path"
+        },
+        {
+          "id": "target_referrer",
+          "type": "text",
+          "label": "Targeted referrer"
+        },
+        {
+          "type": "header",
+          "content": "Target device"
+        },
+        {
+          "id": "target_device_enabled",
+          "type": "checkbox",
+          "label": "Limit to desktop or mobile"
+        },
+        {
+          "type": "select",
+          "id": "target_device",
+          "label": "Device ",
+          "default": "mobile",
+          "options": [
+            {"value": "mobile", "label": "Only show on mobile" },
+            {"value": "desktop", "label": "Only show on desktop" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "name": "Custom HTML",
+      "settings": [
+        {
+          "type": "html",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Custom HTML</p>"
+        },
+        {
+          "type": "header",
+          "content": "Target page"
+        },
+        {
+          "id": "target_url_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific page"
+        },
+        {
+          "id": "target_url",
+          "type": "url",
+          "label": "Targeted page"
+        },
+        {
+          "type": "header",
+          "content": "Target referrer"
+        },
+        {
+          "id": "target_referrer_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific referrer path"
+        },
+        {
+          "id": "target_referrer",
+          "type": "text",
+          "label": "Targeted referrer"
+        },
+        {
+          "type": "header",
+          "content": "Target device"
+        },
+        {
+          "id": "target_device_enabled",
+          "type": "checkbox",
+          "label": "Limit to desktop or mobile"
+        },
+        {
+          "type": "select",
+          "id": "target_device",
+          "label": "Device ",
+          "default": "mobile",
+          "options": [
+            {"value": "mobile", "label": "Only show on mobile" },
+            {"value": "desktop", "label": "Only show on desktop" }
+          ]
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  }
+}
+{% endschema %}

@@ -1,0 +1,21 @@
+{%- liquid
+  assign heading = block_settings.accordion_heading
+  assign text = block_settings.accordion_text
+  assign page = block_settings.accordion_page
+  assign content = page.content | default: text
+-%}
+
+{%- if heading != '' and content != '' -%}
+  <div class="product__accordion">
+    <button class="product__accordion__title" aria-controls="ProductAccordion--page-{{ heading | handle }}--{{ section.id }}--{{ block_id }}" data-collapsible-trigger>
+      {{- heading -}}
+      {%- render 'icon-toggle-plus' -%}
+      {%- render 'icon-toggle-minus' -%}
+    </button>
+    <div class="product__accordion__content" id="ProductAccordion--page-{{ heading | handle }}--{{ section.id }}--{{ block_id }}" data-collapsible-container>
+      <div class="product__accordion__inner rte" data-collapsible-content>
+        {{- content -}}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

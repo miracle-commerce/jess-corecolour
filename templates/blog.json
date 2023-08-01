@@ -1,0 +1,51 @@
+{
+  "sections": {
+    "main": {
+      "type": "blog",
+      "settings": {
+        "default_color": "accent",
+        "blog_style": "photo",
+        "post_columns": 3,
+        "image_aspect_ratio": 0.8,
+        "show_rss_icon": false,
+        "show_date": true,
+        "show_author": true,
+        "show_tags": true,
+        "show_comments_count": false,
+        "tag_alignment": "center",
+        "bg_color_secondary": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "5ce8c592-0356-4070-8558-8f2804928e20": {
+      "type": "section-blog",
+      "settings": {
+        "blog": "",
+        "blog_style": "photo",
+        "image_aspect_ratio": 1.1,
+        "rows": 2,
+        "columns": 3,
+        "show_tags": false,
+        "show_author": true,
+        "show_date": true,
+        "show_comments_count": false,
+        "default_color": "none",
+        "heading": "",
+        "button_text": "View all posts",
+        "button_color": "btn--black",
+        "button_style": "btn--solid",
+        "button_size": "btn--small",
+        "text_color": "text-dark",
+        "bg_color_secondary": false,
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "5ce8c592-0356-4070-8558-8f2804928e20"
+  ]
+}

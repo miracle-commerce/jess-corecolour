@@ -1,0 +1,660 @@
+{%- comment -%} /sections/promotion-row.liquid {%- endcomment -%}
+
+{%- liquid
+  assign section_width = section.settings.width
+  assign section_height = section.settings.height
+  assign bg_color = section.settings.bg_color
+  assign block_count = section.blocks.size
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#SectionPromotionRow--' | append: section.id
+  assign animation_delay = 150
+  assign layout = section.settings.layout
+
+  assign mobile_class = ' grid--mobile'
+  assign mobile_item_class = ' grid__item'
+  if section.settings.enable_slider_mobile
+    assign mobile_class = ' carousel--mobile'
+    assign mobile_item_class = ' carousel__item'
+  endif
+-%}
+
+{%- style -%}
+  #SectionPromotionRow--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --min-height: {{ section_height }}px;
+
+    {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+      --bg: {{ bg_color }};
+    {%- endif -%}
+  }
+{%- endstyle -%}
+
+<section id="SectionPromotionRow--{{ section.id }}"
+  class="promotion-row section-padding"
+  data-section-id="{{ section.id }}"
+  data-section-type="promotion-row">
+  <div class="{{ section_width }}">
+    {%- if block_count > 0 -%}
+      <div class="promotion-row__inner promotion-row__inner--{{ block_count }}">
+        <div class="promotion-row__grid promotion-row__grid--enlarge-{{ layout }}{{ mobile_class }}">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign block_id = block.id
+              assign image = block.settings.image
+              assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+              assign subheading = block.settings.subheading
+              assign subheading_size = block.settings.subheading_size | times: 0.01
+              assign title = block.settings.heading
+              assign heading_highlight_type = block.settings.heading_highlight_type
+              assign highlight_color = block.settings.highlight_color
+              assign heading_size = block.settings.heading_size | times: 0.01
+              assign description = block.settings.description
+              assign description_size = block.settings.description_size | times: 0.01
+              assign button_text = block.settings.button_text
+              assign button_link = block.settings.button_link
+              assign button_style = block.settings.button_style
+              assign button_color = block.settings.button_color
+              assign button_size = block.settings.button_size
+              assign disclaimer = block.settings.disclaimer
+              assign disclaimer_size = block.settings.disclaimer_size | times: 0.01
+              assign bg_color = block.settings.bg_color
+              assign text_color = block.settings.text_color
+              assign animation_delay = forloop.index | times: 150
+              assign gradient_background = block.settings.gradient_background | default: 'none'
+
+              assign image_link = false
+              if button_link != blank and button_text == blank
+                assign image_link = true
+              endif
+
+              assign empty_bg_color = true
+              if bg_color != 'rgba(0,0,0,0)' and bg_color != ''
+                assign empty_bg_color = false
+              endif
+            -%}
+
+            {%- style -%}
+              #SectionPromotionRow--{{ block_id }} {
+                --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }});
+                --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ description_size }});
+                --overlay: {{ gradient_background }};
+                --overlay-opacity: {{ overlay_opacity }};
+
+                {%- if empty_bg_color == false and image == blank -%}
+                  --overlay: {{ bg_color }};
+                {%- endif -%}
+
+                {%- if text_color != 'rgba(0,0,0,0)' and text_color != '' -%}
+                  --text: {{ text_color }};
+                {%- endif -%}
+
+                {%- if heading_highlight_type != 'highlight' -%}
+                  --highlight-color: var(--text);
+                {%- endif -%}
+
+                {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+                  --highlight-color: {{ highlight_color }};
+                {%- endif -%}
+              }
+
+              #SectionPromotionRow--{{ block_id }} .promotion-row__item__subheading { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ subheading_size }}); }
+              #SectionPromotionRow--{{ block_id }} .promotion-row__item__disclaimer { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ disclaimer_size }}); }
+            {%- endstyle -%}{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}<div id="SectionPromotionRow--{{ block_id }}"
+              class="promotion-row__item promotion-row__item--{{ forloop.index }} text-center{{ mobile_item_class }}"
+              {% if animations_enabled %}
+                data-aos="fade"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              {{ block.shopify_attributes }}>
+                {%- if image_link -%}
+                  <a class="promotion-row__item__link" href="{{ button_link }}">
+                    <span class="visually-hidden">{{ title | strip_html | strip }}</span>
+                  </a>
+                {%- endif -%}
+
+                <div class="overlay"></div>
+
+                {%- if image != blank -%}
+                  {%- render 'image-fill', is_background: true, img_object: image, classes: 'promotion-row__item__image-bg' -%}
+                {%- else -%}
+                  {%- render 'image-fill', is_background: true, img_object: '', classes: 'promotion-row__item__image-bg' -%}
+                {%- endif -%}
+
+                <div class="promotion-row__item__content">
+                  {%- if subheading != blank -%}
+                    <div class="promotion-row__item__subheading subheading-text"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>{{ subheading }}</div>
+                  {%- endif -%}
+
+                  {%- if title != blank -%}
+                    {%- liquid
+                      assign hasPercentOff = false
+                      if title contains '% off' or title contains '% OFF' or title contains '% Off'
+                        assign hasPercentOff = true
+                      endif
+                      assign title = title | replace: '%', '<sup>%</sup>'
+                      assign title = title | replace: '<sup>%</sup> off', '<sup>%</sup> <small>off</small>'
+                      assign title = title | replace: '<sup>%</sup> OFF', '<sup>%</sup> <small>OFF</small>'
+                      assign title = title | replace: '<sup>%</sup> Off', '<sup>%</sup> <small>Off</small>'
+                    -%}
+
+                    <h3 class="promotion-row__item__heading{% if has_text_highlight %} {{ text_highlight_wrapper_class }}{% endif %}{% if hasPercentOff %} promotion-row__item__heading--haspercentoff{% endif %}"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>
+                      {% render 'title-with-highlights',
+                        title: title,
+                        heading_highlight_type: heading_highlight_type,
+                        highlight_color: highlight_color,
+                        has_text_highlight: has_text_highlight %}
+                    </h3>
+                  {%- endif -%}
+
+                  {%- if description != blank -%}
+                    <p class="promotion-row__item__description"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>{{ description }}</p>
+                  {%- endif -%}
+
+                  {%- if button_text != blank -%}
+                    {%- assign button_link = button_link | default: '#' -%}
+                    <div class="promotion-row__item__button main-buttons__item"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>
+                      <a class="btn {{ button_style }} {{ button_size }} {{ button_color }}" href="{{ button_link }}">{{ button_text }}</a>
+                    </div>
+                  {%- endif -%}
+
+                  {%- if disclaimer != blank -%}
+                    <p class="promotion-row__item__disclaimer"
+                      {% if animations_enabled %}
+                        data-aos="fade-up"
+                        data-aos-anchor="{{ animation_anchor }}"
+                        data-aos-delay="{{ animation_delay }}"
+                        {%- assign animation_delay = animation_delay | plus: 150 -%}
+                      {% endif %}>{{ disclaimer }}</p>
+                  {%- endif -%}
+                </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- else -%}
+      {%- render 'no-blocks' -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Promotion row",
+    "max_blocks": 4,
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "label": "Modify selected block width",
+        "default": "none",
+        "options": [
+          {"label": "First", "value": "1"},
+          {"label": "Second", "value": "2"},
+          {"label": "Third", "value": "3"},
+          {"label": "Fourth", "value": "4"},
+          {"label": "None", "value": "none"}
+        ],
+        "info": "Change the layout by increasing the width of one selected block"
+      },
+      {
+        "type": "select",
+        "id": "height",
+        "label": "Height",
+        "default": "250",
+        "options": [
+          {"label": "450px", "value": "450"},
+          {"label": "400px", "value": "400"},
+          {"label": "350px", "value": "350"},
+          {"label": "300px", "value": "300"},
+          {"label": "250px", "value": "250"},
+          {"label": "200px", "value": "200"},
+          {"label": "150px", "value": "150"}
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Style"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background"
+      },
+      {
+        "type": "header",
+        "content": "Mobile slider"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_slider_mobile",
+        "label": "Enable slider",
+        "default": true,
+        "info": "Horizontal slider in mobile layout."
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper--full-padded",
+        "options": [
+          { "value": "wrapper--full-padded", "label": "Full width padded" },
+          { "value": "wrapper", "label": "Page width" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "blocks": [
+      {
+        "type": "column",
+        "name": "Custom promo",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image"
+          },
+          {
+            "type": "header",
+            "content": "Text"
+          },
+          {
+            "type": "richtext",
+            "id": "subheading",
+            "label": "Subheading"
+          },
+          {
+            "type": "range",
+            "id": "subheading_size",
+            "label": "Subheading size",
+            "default": 100,
+            "min": 75,
+            "max": 250,
+            "step": 5,
+            "unit": "%"
+          },
+          {
+            "type": "richtext",
+            "id": "heading",
+            "label": "Heading",
+            "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below",
+            "default": "<p>50% OFF</p>"
+          },
+          {
+            "type": "select",
+            "id": "heading_highlight_type",
+            "label": "Highlight type",
+            "default": "italics",
+            "options": [
+              { "value": "italics", "label": "Italics (no decoration)" },
+              { "value": "highlight", "label": "Highlight" },
+              { "value": "highlight-color", "label": "Text color" },
+              { "value": "underline", "label": "Underline" },
+              { "value": "squiggle", "label": "Squiggle" },
+              { "value": "circle", "label": "Circle" },
+              { "value": "stroke", "label": "Stroke (outlined text)" }
+            ]
+          },
+          {
+            "type": "color",
+            "id": "highlight_color",
+            "label": "Highlight color",
+            "default": "#D43747"
+          },
+          {
+            "type": "range",
+            "id": "heading_size",
+            "label": "Heading size",
+            "default": 280,
+            "min": 75,
+            "max": 350,
+            "step": 5,
+            "unit": "%"
+          },
+          {
+            "type": "text",
+            "id": "description",
+            "label": "Description",
+            "default": "Share details about the promotion"
+          },
+          {
+            "type": "range",
+            "id": "description_size",
+            "label": "Description size",
+            "default": 100,
+            "min": 75,
+            "max": 150,
+            "step": 5,
+            "unit": "%"
+          },
+          {
+            "type": "text",
+            "id": "disclaimer",
+            "label": "Disclaimer text"
+          },
+          {
+            "type": "range",
+            "id": "disclaimer_size",
+            "label": "Disclaimer size",
+            "default": 75,
+            "min": 75,
+            "max": 150,
+            "step": 5,
+            "unit": "%"
+          },
+          {
+            "type": "header",
+            "content": "Buttons"
+          },
+          {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button text"
+          },
+          {
+            "type": "url",
+            "id": "button_link",
+            "label": "Link"
+          },
+          {
+            "type": "select",
+            "id": "button_color",
+            "label": "Color",
+            "default": "btn--black",
+            "options": [
+              { "label": "Primary", "value": "btn--primary" },
+              { "label": "Secondary", "value": "btn--secondary" },
+              { "label": "White", "value": "btn--white" },
+              { "label": "Black", "value": "btn--black" }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "button_style",
+            "label": "Button style",
+            "default": "btn--solid",
+            "options": [
+              { "label": "Solid", "value": "btn--solid" },
+              { "label": "Outline", "value": "btn--outline" },
+              { "label": "Solid with border", "value": "btn--solid-border" },
+              { "label": "Text", "value": "btn--text" }
+            ]
+          },
+          {
+            "type": "select",
+            "id": "button_size",
+            "label": "Size",
+            "default": "btn--small",
+            "options": [
+              { "label": "Large", "value": "btn--large" },
+              { "label": "Medium", "value": "btn--medium" },
+              { "label": "Small", "value": "btn--small" }
+            ]
+          },
+          {
+            "type": "header",
+            "content": "Colors"
+          },
+          {
+            "type": "color",
+            "id": "bg_color",
+            "label": "Background"
+          },
+          {
+            "type": "color_background",
+            "id": "gradient_background",
+            "label": "Overlay gradient",
+            "info": "To apply the gradient color, remove the 'Background' color above"
+          },
+          {
+            "type": "color",
+            "id": "text_color",
+            "label": "Text"
+          },
+          {
+            "type": "range",
+            "id": "overlay_opacity",
+            "label": "Overlay opacity",
+            "info": "Improves readability of text",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": "%",
+            "default": 10
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Promotion row",
+        "category": "Image",
+        "blocks": [
+          {
+            "type": "column",
+            "settings": {
+              "subheading": "<p>IN-STORE AND ONLINE</p>",
+              "subheading_size": 90,
+              "heading": "<p>20% OFF</p>",
+              "heading_size": 295,
+              "description": "Share details about the promotion",
+              "disclaimer": "*Use this text for a disclaimer."
+            }
+          },
+          {
+            "type": "column",
+            "settings": {
+              "subheading": "<p>WEEKEND SALE</p>",
+              "subheading_size": 80,
+              "heading": "<p>BOGO</p>",
+              "heading_size": 260,
+              "description": "Share details about the promotion",
+              "description_size": 85,
+              "disclaimer": "*Use this text for a disclaimer."
+            }
+          },
+          {
+            "type": "column",
+            "settings": {
+              "heading": "<p><em>FREE</em> GIFT</p>",
+              "heading_highlight_type": "circle",
+              "highlight_color": "#D43747",
+              "heading_size": 205,
+              "description": "WITH EVERY PURCHASE",
+              "bg_color": "#000000",
+              "text_color": "#ffffff"
+            }
+          }
+        ]
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside","footer"]
+    }
+  }
+{% endschema %}

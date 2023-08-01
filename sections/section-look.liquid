@@ -1,0 +1,506 @@
+<!-- /sections/look.liquid -->
+
+{%- liquid
+  assign section_width = section.settings.width
+  assign image = section.settings.image
+  assign enable_aspect_ratio = section.settings.enable_aspect_ratio
+  assign main_image_aspect_ratio = section.settings.main_image_aspect_ratio
+  assign show_hotspots = section.settings.show_hotspots
+  assign heading = section.settings.title
+  assign text = section.settings.text
+  assign text_alignment = section.settings.text_alignment
+  assign hotspot_color = section.settings.hotspot_color
+  assign text_color = section.settings.content_color
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Look--' | append: section.id
+-%}
+
+{%- style -%}
+  #Look--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+
+  {%- if hotspot_color != 'rgba(0,0,0,0)' and hotspot_color != '' -%}
+    #Look--{{ section.id }} { --hotspot: {{ hotspot_color }}; }
+  {%- endif -%}
+
+  {%- if enable_aspect_ratio -%}
+    #Look--{{ section.id }} { --aspect-ratio: {{ main_image_aspect_ratio | times: 100 | append: '%' }}; }
+  {%- else -%}
+    {%- unless image == blank -%}
+      #Look--{{ section.id }} { --aspect-ratio: {{ 1 | divided_by: image.aspect_ratio | times: 100 | append: '%' }}; }
+    {%- else -%}
+      #Look--{{ section.id }} { --aspect-ratio: 100%; }
+    {%- endunless -%}
+  {%- endif -%}
+{%- endstyle -%}
+
+<section id="Look--{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="look"
+  class="look section-padding{% if bg_color_secondary %} bg-secondary{% endif %}">
+  <div class="{{ section_width }}">
+    <div class="look__wrapper">
+      {%- liquid
+        assign quick_view_items_template = ''
+        assign data_hotspot_array = ''
+        for i in (1..section.blocks.size)
+          assign data_hotspot_array = data_hotspot_array | append: '@@' | append: i
+        endfor
+        assign data_hotspot_array = data_hotspot_array | split: '@@'
+      -%}
+
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign product = all_products[block.settings.product]
+            assign position_x = block.settings.position_x
+            assign position_y = block.settings.position_y
+            assign unique = 'quick-view-item-' | append: block.id
+            assign index = forloop.index
+            assign index_0 = forloop.index0
+            assign data_hotspot = section.id | append: '--' | append: data_hotspot_array[index]
+          -%}
+
+          {%- capture look_products -%}
+            {{- look_products -}}
+
+            <div class="look__slide look__slide--{{ block.id }}" data-slide-item="{{ block.id }}">
+              {%- if product != blank -%}
+                {%- render 'product-grid-item',
+                  product: product,
+                  index: index,
+                  tabindex_hidden: true,
+                  image_animation: 'fade-up',
+                  text_animation: 'fade-up',
+                  animation_anchor: animation_anchor %}
+              {%- else -%}
+                {%- render 'product-grid-item--onboarding',
+                  title: 'Product Title',
+                  index: index,
+                  animation_delay: index_0,
+                  tabindex_hidden: true,
+                  image_animation: 'fade-up',
+                  text_animation: 'fade-up',
+                  animation_anchor: animation_anchor -%}
+              {%- endif -%}
+            </div>
+          {%- endcapture -%}
+
+          {%- capture look_dot -%}
+            {{ look_dot }}
+
+            <button class="pointer{% unless show_hotspots %} visually-hidden{% endunless %}"
+              aria-label="{{ 'general.accessibility.product' | t | append: '-' | append: index }}"
+              data-top="{{ position_y }}"
+              data-left="{{ position_x }}"
+              data-pointer="{{ index_0 }}"
+              data-handle="{{ product.handle }}"
+              data-hotspot="{{ data_hotspot }}"
+              data-button-quick-view
+              data-shop-the-look-quick-view
+              {% if animations_enabled %}
+                data-aos="fade"
+                data-aos-duration="500"
+                data-aos-anchor="{{ animation_anchor }}"
+              {% endif %}
+              style="top: {{ position_y }}%; left: {{ position_x }}%;"
+              {{ block.shopify_attributes }}>
+              <span class="pointer__inner"></span>
+
+              {%- liquid
+                assign nav_thumbs = ''
+                assign nav_thumbs_class = 'popup-quick-view__nav-thumbs'
+              -%}
+
+              {%- for product_block in section.blocks -%}
+                {%- liquid
+                  assign current_product = all_products[product_block.settings.product]
+                  assign current_index = forloop.index
+                  assign current_index_0 = forloop.index0
+
+                  if current_product != blank
+                    assign product_title = current_product.title | strip_html | escape
+                    assign product_url = current_product.url
+                  else
+                    assign product_title = 'homepage.onboarding.product_title' | t
+                    assign product_url = '#!'
+                  endif
+
+                  for i in (1..section.blocks.size)
+                    if current_index == i
+                      assign current_data_hotspot = section.id | append: '--' | append: data_hotspot_array[current_index]
+                    endif
+                  endfor
+
+                  if current_index_0 == index_0 and index_0 == 0
+                    assign nav_thumbs_class = nav_thumbs_class | append: ' ' | append: 'popup-quick-view__nav-thumbs--first-active'
+                  endif
+                -%}
+
+                {%- capture nav_media -%}
+                  <div class="popup-quick-view__nav-media">
+                    {%- if current_product != blank -%}
+                      {%- liquid
+                        assign product_block_unique = unique | append: '-' | append: current_product.id
+                        assign current_variant = current_product.selected_or_first_available_variant
+                        assign featured_media = current_variant.featured_media | default: current_product.featured_media
+                        assign product_image = current_product.featured_image
+                        assign image_url_pattern = product_image | img_url: '540x' | replace: '_540x.', '_{width}x.'
+                        assign image_widths = '[180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048]'
+                      -%}
+
+                      {%- if current_product.media.size > 0 -%}
+                        {%- render 'media-thumb',
+                          media: featured_media,
+                          featured_media: featured_media,
+                          unique: product_block_unique,
+                          has_link: false,
+                          product_title: product_title -%}
+                      {%- else -%}
+                        <div class="popup-quick-view__thumbnail">
+                          <img
+                            class="no-image-placeholder lazyload"
+                            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+                            data-src="{{ image_url_pattern }}"
+                            data-widths= "{{ image_widths }}"
+                            data-aspectratio="1"
+                            data-sizes="auto"
+                            data-product-image
+                            width="540"
+                            height="540"
+                            alt="{{ product_title }}">
+                        </div>
+                      {%- endif -%}
+
+                    {%- else -%}
+                      <div class="popup-quick-view__thumbnail">
+                        {{- 'product-5' | placeholder_svg_tag: 'placeholder-svg' -}}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                {%- endcapture -%}
+
+                {%- capture nav_thumbs -%}
+                  {{- nav_thumbs -}}
+
+                  <a href="{{ product_url }}"
+                    class="popup-quick-view__nav-thumb{% if current_index_0 == index_0 %} is-active{% endif %}"
+                    aria-label="{{ product_title }}"
+                    data-shop-the-look-thumb
+                    data-hotspot-ref="{{ current_data_hotspot }}">
+                    {{- nav_media -}}
+                  </a>
+                {%- endcapture -%}
+              {%- endfor -%}
+
+              {% capture quick_view_nav %}
+                <div class="popup-quick-view__nav">
+                  <p class="popup-quick-view__nav-title h5">
+                    {{- 'general.pagination.shop_the_look_quick_view' | t: current: index, total: section.blocks.size -}}
+                  </p>
+
+                  <div class="{{ nav_thumbs_class }}">
+                    {{- nav_thumbs -}}
+                  </div>
+                </div>
+              {% endcapture %}
+
+              {%- capture quick_view_item -%}
+                <div class="look__quick-view-item look__quick-view-item--{{ block.id }}{% if index_0 == 0 %} is-active{% endif %}"
+                  data-hotspot="{{ data_hotspot }}"
+                  data-quick-view-item-holder>
+                  <div class="popup-quick-view__item"
+                    data-product
+                    {% if product == blank %} data-quick-view-onboarding{% endif %}
+                    data-quick-view-item>
+                    {%- render 'product', product: product, unique: unique, section: nil, section_type: 'quickview', quick_view_nav: quick_view_nav, multiple_quick_view_items: true -%}
+                  </div>
+                </div>
+              {%- endcapture -%}
+
+              {%- assign quick_view_items_template = quick_view_items_template | append: quick_view_item -%}
+            </button>
+          {%- endcapture -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      <div class="look__column look__column--image"
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-duration="500"
+          data-aos-anchor="{{ animation_anchor }}"
+        {% endif %}>
+
+        {%- render 'image-fill',
+          is_background: true,
+          img_object: image,
+          classes: 'look__image',
+          placeholder_svg: 'collection-1' -%}
+
+        <div class="look__column__pointers">
+          {{ look_dot }}
+        </div>
+      </div>
+
+      {%- if look_products -%}
+        <button type="button" class="look__column__button btn btn--primary{% if show_hotspots %} visually-hidden{% endif %}" aria-controls="look__column__button--{{ section.id }}" data-shop-the-look-quick-view-button>
+          {{- 'general.accessibility.show_products' | t -}}
+        </button>
+
+        <template data-quick-view-items-template>
+          <div class="look__quick-view-items">
+            <div class="popup-quick-view__inner" data-section-id="{{ 'LookQuickViewItems--' | append: section.id }}" data-quick-view-inner>
+              {{- quick_view_items_template -}}
+            </div>
+          </div>
+        </template>
+      {%- endif -%}
+
+      <div class="look__column look__column--slider {{ text_alignment }}">
+        <div class="look__content {{ text_color }}">
+          {%- unless heading == blank and text == blank -%}
+            <div class="look__text">
+              {%- if heading != blank -%}
+                <h3 class="look__heading h2"
+                  {% if animations_enabled %}
+                    data-aos="come-up"
+                    data-aos-duration="400"
+                    data-aos-anchor="{{ animation_anchor }}"
+                  {% endif %}>{{ heading }}</h3>
+
+                {%- if settings.show_spacer_lines -%}
+                  <hr
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-duration="400"
+                    data-aos-anchor="{{ animation_anchor }}"
+                  {% endif %}>
+                {%- endif -%}
+              {%- endif -%}
+
+              {%- if text != blank -%}
+                <div class="rich-text__text"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-duration="400"
+                    data-aos-anchor="{{ animation_anchor }}"
+                  {% endif %}>
+                  {{- text -}}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endunless -%}
+
+          {%- if look_products -%}
+            <div class="look__column__drawer">
+              <div class="look__column__drawer__inner">
+                <div class="look__column__drawer__products">
+                  <div class="look__slider"
+                    data-slider
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-duration="800"
+                      data-aos-anchor="{{ animation_anchor }}"
+                    {% endif %}>
+                    {{- look_products -}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shop the Look",
+  "class": "section-look",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "id": "enable_aspect_ratio",
+      "type": "checkbox",
+      "label": "Set custom aspect ratio",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "main_image_aspect_ratio",
+      "label": "Aspect ratio",
+      "min": 0.5,
+      "max": 1.5,
+      "step": 0.1,
+      "unit": ":1",
+      "default": 1.0
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Shop the Look"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Our most popular looks of the season</p>"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "text-left",
+      "options": [
+        { "label": "Center", "value": "text-center" },
+        { "label": "Left", "value": "text-left" }
+      ]
+    },
+    {
+      "id": "show_hotspots",
+      "type": "checkbox",
+      "label": "Show hotspots",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "select",
+      "id": "content_color",
+      "label": "Text",
+      "default": "text-dark",
+      "options": [
+        { "value": "text-light", "label": "Light" },
+        { "value": "text-dark", "label": "Dark" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "hotspot_color",
+      "label": "Hotspot color"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product",
+      "type": "product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "header",
+          "content": "Dot position"
+        },
+        {
+          "type":    "range",
+          "id":      "position_x",
+          "min":     10,
+          "max":     90,
+          "step":    1,
+          "label":   "Horizontal",
+          "unit":    "%",
+          "default": 50
+        },
+        {
+          "type":    "range",
+          "id":      "position_y",
+          "min":     10,
+          "max":     90,
+          "step":    1,
+          "label":   "Vertical",
+          "unit":    "%",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the look ",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 31,
+            "position_y": 41
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 50,
+            "position_y": 63
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "position_x": 73,
+            "position_y": 47
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

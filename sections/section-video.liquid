@@ -1,0 +1,428 @@
+{% comment %} /sections/background-video.liquid {% endcomment %}
+
+{%- liquid
+  assign unique = section.id
+  assign video_id = section.settings.video_link.id
+  assign section_height = section.settings.video_height
+  assign title = section.settings.title
+  assign heading_highlight_type = section.settings.heading_highlight_type
+  assign highlight_color = section.settings.highlight_color
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign text = section.settings.text
+  assign text_color = section.settings.text_color
+  assign image = section.settings.image
+  assign button_text = section.settings.button_text
+  assign button_link = section.settings.button_link | default: '#'
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign text_position = section.settings.text_position
+  assign show_text_shadow = settings.show_text_shadow
+  assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#FeaturedVideo--' | append: section.id
+  assign animation_delay = 150
+  assign video_link = section.settings.video_link
+  assign background_video = section.settings.video_link_bg
+-%}{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}{%- style -%}
+  #FeaturedVideo--{{ section.id }} { --overlay-opacity: {{ overlay_opacity }}; }
+  #FeaturedVideo--{{ section.id }} .main-heading {
+
+    {%- if heading_highlight_type != 'highlight' -%}
+      --highlight-color: var(--text);
+    {%- endif -%}
+
+    {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+      --highlight-color: {{ highlight_color }};
+    {%- endif -%}
+  }
+  #FeaturedVideo--{{ section.id }} .main-heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }}); }
+{%- endstyle -%}
+
+<section id="FeaturedVideo--{{ unique }}"
+  class="featured-video-section {{ section_height }}"
+  data-section-id="{{ unique }}"
+  data-section-type="featured-video">
+  <div class="video-wrapper" data-video-wrapper>
+    {%- render 'video',
+      unique: unique,
+      text_color: text_color,
+      overlay_opacity: overlay_opacity,
+      title: title,
+      heading_highlight_type: heading_highlight_type,
+      highlight_color: highlight_color,
+      has_text_highlight: has_text_highlight,
+      text_highlight_wrapper_class: text_highlight_wrapper_class,
+      heading_size: heading_size,
+      text: text,
+      image: image,
+      button_text: button_text,
+      button_link: button_link,
+      button_style: button_style,
+      button_color: button_color,
+      button_size: button_size,
+      text_position: text_position,
+      show_text_shadow: show_text_shadow,
+      animations_enabled: animations_enabled,
+      animation_anchor: animation_anchor,
+      animation_delay: animation_delay,
+      background_video: background_video,
+      video_id: video_id,
+      video_link: video_link
+    -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Video",
+  "class": "featured-video-section supports-transparent-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "video_height",
+      "label": "Height",
+      "default": "six-fifty-height",
+      "options": [
+        { "value": "full-height", "label": "Full screen" },
+        { "value": "two-thirds-height", "label": "Two thirds of screen" },
+        { "value": "one-half-height", "label": "One half of screen" },
+        { "value": "one-third-height", "label": "One third of screen" },
+        { "value": "one-fifth-height", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height", "label": "750px" },
+        { "value": "six-fifty-height", "label": "650px" },
+        { "value": "five-fifty-height ", "label": "550px" },
+        { "value": "four-fifty-height", "label": "450px" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Content alignment",
+      "default": "middle-center",
+      "options": [
+        {
+          "value": "top-left",
+          "label": "Top left"
+        },
+        {
+          "value": "top-center",
+          "label": "Top center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top right"
+        },
+        {
+          "value": "middle-center",
+          "label": "Center"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom left"
+        },
+        {
+          "value": "bottom-center",
+          "label": "Bottom center"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Video"
+    },
+    {
+      "type": "text",
+      "id": "video_link_bg",
+      "label": "Video background link",
+      "info": "MP4 video link from [files](/admin/content/files?selectedView=all&media_type=VIDEO)"
+    },
+    {
+      "type": "text",
+      "id": "video_link",
+      "label": "Video popup link",
+      "info": "Video links from YouTube, Vimeo or MP4 video link from [files](/admin/content/files?selectedView=all&media_type=VIDEO)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Displays while video is loading"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Text contrast",
+      "info": "Improves readability of text",
+      "min": 0,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Color",
+      "default": "text-light",
+      "options": [
+        {
+          "value": "text-light",
+          "label": "Light"
+        },
+        {
+          "value": "text-dark",
+          "label": "Dark"
+        }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "<p>Welcome to Palo Alto</p>",
+      "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below"
+    },
+    {
+      "type": "select",
+      "id": "heading_highlight_type",
+      "label": "Highlight type",
+      "default": "italics",
+      "options": [
+        { "value": "italics", "label": "Italics (no decoration)" },
+        { "value": "highlight", "label": "Highlight" },
+        { "value": "highlight-color", "label": "Text color" },
+        { "value": "underline", "label": "Underline" },
+        { "value": "squiggle", "label": "Squiggle" },
+        { "value": "circle", "label": "Circle" },
+        { "value": "stroke", "label": "Stroke (outlined text)" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight color",
+      "default": "#D43747"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "This text helps you provide some more detail to the title above."
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": 100,
+      "min": 100,
+      "max": 200,
+      "step": 10,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text",
+      "default": "Welcome"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Color",
+      "default": "btn--white",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--solid-border",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--small",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video",
+      "category": "Image"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

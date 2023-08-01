@@ -1,0 +1,159 @@
+/*============================================================================
+CORECOLOUR Custom CSS by Joey Clarin (https://joefclarin.github.io/)
+==============================================================================*/
+
+
+/*================ MOBILE FILTER AND SORT TOGGLE BUTTON ================*/
+#CollectionStickyBar button.collection__filters__toggle {
+  border: 1px solid #2b2b2b;
+  height: auto;
+  margin-bottom: 1rem;
+  margin-right: 0;
+  padding: 0.5rem 1rem;
+  width: auto;
+}
+#CollectionStickyBar button.collection__filters__toggle:before {
+  content: "Filter & Sort";
+}
+#CollectionStickyBar button.collection__filters__toggle svg {
+  display: none;
+}
+
+
+
+/*================ COLLECTION CUSTOM DEVICE FILTER ================*/
+.cc-has-custom-device-filter .collection__filter:has(#CollectionFilter--device) {
+  display: none;
+}
+.collection__filters-list form {
+  display: flex;
+  flex-direction: column;
+}
+.collection__filters-list form .collection__filters-header { order: 1; }
+.collection__filters-list form .collection__sort { order: 2; }
+.collection__filters-list form .cc-custom-device-filter { order: 3; }
+.collection__filters-list form .collection__filter { order: 4; }
+.cc-custom-device-filter a.filter__button {
+  padding-left: 22px;
+  position: relative;
+}
+.cc-custom-device-filter a.filter__button:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--white);
+  border-radius: var(--RADIUS-CHECKBOX);
+  border: var(--BORDER-WIDTH) solid var(--text);
+}
+.cc-custom-device-filter a.filter__button.checked:before {
+  background: var(--text) var(--icon-check) no-repeat center center;
+  background-size: 14px auto;
+}
+
+
+/*================ PRODUCT TEMPLATE STICKY PRODUCT GALLERY ================*/
+.cc-product-sticky-wrapper > div {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 4rem;
+}
+
+
+/*================ PRODUCT Description hyperlinks ================*/
+
+
+  .product__description a.internal:link, a.internal:link:before, a.internal:link:after, a.internal:hover, a.internal:hover:before, a.internal:hover:after, a.internal:visited, a.internal:visited:before, a.internal:visited:after  {
+  text-decoration: none !important;
+  background-color:white !important;
+  /* display: inline-block !important;
+  position: relative !important;
+  display:none !important; */
+}
+
+
+/*================ FOOTER CHANGE COUNTRY ================*/
+.footer-cc-custom-change-country {
+  
+}
+.footer-cc-custom-change-country select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #000000;
+  background-image: url(data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Ctitle%3Edown-arrow%3C%2Ftitle%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10.293%2C3.293%2C6%2C7.586%2C1.707%2C3.293A1%2C1%2C0%2C0%2C0%2C.293%2C4.707l5%2C5a1%2C1%2C0%2C0%2C0%2C1.414%2C0l5-5a1%2C1%2C0%2C1%2C0-1.414-1.414Z%22%20fill%3D%22%23727272%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E);
+  background-position: top 50% right 10%;
+  background-repeat: no-repeat;
+  background-size: 0.6rem;
+  border: var(--BORDER-WIDTH) solid var(--text);
+  border-radius: var(--RADIUS);
+  color: var(--text);
+  display: block;
+  font-size: calc(.875rem * var(--adjust-body));
+  font-family: var(--FONT-STACK-BODY);
+  line-height: 1;
+  margin: 0 auto;
+  padding: 13px 40px 13px 20px;
+}
+
+.footer-cc-custom-change-country-dropdown {
+  margin: 0 auto;
+  position: relative;
+  width: fit-content;
+}
+.footer-cc-custom-change-country-dropdown:hover {
+  
+}
+.footer-cc-custom-change-country-dropdown-btn {
+  font-size: calc(.875rem * var(--adjust-body));
+  font-family: var(--FONT-STACK-BODY);
+  padding-right: 1.5rem;
+  position: relative;
+}
+.footer-cc-custom-change-country-dropdown-btn svg {
+  transition: transform .4s;
+  transform: rotate(90deg) translateY(-50%);
+  animation: absolute;
+  top: 50%;
+  right: 0;
+}
+.footer-cc-custom-change-country-dropdown-content {
+  background: #000000;
+  border: 1px solid white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: max-content;
+  
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.footer-cc-custom-change-country-dropdown:hover .footer-cc-custom-change-country-dropdown-content {
+  display: flex;
+}
+.footer-cc-custom-change-country-dropdown:hover svg {
+  transform: rotate(270deg) translateY(50%);
+}
+.footer-cc-custom-change-country-dropdown-content img {
+  height: auto;
+  margin-right: 0.5rem;
+  width: 1.6rem;
+}
+.footer-cc-custom-change-country-dropdown-content a {
+  font-size: calc(.875rem * var(--adjust-body));
+  font-family: var(--FONT-STACK-BODY);
+  text-wrap: nowrap;
+}
+
+@media (max-width: 767px) {
+  .footer-cc-custom-change-country-dropdown {
+    margin-left: 0;
+  }
+}

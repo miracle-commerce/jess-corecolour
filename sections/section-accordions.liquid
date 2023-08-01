@@ -1,0 +1,391 @@
+{%- comment -%} Accordions section {%- endcomment -%}
+
+{%- liquid
+  assign section_width = section.settings.width
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Accordions--' | append: section.id
+  assign animation_delay = 150
+  assign heading = section.settings.title
+  assign subheading = section.settings.subheading
+  assign text = section.settings.text
+  assign layout = section.settings.layout
+  assign show_accordion_divider = section.settings.show_accordion_divider
+  assign text_color = section.settings.text_color
+  assign color_body_bg = settings.color_body_bg
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign bg_color = settings.color_body_bg_secondary
+
+  if bg_color_secondary == false
+    assign bg_color = color_body_bg
+  endif
+
+  assign tabs_bg_color = section.settings.tabs_bg_color
+  assign tabs_no_bg = false
+  if bg_color == tabs_bg_color or tabs_bg_color == '' or tabs_bg_color == 'rgba(0,0,0,0)'
+    assign tabs_no_bg = true
+  endif
+
+  assign padded = true
+  if bg_color_secondary and tabs_no_bg
+    assign padded = false
+  elsif bg_color_secondary == false and tabs_no_bg
+    assign padded = false
+  endif
+
+  assign block_size = section.blocks.size
+  assign blocks_count_round = block_size | modulo: 2
+  assign blocks_in_column = block_size | divided_by: 2
+
+  if blocks_count_round == 1
+    assign blocks_in_column = blocks_in_column | plus: 1
+  endif
+
+  assign border_opacity = 0
+
+  if show_accordion_divider
+    assign border_opacity = 0.3
+  endif
+
+  assign margin_bottom = 0
+  if tabs_bg_color != 'rgba(0,0,0,0)' and tabs_bg_color != '' and bg_color != tabs_bg_color
+    assign border_opacity = 0
+    assign margin_bottom = 10
+    assign padded = true
+  endif
+-%}
+
+{%- style -%}
+  #Accordions--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --border-opacity: {{ border_opacity }};
+    --MB: {{ margin_bottom }}px;
+
+  {%- if padded -%}
+    {%- unless tabs_bg_color != 'rgba(0,0,0,0)' -%}
+      --bg-padded-line: #fff;
+    {%- else -%}
+      --bg-padded-line: var(--bg);
+    {%- endunless -%}
+  {%- endif -%}
+  }
+
+  {%- if tabs_bg_color != 'rgba(0,0,0,0)' and tabs_bg_color != '' -%}
+    #Accordions--{{ section.id }} .accordion__item { --bg: {{ tabs_bg_color }}; }
+  {%- endif -%}
+{%- endstyle -%}
+
+{% capture section__heading %}
+  {%- unless heading == blank and subheading == blank and text == blank -%}
+    <div class="accordion__header">
+      <div class="{{ section_width }}">
+        <div class="section__header">
+          {%- if heading != blank -%}
+            <h2 class="section__heading h2"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ heading }}</h2>
+
+            {%- if settings.show_spacer_lines -%}
+              <hr class="section__heading-line"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if subheading != blank -%}
+            <h4 class="accordion__subheading subheading-text"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>{{ subheading }}</h4>
+          {%- endif -%}
+
+          {%- if text != blank -%}
+            <div class="rte"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ text }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endunless -%}
+
+  {%- assign animation_delay_header = animation_delay -%}
+  {%- assign animation_delay_mobile = animation_delay -%}
+{% endcapture %}
+
+{% capture accordions %}
+  {%- if layout == 'one-column' -%}
+    <ul class="accordion__list">
+  {%- else -%}
+    <div class="accordion__columns">
+      <div class="accordion__column">
+        <ul class="accordion__list">
+  {%- endif -%}
+      {%- for block in section.blocks -%}
+        {%- assign title = block.settings.title -%}
+        {%- assign block_text = pages[block.settings.raw_content].content | default: block.settings.text -%}
+        {%- assign block_index = forloop.index -%}
+        {%- assign accordion_id = 'Accordion--' | append: block.id -%}
+
+        {%- unless title == blank -%}
+          <li id="{{ accordion_id }}" class="accordion__item{% if forloop.index == 1 %} accordion__item--first{% endif %}{% if padded %} accordion__item--padded{% endif %}"
+            aria-haspopup="true"
+            {% if animations_enabled %}
+              style="--AD: {{ animation_delay_mobile }}ms"
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {%- assign animation_delay_mobile = animation_delay_mobile | plus: 150 -%}
+            {% endif %}
+            {{ block.shopify_attributes }}>
+            <button class="accordion__item__title" aria-controls="Accordions-item--{{ forloop.index0 }}-{{ section.id }}" data-collapsible-trigger>
+              <span class="accordion__item__title__text">{{ title }}</span>
+
+              {%- render 'icon-toggle-plus' -%}
+              {%- render 'icon-toggle-minus' -%}
+            </button>
+
+            <div class="accordion__item__text-wrapper" id="Accordions-item--{{ forloop.index0 }}-{{ section.id }}" aria-expanded="false" data-collapsible-container>
+              <div class="accordion__item__text rte" data-collapsible-content>
+                {{- block_text -}}
+              </div>
+            </div>
+          </li>
+        {%- endunless -%}
+
+        {%- if block_index == blocks_in_column and layout == 'two-columns' -%}
+          {% comment %} Close the column and start a new one when reaching half of the blocks {% endcomment %}
+            </ul>
+          </div>
+
+          <div class="accordion__column">
+            {%- assign animation_delay = animation_delay_header -%}
+            <ul class="accordion__list accordion__list--{{ layout }}">
+        {%- endif -%}
+      {%- endfor -%}
+  {%- if layout == 'one-column' -%}
+    </ul>
+  {%- else -%}
+        </ul>
+      </div>
+    </div>
+  {%- endif -%}
+{% endcapture %}
+
+<section data-section-id="{{ section.id }}" id="Accordions--{{ section.id }}" data-section-type="accordions" class="section-padding accordions-section {{ text_color }}{% if bg_color_secondary %} bg-secondary{% endif %}">
+  {{ section__heading }}
+
+  {%- if block_size > 0 -%}
+    <div class="accordion__content">
+      <div class="{{ section_width }}" data-collapsible-single>
+        {{ accordions }}
+      </div>
+    </div>
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Tabs",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "two-columns",
+      "options": [
+        { "label": "One column", "value": "one-column" },
+        { "label": "Two columns", "value": "two-columns" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_accordion_divider",
+      "label": "Show divider lines",
+      "default": false,
+      "info": "For transparent tabs background only"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "tabs_bg_color",
+      "label": "Tabs",
+      "default": "#fafafa"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "text-dark",
+      "options": [
+        { "value": "text-light", "label": "Light"},
+        { "value": "text-dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" },
+        { "value": "wrapper--narrow", "label": "Page width narrow" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Text",
+      "type": "text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.</p>"
+        }
+      ]
+    },
+    {
+      "name": "Page",
+      "type": "page",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Page",
+          "info": "Example: Size chart"
+        },
+        {
+          "type": "page",
+          "id": "raw_content",
+          "label": "Content"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Text",
+      "name": "Tabs",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": {
+            "title": "How long does it take to get my products?",
+            "text": "<p>Domestic shipping can take up to 5 business days.<br\/><br\/>Foreign shipping could take up to 14 business days.<br\/><br\/>Due to global supply chain challenges, shipping times could be longer than usual.<\/p>"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "title": "Do you offer warranty for your products?",
+            "text": "<p>All our products are subject to quality control.<br\/><br\/>Our warranty provides a guarantee against manufacturer defects.<br\/><br\/>The guarantee covers any manufacturing, design, or material defect. Please notify us within 2 months of noticing any defects.<br\/><br\/>It does not cover blows, improper use, or other issues that are not attributable to a manufacturer defects.<\/p>"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "title": "Do you offer refunds?",
+            "text": "<p>Yes, we offer full and partial refunds.<br\/><br\/>Please enquire for more information about our Refund policy.<\/p>"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "title": "What shipping methods do you offer?",
+            "text": "<p>We use all major carriers, and local courier partners. Use the shipping estimator in the cart to check your shipping rates.<\/p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

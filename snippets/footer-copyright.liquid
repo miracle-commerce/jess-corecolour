@@ -1,0 +1,11 @@
+{% capture powered_by_link %} {{ 'footer.powered_by' | t }} <a href="https://www.shopify.com/" rel="noopener" target="_blank" rel="nofollow">Shopify</a>.{% endcapture %}
+
+<div class="footer-copyright">
+  <span class="footer-copyright__copy">&copy; {{ 'now' | date: "%Y" }}, {{ shop.name | link_to: routes.root_url }}.</span>
+
+  <span class="footer-copyright__powered">{{ powered_by_link }}</span>
+
+  {% for link in linklists[section.settings.bottom_menu].links %}
+    <a href="{{ link.url }}" class="footer-copyright__link">{{ link.title | strip_html | escape }}</a>
+  {% endfor %}
+</div>

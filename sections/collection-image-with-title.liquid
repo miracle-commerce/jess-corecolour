@@ -1,0 +1,244 @@
+{% liquid
+  assign show_banner_image = section.settings.show_image
+  assign show_text_shadow = settings.show_text_shadow
+  assign banner_image = collection.image
+  assign banner_height = section.settings.banner_height
+  assign text_position = section.settings.text_position
+  assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
+  if collection.handle == 'all'
+    assign banner_image = section.settings.banner_image
+  endif
+
+  assign bg_color_secondary = section.settings.bg_color_secondary
+
+  if show_banner_image and banner_image
+    assign show_banner_image = true
+  else
+    assign show_banner_image = false
+  endif
+
+  assign prevent_transparent_header = false
+  if section.settings.padding_top > 0
+    assign prevent_transparent_header = true
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#ImageWithTitle--' | append: section.id
+  assign animation_delay = 150
+%}
+
+{%- style -%}
+  #ImageWithTitle--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- capture collection_header -%}
+  {%- liquid
+    if show_banner_image
+      assign collection_header_class = 'collection__header collection__header--has-image ' | append: section.settings.text_color
+    else
+      assign collection_header_class = 'collection__header collection__header--no-image ' | append: section.settings.text_color
+    endif
+  -%}
+  <div class="banner-content">
+    <header class="{{ collection_header_class }}">
+      <div class="wrapper--narrow{% if show_text_shadow and show_banner_image %} backdrop--radial{% endif %}">
+        {%- if collection.description != blank -%}
+          <h1 class="section-header__title collection__title"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>{{ collection.title | escape }}</h1>
+
+          <div class="rte rte--header collection__description"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+            {{- collection.description -}}
+          </div>
+        {%- else -%}
+          {%- if collection.handle == 'all' -%}
+            <h1 class="section-header__title collection__title"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ 'products.general.catalog' | t }}</h1>
+          {%- else -%}
+            <h1 class="section-header__title collection__title"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ collection.title }}</h1>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    </header>
+  </div>
+{%- endcapture -%}
+
+{%- if show_banner_image -%}
+  {%- style -%}
+    #ImageWithTitle--{{ section.id }} { --overlay-opacity: {{ overlay_opacity }}; }
+  {%- endstyle -%}
+{%- endif -%}
+
+<section id="ImageWithTitle--{{ section.id }}" class="banner banner--collection section-padding{% if bg_color_secondary %} bg-secondary{% endif %}" data-section-type="image-with-title" data-section-id="{{ section.id }}"{% unless show_banner_image and prevent_transparent_header == false %} data-prevent-transparent-header{% endunless %}>
+  <div class="banner-inner {{ banner_height }} align--{{ text_position }}">
+    {%- if show_banner_image -%}
+      {%- capture styles -%}
+        {%- if banner_height == 'original-height' -%}
+          padding-top: {{ 1 | divided_by: banner_image.aspect_ratio | times: 100 | round: 1 }}%;
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- render 'image-fill', is_background: true, img_object: banner_image, classes: 'banner-img', styles: styles -%}
+
+      {{- collection_header -}}
+    {%- else -%}
+      {{- collection_header -}}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Image with title",
+    "templates": ["collection"],
+    "class": "supports-transparent-header",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "select",
+        "id": "banner_height",
+        "label": "Height",
+        "options": [
+          { "value": "full-height", "label": "Full screen" },
+          { "value": "three-quarters-height", "label": "Three quarters of screen" },
+          { "value": "two-thirds-height", "label": "Two thirds of screen" },
+          { "value": "one-half-height", "label": "One half of screen" },
+          { "value": "one-third-height", "label": "One third of screen" },
+          { "value": "one-fifth-height", "label": "One fifth of screen" },
+          { "value": "seven-fifty-height", "label": "750px" },
+          { "value": "six-fifty-height", "label": "650px" },
+          { "value": "five-fifty-height", "label": "550px" },
+          { "value": "four-fifty-height", "label": "450px" },
+          { "value": "three-fifty-height", "label": "350px" },
+          { "value": "two-fifty-height", "label": "250px" },
+          { "value": "one-fifty-height", "label": "150px" },
+          { "value": "original-height", "label": "Image height" }
+        ],
+        "default": "one-fifty-height"
+      },
+      {
+        "type": "select",
+        "id": "text_position",
+        "label": "Text position",
+        "default": "middle-center",
+        "options": [
+          { "label": "Left", "value": "middle-left" },
+          { "label": "Center", "value": "middle-center" },
+          { "label": "Right", "value": "middle-right" },
+          { "label": "Bottom left", "value": "bottom-left" },
+          { "label": "Bottom right", "value": "bottom-right" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Banner image"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_image",
+        "label": "Show image",
+        "default": true,
+        "info": "You can add banner images to specific collections in your [admin](/admin/collections?selectedView=all)"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "label": "Text color",
+        "default": "text-dark",
+        "options": [
+          {
+            "value": "text-light",
+            "label": "Light"
+          },
+          {
+            "value": "text-dark",
+            "label": "Dark"
+          }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "overlay_opacity",
+        "label": "Text contrast",
+        "info": "Improves readability of text over images",
+        "step": 5,
+        "max": 95,
+        "min": 0,
+        "unit": "%",
+        "default": 10
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Collections/all Banner image"
+      },
+      {
+        "type": "image_picker",
+        "id": "banner_image",
+        "label": "Default image",
+        "info": "This image only applies to the collections/all page"
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 0
+      }
+    ]
+  }
+{% endschema %}

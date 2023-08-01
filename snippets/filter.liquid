@@ -1,0 +1,290 @@
+{%- comment -%}
+  Renders list of filters in collection/search
+
+  Accepts:
+  - filter: {Object} collection.filter or search.filter (required)
+  - filters_layout: {String} Set filters default state ( open / closed / first-open )
+
+  Usage:
+  {% render 'filter', filter: filter, filters_layout: filters_layout %}
+{%- endcomment -%}
+
+{%- liquid
+  assign is_active = false
+  assign active_values = filter.active_values.size
+  if active_values > 0
+    assign is_active = true
+  endif
+
+  if filter.min_value.value != nil or filter.max_value.value != nil
+    if filter.type == 'price_range'
+      assign is_active = true
+      assign active_values = 1
+    endif
+  endif
+
+  assign toggle_state = false
+
+  case filters_layout
+    when 'open'
+      assign toggle_state = true
+    when 'first-open'
+      if index == 1
+        assign toggle_state = true
+      endif
+  endcase
+
+  if is_active
+    assign toggle_state = true
+  endif
+
+  assign option_name_handle_separator = filter.label | handle | prepend: ',' | append: ','
+  assign enable_color_swatches = settings.enable_color_swatches_collection
+-%}{%- liquid
+  if enable_color_swatches
+    comment
+      Determine if current option matches swatch handle translations
+    endcomment
+    assign is_swatch_option = false
+    assign swatch_translation = 'general.swatches.color' | t
+    assign translation_string = swatch_translation | remove: '  ' | replace: ', ', ',' | replace: ' ,', ',' | replace: ',', '____' | handle | replace: '____', ',' | append: ',' | prepend: ','
+
+    if translation_string contains option_name_handle_separator
+      assign is_swatch_option = true
+    endif
+  endif
+-%}{%- liquid
+  capture filters_list_class
+    echo 'collection__filter-tags'
+    if is_swatch_option
+      echo ' collection__filter-tags--swatches' | append: ' collection__filter-tags--swatches-' | append: settings.color_swatches_product_style
+    endif
+  endcapture
+
+  assign has_show_more = false
+  assign count_threshold = 10
+  if is_swatch_option
+    assign count_threshold = 20
+  endif
+  if filter.values.size > count_threshold and show_more
+    assign has_show_more = true
+  endif
+-%}
+
+<div class="collection__filter"{% if has_show_more %} data-show-more{% endif %}>
+  <button type="button" class="collection__filter__title{% if heading_style == 'body' %} collection__filter__title--body{% endif %}{% if toggle_state %} is-expanded{% endif %}"
+    data-filter-active="{{ is_active }}"
+    aria-expanded="{{ toggle_state }}"
+    aria-controls="CollectionFilter--{{ filter.label | handle }}"
+    data-collapsible-trigger>
+    <span>{{ filter.label }}{% if active_values > 0 %} ({{ active_values }}){% endif %}</span>
+
+    <span class="collection__filter__count">
+      {%- render 'icon-toggle-plus' -%}
+      {%- render 'icon-toggle-minus' -%}
+    </span>
+  </button>
+
+  <div id="CollectionFilter--{{ filter.label | handle }}"
+    class="collection__filter-tags-wrapper{% if toggle_state %} is-expanded{% endif %}"
+    aria-expanded="{% if toggle_state %}true{% else %}false{% endif %}"
+    data-collapsible-container
+    {% if toggle_state %}style="height:auto;"{% endif %}>
+    <ul class="{{ filters_list_class }}" data-collapsible-content>
+      {%- case filter.type -%}
+        {%- when 'list' or 'boolean' -%}
+          {%- liquid
+            assign filters_counter = 0
+            assign filters_markup_first_part = ''
+            assign filters_markup_the_rest = ''
+            assign show_more_active_filters_counter = 0
+          -%}
+
+          {%- for filter_value in filter.values -%}
+            {%- liquid
+              capture filter_classes
+                echo 'collection__filter-tag'
+                if is_swatch_option
+                  echo ' collection__filter-tag--swatch'
+                else
+                  echo ' collection__filter-tag--default'
+                endif
+              endcapture
+            -%}
+
+            {%- capture current_filter -%}
+              <li class="{{ filter_classes }}">
+                {%- if is_swatch_option -%}
+                  <span class="swatch__button swatch__button--{{ settings.color_swatches_product_style }} filter__button">
+                    <input type="checkbox"
+                      class="swatch__input filter__input"
+                      name="{{ filter_value.param_name }}"
+                      value="{{ filter_value.value }}"
+                      id="filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                      {% if filter_value.active %}checked{% endif %}
+                      {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}>
+
+                    <label class="swatch__label swatch__label--{{ settings.color_swatches_product_style }} filter__button" for="filter-{{ filter.label | escape }}-{{ forloop.index }}" data-swatch="{{ filter_value.label | escape_once }}" data-tooltip="{{ filter_value.value | escape_once | capitalize }}">
+                      <span class="visually-hidden">{{ filter_value.label }}</span>
+                      {% if settings.color_swatches_product_style == 'circle' %}
+                        <span class="icon icon-check"></span>
+                      {% endif %}
+                    </label>
+                  </span>
+                {%- else -%}
+                  <input type="checkbox"
+                    class="filter__input"
+                    name="{{ filter_value.param_name }}"
+                    value="{{ filter_value.value }}"
+                    id="filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                    {% if filter_value.active %}checked{% endif %}
+                    {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}>
+                  <label class="filter__button" for="filter-{{ filter.label | escape }}-{{ forloop.index }}">{{ filter_value.label }}</label>
+                {%- endif -%}
+              </li>
+            {%- endcapture -%}
+
+            {%- liquid
+              assign filters_counter = filters_counter | plus: 1
+              if filters_counter <= count_threshold
+                assign filters_markup_first_part = filters_markup_first_part | append: current_filter
+              else
+                assign filters_markup_the_rest = filters_markup_the_rest | append: current_filter
+                if filter_value.active
+                  assign show_more_active_filters_counter = show_more_active_filters_counter | plus: 1
+                endif
+              endif
+            -%}
+          {%- endfor -%}
+
+          {%- if has_show_more -%}
+            {{- filters_markup_first_part -}}
+
+            {%- if filters_markup_the_rest != '' -%}
+              {%- liquid
+                assign open_show_more = false
+                if show_more_active_filters_counter > 0
+                  assign open_show_more = true
+                endif
+              -%}
+              <li class="collection__filter-actions" data-show-more-actions>
+                <div id="CollectionFilterActions--{{ filter.label | handle }}"
+                  class="collection__filter-actions-container{% if open_show_more %} is-expanded{% endif %}"
+                  data-collapsible-container
+                  data-show-more-container
+                  aria-expanded="{{ open_show_more }}"
+                  {% if open_show_more %}style="height:auto;"{% endif %}>
+                  <ul class="{{ filters_list_class }}" data-collapsible-content>
+                    {{- filters_markup_the_rest -}}
+                  </ul>
+                </div>
+
+                <button type="button"
+                  class="collection__filters-more btn btn--text{% if open_show_more %} is-expanded{% endif %}"
+                  aria-expanded="{{ open_show_more }}"
+                  aria-controls="CollectionFilterActions--{{ filter.label | handle }}"
+                  data-collapsible-trigger
+                  data-show-more-trigger>
+                  <span>{{ 'collection.filters.show_more' | t }}</span>
+                  <span>{{ 'collection.filters.show_less' | t }}</span>
+                </button>
+              </li>
+            {%- endif -%}
+
+          {%- else -%}
+           {{- filters_markup_first_part -}}
+           {{- filters_markup_the_rest -}}
+          {%- endif -%}
+
+        {%- when 'price_range' -%}
+          {%- liquid
+            assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
+            assign uses_comma_decimals = false
+            if currencies_using_comma_decimals contains cart.currency.iso_code
+              assign uses_comma_decimals = true
+            endif
+
+            if uses_comma_decimals
+              assign filter_range_max = filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.'
+            else
+              assign filter_range_max = filter.range_max | money_without_currency | replace: ',', ''
+            endif
+
+            assign filter_max_placeholder = filter_range_max
+
+            if filter.min_value.value
+              if uses_comma_decimals
+                assign filter_min_value = filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
+              else
+                assign filter_min_value = filter.min_value.value | money_without_currency | replace: ',', ''
+              endif
+            endif
+
+            if filter.max_value.value
+              if uses_comma_decimals
+                assign filter_max_value = filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.'
+              else
+                assign filter_max_value = filter.max_value.value | money_without_currency | replace: ',', ''
+              endif
+
+              assign filter_max_placeholder = filter_max_value
+            endif
+          -%}
+
+          <li class="{{ filter_classes }}">
+            <div class="filter__price" data-range-holder>
+              <div class="filter__price__range range" data-range-slider data-range-filter-update data-se-min="0" data-se-step="1" data-se-min-value="{{ filter_min_value | default: 0 }}" data-se-max-value="{{ filter_max_value | default: filter_range_max }}" data-se-max="{{ filter_range_max | ceil }}">
+                <div class="range__dot range__dot--left" data-range-left>
+                  <span>&nbsp;</span>
+                </div>
+                <div class="range__dot range__dot--right" data-range-right>
+                  <span>&nbsp;</span>
+                </div>
+                <div class="range__line">
+                  <span data-range-line>&nbsp;</span>
+                </div>
+              </div>
+
+              <div class="filter__price__fields">
+                <div class="filter__price__field filter__price__from">
+                  <span>{{ cart.currency.symbol }}</span>
+
+                  <input
+                    data-field-price-min
+                    class="filter__price__input"
+                    name="{{ filter.min_value.param_name }}"
+                    id="filter-price-{{ filter.label | escape }}-GTE"
+                    {% if filter_min_value %}
+                      value="{{ filter_min_value | round }}"
+                    {% endif %}
+                    type="number"
+                    placeholder="{{ filter_min_value | round }}"
+                    min="0"
+                    max="{{ filter_range_max }}">
+                  <label for="filter-price-{{ filter.label | escape }}-GTE">{{ 'collection.filters.from' | t }}</label>
+                </div>
+                <div class="filter__price__field filter__price__to">
+                  <span>{{ cart.currency.symbol }}</span>
+
+                  <input
+                    data-field-price-max
+                    class="filter__price__input"
+                    name="{{ filter.max_value.param_name }}"
+                    id="filter-price-{{ filter.label | escape }}-LTE"
+                    {% if filter_max_value and filter_max_value != filter_range_max %}
+                      value="{{ filter_max_value | ceil }}"
+                    {% endif %}
+                    type="number"
+                    placeholder="{{ filter_max_placeholder | ceil }}"
+                    min="0"
+                    max="{{ filter_range_max | ceil }}">
+                  <label for="filter-price-{{ filter.label | escape }}-LTE">{{ 'collection.filters.to' | t }}</label>
+                </div>
+              </div>
+            </div>
+          </li>
+        {%- else -%}
+      {%- endcase -%}
+    </ul>
+  </div>
+</div>

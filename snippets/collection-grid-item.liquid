@@ -1,0 +1,142 @@
+{%- comment -%}
+  Renders list of collections in grid layout
+
+  Accepts:
+  - collection: {Object} collection (required)
+  - custom_collection_image: {Object} Replace collection's image
+  - custom_bg_color: {String} Set a background color
+  - animation_delay: {Number} Factor based on grid items per row
+  - animation_anchor: {String} Link the animation to an ID
+  - carousel: {Boolean} Show the collections in carousel. Default: true
+  - image_shape: {String} Add custom image shape: circle, square or a rectangle
+  - block_shopify_attributes: {Object} Shopify attributes for block
+  - placeholder_index: {Integer} Alternating placeholder images
+  - text_over_image: {Boolean} Show text over images
+  - text_color: {String} Add custom text color
+  - unique: {String} Section or Block id
+
+  Usage:
+  {%- render 'collection-grid-item', collection: collection, custom_collection_image: custom_collection_image, custom_bg_color: custom_bg_color, animation_delay: animation_delay, animation_anchor: animation_anchor, carousel: carousel, image_shape: image_shape, block_shopify_attributes: block.shopify_attributes, placeholder_index: placeholder_index, text_over_image: text_over_image, text_color: text_color, unique: unique -%}
+
+  Example:
+  {%- render 'collection-grid-item', collection: collections[block.settings.collection], custom_collection_image: block.settings.custom_collection_image, unique: block.id -%}
+{%- endcomment -%}
+
+{%- liquid
+  if custom_collection_image
+    assign image = custom_collection_image
+  elsif collection.image
+    assign image = collection.image
+  elsif collection.products.first and collection.products.first.featured_media.preview_image
+    assign image = collection.products.first.featured_media.preview_image
+  endif
+
+  if collection.title == blank
+    assign collection_title = 'homepage.onboarding.collection_title' | t
+    assign collection_url = '#!'
+  else
+    assign collection_title = collection.title | strip_html | escape | truncatewords: 10
+    assign collection_url = collection.url
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+
+  assign show_bg_color = false
+  if overlay_opacity == 100 and custom_bg_color != 'rgba(0,0,0,0)' and custom_bg_color != blank
+    assign show_bg_color = true
+  endif
+
+  capture item_class
+    echo 'list-collections__item'
+
+    if image_shape == 'circle'
+      echo ' list-collections__item--circle'
+    endif
+
+    if image_shape == 'square'
+      echo ' list-collections__item--square'
+    endif
+
+    if text_over_image
+      echo ' list-collections__item--over-image'
+    endif
+
+    if collection == empty
+      echo ' list-collections__item--onboarding'
+    endif
+
+    if carousel
+      echo ' carousel__item'
+    else
+      echo ' grid__item'
+    endif
+
+    echo ' ' | append: text_color
+  endcapture
+
+  capture item_bg_class
+    echo 'list-collections__item__image-bg'
+  endcapture
+
+  capture content_position_class
+    if text_over_image
+      echo 'list-collections__item__content--overlayed'
+    else
+      echo 'list-collections__item__content--under'
+    endif
+  endcapture
+-%}
+
+<div class="{{ item_class }}"
+  id="list-collections__item--{{ unique }}"
+  {% if carousel %}
+    data-slide
+  {% endif %}
+  {% if block_shopify_attributes %}
+    {{ block_shopify_attributes }}
+  {% endif %}>
+
+  {%- style -%}
+    #list-collections__item--{{ unique }} .list-collections__item__image-bg { --overlay: {{ custom_bg_color }}; --overlay-opacity: {{ overlay_opacity | times: 0.01 }}; }
+    {% if overlay_opacity == 0 %}
+      #list-collections__item--{{ unique }} .list-collections__item__image-bg:before { content: none; }
+    {% endif %}
+  {%- endstyle -%}
+
+  <a href="{{ collection_url }}" class="list-collections__item__outer">
+    <div class="list-collections__item__image"
+      data-product-media-container
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay | times: 150 }}"
+      {% endif %}>
+      {%- unless show_bg_color -%}
+        {%- liquid
+          capture placeholder_svg
+            if collection != empty and image == blank
+              echo 'image'
+            else
+              echo 'collection-' | append: placeholder_index
+            endif
+          endcapture
+
+          render 'image-fill', is_background: true, img_object: image, classes: item_bg_class, placeholder_svg: placeholder_svg
+        -%}
+      {%- else -%}
+        <div class="background-size-cover {{ item_bg_class }}"></div>
+      {%- endunless -%}
+    </div>
+
+    <div class="list-collections__item__content {{ content_position_class }}"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay | times: 150 }}"
+      {% endif %}>
+      <h3 class="list-collections__item__title">
+        {{- collection_title -}}
+      </h3>
+    </div>
+  </a>
+</div>

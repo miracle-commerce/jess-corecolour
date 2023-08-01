@@ -1,0 +1,145 @@
+{%- comment -%}
+    Renders Newsletter form
+
+    Accepts:
+    - unique: {String} section.id (required)
+    - extra_fields: {String} Show\Hide extra fields for Name or First and Last name; Default: "none" (required),
+    - button_text: {String} Button text (required),
+    - is_popup: {Boolean} If newsletter is shown in popup
+
+    Usage:
+    {% render 'newsletter-form', unique: unique, extra_fields: extra_fields, button_text: button_text %}
+{%- endcomment -%}
+
+{%- liquid
+  assign button_class = 'input-group__btn input-group__btn--icon'
+  assign placeholder_name = 'general.newsletter_form.name' | t
+  assign placeholder_first_name = 'general.newsletter_form.first_name' | t
+  assign placeholder_last_name = 'general.newsletter_form.last_name' | t
+  assign input_group_inline = true
+  assign btn_width = false
+
+  if extra_fields != blank or button_text != blank
+    assign button_class = 'input-group__btn btn'
+    assign input_group_inline = false
+    assign btn_width = true
+
+    if button_text == blank
+      assign button_text = 'general.newsletter_form.sign_up' | t
+    endif
+
+    if extra_fields == blank
+      assign btn_width = false
+    endif
+  endif
+
+  capture form_id
+    echo 'NewsletterForm--' | append: unique
+  endcapture
+
+  assign fields_class = 'input-group__fields'
+  unless extra_fields == blank
+    assign fields_class = fields_class | append: ' ' | append: fields_class | append: '--' | append: extra_fields
+  endunless
+-%}
+
+{%- form 'customer', id: form_id, data-newsletter-form: '', class: 'newsletter-form' -%}
+  <input type="hidden" name="contact[accepts_marketing]" value="true">
+
+  <div class="input-group{% if input_group_inline %} input-group--inline{% endif %}">
+    <div class="{{ fields_class }}">
+      {%- case extra_fields -%}
+        {%- when 'name' -%}
+          <div class="input-group__item input-group__item--name">
+            <input type="text" id="Name--{{ unique }}"
+              class="input-group__field input-group__field--name"
+              value="{% if customer %}{{ customer.name }}{% endif %}"
+              placeholder="{{ placeholder_name }}"
+              name="contact[first_name]"
+              autocorrect="off"
+              autocapitalize="off"
+              aria-label="{{ placeholder_name }}"
+              {% if form.errors contains 'name' %}
+                aria-invalid="true"
+              {% endif %}>
+          </div>
+
+        {%- when 'first-last-name' -%}
+          <div class="input-group__item input-group__item--first-name">
+            <input type="text" id="Name--{{ unique }}"
+              class="input-group__field input-group__field--first-name"
+              value="{% if customer %}{{ customer.name }}{% endif %}"
+              placeholder="{{ placeholder_first_name }}"
+              name="contact[first_name]"
+              autocorrect="off"
+              autocapitalize="off"
+              aria-label="{{ placeholder_first_name }}"
+              {% if form.errors contains 'name' %}
+                aria-invalid="true"
+              {% endif %}>
+          </div>
+
+          <div class="input-group__item input-group__item--last-name">
+            <input type="text" id="Name--{{ unique }}"
+              class="input-group__field input-group__field--last-name"
+              value="{% if customer %}{{ customer.name }}{% endif %}"
+              placeholder="{{ placeholder_last_name }}"
+              name="contact[last_name]"
+              autocorrect="off"
+              autocapitalize="off"
+              aria-label="{{ placeholder_last_name }}"
+              {% if form.errors contains 'name' %}
+                aria-invalid="true"
+              {% endif %}>
+          </div>
+      {%- endcase -%}
+
+      <div class="input-group__item input-group__item--email">
+        <input type="email" id="Email--{{ unique }}"
+          class="input-group__field input-group__field--email"
+          value="{% if customer %}{{ customer.email }}{% endif %}"
+          placeholder="{{ 'general.newsletter_form.email' | t }}"
+          name="contact[email]"
+          autocorrect="off"
+          autocapitalize="off"
+          aria-label="{{ 'general.newsletter_form.email' | t }}"
+          {% if form.errors contains 'email' %}
+            aria-invalid="true"
+          {% endif %}
+        >
+      </div>
+    </div>
+
+    <div class="input-group__item input-group__item--btn{% if btn_width %} input-group__item--btn-width{% endif %}">
+      <button type="submit" name="subscribe" id="SubscribeSubmit--{{ unique }}" class="{{ button_class }}"{% if is_popup %} data-newsletter-submit{% endif %}>
+        {%- if button_text != blank -%}
+          {{- button_text -}}
+        {%- else -%}
+          <span class="visually-hidden">{{ 'general.accessibility.subscribe_to_newsletter' | t }}</span>
+          {%- render 'icon-select' -%}
+        {%- endif -%}
+      </button>
+    </div>
+
+    {%- if is_popup -%}
+      {%- if input_group_inline -%}
+        </div>
+        <div class="input-group">
+      {%- endif -%}
+
+      <div class="input-group__item input-group__item--text disclaimer{% if extra_fields == 'name' %} disclaimer--inline{% endif %}">
+        {{ 'shopify.online_store.spam_detection.disclaimer_html' | t }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if form.posted_successfully? -%}
+    <div class="note form-success">
+      {{- 'general.newsletter_form.newsletter_success' | t -}}
+    </div>
+  {%- endif -%}
+
+  <div class="errors">
+    {{- 'general.newsletter_form.newsletter_error' | t -}}
+  </div>
+{%- endform -%}

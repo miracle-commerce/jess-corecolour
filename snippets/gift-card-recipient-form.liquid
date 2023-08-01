@@ -1,0 +1,202 @@
+{% comment %}
+  Renders gift card recipient form.
+  Accepts:
+  - product: {Object} product object.
+  - form: {Object} the product form object.
+  - section: {Object} section to which this snippet belongs.
+  - animation_delay: {Number} Sets AOS delays
+  - animation_anchor: {String} Link the animation to an ID
+
+  Usage:
+  {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+{% endcomment %}
+
+{%- liquid
+  assign gift_card_recipient_control_flag = 'properties[__shopify_send_gift_card_to_recipient]'
+  assign max_chars_message = 200
+  assign max_chars_message_rendered = 'recipient.form.max_characters' | t: max_chars: max_chars_message
+  assign message_label_rendered = 'recipient.form.message_label' | t
+  assign animations_enabled = settings.animations_enabled
+-%}
+
+<div class="recipient-form-wrapper"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+    {%- assign animation_delay = animation_delay | plus: 150 -%}
+  {% endif %}>
+  <recipient-form class="recipient-form checkbox">
+    <input type="checkbox"
+      id="Recipient-Checkbox-{{ section.id }}"
+      name="{{ gift_card_recipient_control_flag }}"
+      data-recipient-checkbox>
+
+    <label for="Recipient-Checkbox-{{ section.id }}">
+      <span>{{ 'recipient.form.checkbox' | t }}</span>
+    </label>
+
+    <noscript>
+      {%- if form.errors -%}
+        <div class="product-form__recipient-error-message-wrapper product__form__errors is-visible" role="alert">
+          <div class="form__message errors" tabindex="-1" autofocus>
+            <ul>
+              <li class="error-message">{{ 'recipient.form.error_heading' | t }}</li>
+
+              {%- for field in form.errors -%}
+                <li>
+                  {%- if field == 'form' -%}
+                    {{ form.errors.messages[field] }}
+                  {%- else -%}
+                    <a href="#Recipient-{{ field }}-{{ section.id }}">
+                      {{ form.errors.translated_fields[field] | capitalize }} - {{ form.errors.messages[field] }}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+    </noscript>
+
+    <div class="recipient-fields">
+      <div class="recipient-fields__field form__item">
+        <label class="hidden-label" for="Recipient-email-{{ section.id }}">
+          <span class="recipient-email-label required">{{ 'recipient.form.email_label' | t }}</span>
+        </label>
+
+        <input type="email"
+          name="properties[Recipient email]"
+          value="{{ form.email }}"
+          id="Recipient-email-{{ section.id }}"
+          class="input--full"
+          placeholder="{{ 'recipient.form.email' | t }}"
+          {% if form.errors contains 'email' %}
+            aria-invalid="true"
+            aria-describedby="RecipientForm-email-error-{{ section.id }}"
+          {% endif %}
+          data-recipient-email>
+
+        <noscript>
+          <div id="RecipientForm-email-error-{{ section.id }}"
+            class="form__message errors{% unless form.errors contains 'email' %} hidden{% else %%} is-visible{% endunless %}">
+            <small class="error-message">
+              {%- if form.errors contains 'email' -%}
+                {{ form.errors.translated_fields.email | capitalize }} - {{ form.errors.messages.email }}.
+              {%- endif -%}
+            </small>
+          </div>
+        </noscript>
+      </div>
+
+      <div class="recipient-fields__field form__item">
+        <label class="hidden-label" for="Recipient-name-{{ section.id }}">
+          {{- 'recipient.form.name_label' | t -}}
+        </label>
+
+        <input type="text"
+          name="properties[Recipient name]"
+          value="{{ form.name }}"
+          id="Recipient-name-{{ section.id }}"
+          class="input--full"
+          autocomplete="name"
+          placeholder="{{ 'recipient.form.name' | t }}"
+          {% if form.errors contains 'name' %}
+            aria-invalid="true"
+            aria-describedby="RecipientForm-name-error-{{ section.id }}"
+          {% endif %}
+          data-recipient-name>
+
+        <noscript>
+          <div id="RecipientForm-name-error-{{ section.id }}"
+            class="form__message errors{% unless form.errors contains 'name' %} hidden{% else %%} is-visible{% endunless %}">
+            <small class="error-message">
+              {%- if form.errors contains 'name' -%}
+                {{ form.errors.translated_fields.name | capitalize }} - {{ form.errors.messages.name }}.
+              {%- endif -%}
+            </small>
+          </div>
+        </noscript>
+      </div>
+
+      <div class="recipient-fields__field form__item">
+        <label class="hidden-label" for="Recipient-message-{{ section.id }}">
+          {{ message_label_rendered }}
+        </label>
+
+        <textarea rows="7"
+          name="properties[Message]"
+          id="Recipient-message-{{ section.id }}"
+          class="input--full"
+          maxlength="{{ max_chars_message }}"
+          placeholder="{{ 'recipient.form.message' | t }}"
+          aria-label="{{ message_label_rendered }} {{ max_chars_message_rendered }}"
+          {% if form.errors contains 'message' %}
+            aria-invalid="true"
+            aria-describedby="RecipientForm-message-error-{{ section.id }}"
+          {% endif %}
+          data-recipient-message></textarea>
+
+        <label class="form__label recipient-fields__message">
+          <span>{{ max_chars_message_rendered }}</span>
+        </label>
+
+        <noscript>
+          <div id="RecipientForm-message-error-{{ section.id }}"
+            class="form__message errors{% unless form.errors contains 'message' %} hidden{% else %%} is-visible{% endunless %}">
+            <span class="error-message">
+              {%- if form.errors contains 'message' -%}
+                {{ form.errors.translated_fields.message | capitalize }} - {{ form.errors.messages.message }}.
+              {%- endif -%}
+            </span>
+          </div>
+        </noscript>
+      </div>
+
+      <div class="recipient-fields__field form__item">
+        <label for="Recipient-send_on-{{ section.id }}" class="form__label">
+          {{ 'recipient.form.send_on_label' | t }}
+        </label>
+
+        <input type="date"
+          name="properties[Send on]"
+          value="{{ form.send_on }}"
+          id="Recipient-send_on-{{ section.id }}"
+          class="input--full"
+          placeholder="{{ 'recipient.form.send_on' | t }}"
+          pattern="\d{4}-\d{2}-\d{2}"
+          autocomplete="send_on"
+          {% if form.errors contains 'send_on' %}
+            aria-invalid="true"
+            aria-describedby="RecipientForm-send_on-error-{{ section.id }}"
+          {% endif %}
+          data-recipient-send-on>
+
+        <noscript>
+          <div id="RecipientForm-send_on-error-{{ section.id }}"
+            class="form__message errors{% unless form.errors contains 'send_on' %} hidden{% else %%} is-visible{% endunless %}">
+            <span class="error-message">
+              {%- if form.errors contains 'send_on' -%}
+                {{ form.errors.translated_fields.send_on | capitalize }} - {{ form.errors.messages.send_on }}.
+              {%- endif -%}
+            </span>
+          </div>
+        </noscript>
+      </div>
+    </div>
+
+    <input type="hidden"
+      name="{{ gift_card_recipient_control_flag }}"
+      value="if_present"
+      id="Recipient-Control-{{ section.id }}"
+      data-recipient-control>
+
+    <input type="hidden"
+      name="properties[__shopify_offset]"
+      value=""
+      id="Recipient-Offset-{{ section.id }}"
+      disabled
+      data-recipient-offset>
+  </recipient-form>
+</div>

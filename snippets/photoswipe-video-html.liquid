@@ -1,0 +1,45 @@
+{%- liquid
+  assign item_link = item_link | default: ''
+  assign item_id = item_id | default: ''
+  assign item_link_type = item_link_type | default: item_link.type
+  assign item_link_id = item_link_id | default: item_link.id
+  assign item_enable_sound = item_enable_sound | default: true
+-%}
+
+{%- if item_link != '' -%}
+  {%- capture data_html_video -%}
+    <div class="pswp__custom-inner">
+      <div class="pswp__custom-content">
+        <div class="iframe-outer{% if item_link_type != 'native' %} pswp__custom-iframe-outer{% else %} pswp__custom-native{% endif %}">
+          {%- if item_id != '' -%}
+            {%- if item_link_type == 'native' -%}
+              <video
+                id="{{ item_id }}"
+                class="pswp__custom-iframe"
+                data-video-type="{{ item_link_type }}"
+                data-video-id="{{ item_id }}"
+                playsinline
+                autoplay
+                loop
+                controls
+                {% unless item_enable_sound %}muted{% endunless %}
+                width="320"
+                height="240">
+                <source src="{{ item_link }}" type="video/mp4" />
+              </video>
+            {%- else -%}
+              <div id="{{ item_id }}" class="pswp__custom-iframe"
+                data-video-type="{{ item_link_type }}"
+                data-video-id="{{ item_link_id }}"
+                data-enable-sound="{{ item_enable_sound }}"></div>
+            {%- endif -%}
+          {%- else -%}
+            {% render 'video-iframe' video_object: item_link %}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endcapture -%}
+  {%- assign data_html_video =  data_html_video | replace: '"', "'" -%}
+  {{ data_html_video | strip }}
+{%- endif -%}

@@ -1,0 +1,43 @@
+{%- liquid
+  assign classes = classes | prepend: ' ' | default: ''
+  assign animation_anchor = 'details[open] .search-popdown__body'
+  assign animation_delay = 200
+  assign animation_duration = 200
+  assign suggestions_terms_limit = settings.suggestions_terms_limit
+-%}
+
+<div id="popularSearches-{{ unique }}" class="popular-searches{{ classes }}" data-popular-searches data-scroll-lock-scrollable>
+  <div class="popular-searches__wrapper">
+    {%- if popular_searches_menu != blank -%}
+      <div class="predictive-search__group" role="group" aria-labelledby="predictiveSearchPopularSearches-{{ unique }}">
+        <p id="predictiveSearchPopularSearches-{{ unique }}" class="predictive-search__heading">
+          <span>{{ 'general.search.popular_searches' | t }}</span>
+        </p>
+
+        <div class="predictive-search__list" role="listbox">
+          {%- for link in popular_searches_menu.links limit: suggestions_terms_limit -%}
+            <div class="predictive-search__item" id="popularSearchesMenuItem-{{ forloop.index }}-{{ unique }}" role="option" aria-selected="false">
+              <a href="{{ link.url }}" class="predictive-search__link" tabindex="-1" data-popular-searches-link>{{ link.title }}</a>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if show_browse_categories_menu -%}
+      <div class="predictive-search__group" role="group" aria-labelledby="popularSearchesCollectionLinks-{{ unique }}">
+        <p id="popularSearchesCollectionLinks-{{ unique }}" class="predictive-search__heading">
+          <span>{{ 'general.search.browse_categories' | t }}</span>
+        </p>
+
+        <div class="predictive-search__list" role="listbox">
+          {%- for collection in collections limit: suggestions_terms_limit -%}
+            <div class="predictive-search__item" id="popularSearchesCollectionLink-{{ forloop.index }}-{{ unique }}" role="option" aria-selected="false">
+              <a href="{{ collection.url }}" class="predictive-search__link" tabindex="-1" data-popular-searches-link>{{ collection.title }}</a>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

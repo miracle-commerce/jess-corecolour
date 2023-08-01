@@ -1,0 +1,331 @@
+{% if headingFont contains 'Droid+Sans' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Inconsolata' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Lato' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='bold' %}
+	{% else %}
+	{% assign headingWeight ='black' %}
+	{% endif %}
+{% elsif headingFont contains 'Montserrat' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight = 'regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Open+Sans' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='semi-bold' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Oswald' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'PT+Sans' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Raleway' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='bold' %}
+	{% else %}
+	{% assign headingWeight ='black' %}
+	{% endif %}
+{% elsif headingFont contains 'Roboto' %}
+	{% unless headingFont contains 'Condensed' %}
+		{% if headingWeight == '100' %}
+		{% assign headingWeight ='light' %}
+		{% elsif headingWeight == '500' %}
+		{% assign headingWeight ='regular' %}
+		{% elsif headingWeight == '700' %}
+		{% assign headingWeight ='medium' %}
+		{% else %}
+		{% assign headingWeight ='black' %}
+		{% endif %}
+	{% else %}
+		{% if headingWeight == '100' %}
+		{% assign headingWeight = 'light' %}
+		{% elsif headingWeight == '500' %}
+		{% assign headingWeight = 'regular' %}
+		{% else %}
+		{% assign headingWeight ='bold' %}
+		{% endif %}
+	{% endunless %}
+{% elsif headingFont contains 'Source+Sans+Pro' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='bold' %}
+	{% else %}
+	{% assign headingWeight ='black' %}
+	{% endif %}
+{% elsif headingFont contains 'Ubuntu' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='medium' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Abril+Fatface' %}
+	{% assign headingWeight ='regular' %}
+{% elsif headingFont contains 'Arapey' %}
+	{% assign headingWeight ='regular' %}
+{% elsif headingFont contains 'Arvo' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Crimson+Text' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='semi-bold' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Droid+Serif' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Lora' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Merriweather' %}
+	{% if headingWeight == '100' %}
+	{% assign headingWeight ='light' %}
+	{% elsif headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='bold' %}
+	{% else %}
+	{% assign headingWeight ='black' %}
+	{% endif %}
+{% elsif headingFont contains 'Playfair+Display' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% elsif headingWeight == '700' %}
+	{% assign headingWeight ='bold' %}
+	{% else %}
+	{% assign headingWeight ='black' %}
+	{% endif %}
+{% elsif headingFont contains 'Lora' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight ='regular' %}
+	{% else %}
+	{% assign headingWeight ='bold' %}
+	{% endif %}
+{% elsif headingFont contains 'Vollkorn' %}
+	{% if headingWeight == '100' or headingWeight == '500' %}
+	{% assign headingWeight = 'regular' %}
+	{% else %}
+	{% assign headingWeight = 'bold' %}
+	{% endif %}
+{% else %}
+{% endif %}
+
+{% if bodyFont contains 'Droid+Sans' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Inconsolata' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Lato' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='bold' %}
+	{% else %}
+	{% assign bodyWeight ='black' %}
+	{% endif %}
+{% elsif bodyFont contains 'Montserrat' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Open+Sans' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='semi-bold' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Oswald' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'PT+Sans' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Raleway' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='bold' %}
+	{% else %}
+	{% assign bodyWeight ='black' %}
+	{% endif %}
+{% elsif bodyFont contains 'Roboto' %}
+	{% unless bodyFont contains 'Condensed' %}
+		{% if bodyWeight == '100' %}
+		{% assign bodyWeight ='light' %}
+		{% elsif bodyWeight == '500' %}
+		{% assign bodyWeight ='regular' %}
+		{% elsif bodyWeight == '700' %}
+		{% assign bodyWeight ='medium' %}
+		{% else %}
+		{% assign bodyWeight ='black' %}
+		{% endif %}
+	{% else %}
+		{% if bodyWeight == '100' %}
+		{% assign bodyWeight ='light' %}
+		{% elsif bodyWeight == '500' %}
+		{% assign bodyWeight ='regular' %}
+		{% else %}
+		{% assign bodyWeight ='bold' %}
+		{% endif %}
+	{% endunless %}
+{% elsif bodyFont contains 'Source+Sans+Pro' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='bold' %}
+	{% else %}
+	{% assign bodyWeight ='black' %}
+	{% endif %}
+{% elsif bodyFont contains 'Ubuntu' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='medium' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Abril+Fatface' %}
+	{% assign bodyWeight ='regular' %}
+{% elsif bodyFont contains 'Arapey' %}
+	{% assign bodyWeight ='regular' %}
+{% elsif bodyFont contains 'Arvo' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Crimson+Text' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='semi-bold' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Droid+Serif' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Lora' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Merriweather' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='bold' %}
+	{% else %}
+	{% assign bodyWeight ='black' %}
+	{% endif %}
+{% elsif bodyFont contains 'Playfair+Display' %}
+	{% if bodyWeight == '100' %}
+	{% assign bodyWeight ='light' %}
+	{% elsif bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% elsif bodyWeight == '700' %}
+	{% assign bodyWeight ='bold' %}
+	{% else %}
+	{% assign bodyWeight ='black' %}
+	{% endif %}
+{% elsif bodyFont contains 'Lora' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% elsif bodyFont contains 'Vollkorn' %}
+	{% if bodyWeight == '100' or bodyWeight == '500' %}
+	{% assign bodyWeight ='regular' %}
+	{% else %}
+	{% assign bodyWeight ='bold' %}
+	{% endif %}
+{% else %}
+{% endif %}

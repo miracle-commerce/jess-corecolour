@@ -1,0 +1,18 @@
+<!-- CUSTOM CHANGE COUNTRY(SITE) DROPDOWN - ADDED BY JOEY CLARIN (https://joefclarin.github.io/) -->
+<div class="footer-cc-custom-change-country">
+  <!--select>
+    <option data-url="https://corecolour.com.au">Australia</option>
+    <option data-url="https://corecolour.com">United States</option>
+    <option data-url="https://corecolour.co.jp">Japan</option>
+  </select-->
+
+  <!-- Flag Images Here: https://www.countryflags.com/ -->
+  <div class="footer-cc-custom-change-country-dropdown">
+    <button class="footer-cc-custom-change-country-dropdown-btn">Change Country<svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-select" viewBox="0 0 192 192"><path d="m72 36 60 60-60 60" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <div class="footer-cc-custom-change-country-dropdown-content">
+      <a disabled href="javascript:void(0);">{{ 'au-flag.jpg' | file_img_url | img_tag | replace: '>', 'loading="lazy">' }} Australia</a>
+      <a href="https://corecolour.com">{{ 'us-flag.jpg' | file_img_url | img_tag | replace: '>', 'loading="lazy">' }} United States</a>
+      <a href="https://corecolour.co.jp">{{ 'jp-flag.jpg' | file_img_url | img_tag | replace: '>', 'loading="lazy">' }} Japan</a>
+    </div>
+  </div>
+</div>

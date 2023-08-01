@@ -1,0 +1,17 @@
+{%- comment -%}
+	/snippets/tags-article.liquid
+
+	This snippet renders a list item with all tags listed out.
+	It is used in article.liquid and blog.liquid.
+{%- endcomment -%}
+
+<li>
+	<small class="light-gray article-tags">
+		<span>{{ 'blogs.article.tags' | t }}: </span>
+		{%- for tag in article.tags -%}
+			{%- unless tag contains 'time_' -%}
+				<a href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag }}</a>
+			{% endunless %}
+		{%- endfor -%}
+	</small>
+</li>

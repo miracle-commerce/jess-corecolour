@@ -1,0 +1,19 @@
+{%- for i in (1..3) -%}
+	{%- capture value -%}{%- cycle 'White', 'Grey', 'Black' -%}{%- endcapture -%}
+	<span class="swatch__button swatch__button--{{ settings.color_swatches_product_style }}">
+		<input type="radio"
+			class="swatch__input"
+			data-single-option-selector
+			data-index="option1"
+			name="color--{{ section.id }}"
+			value="{{ value | escape_once }}"
+			id="option-{{ value }}-0-{{ section.id }}"
+			{% if forloop.index == 1 %}checked{% endif %}>
+		<label for="option-{{ value }}-0-{{ section.id }}" class="swatch__label" data-swatch="{{ value | escape_once }}" data-tooltip="{{ value | escape_once }}">
+			<span class="visually-hidden">{{ value | escape_once }}</span>
+			{%- if settings.color_swatches_product_style == 'circle' -%}
+				<span class="icon icon-check"></span>
+			{%- endif -%}
+		</label>
+	</span>
+{%- endfor -%}

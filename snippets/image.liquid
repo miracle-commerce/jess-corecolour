@@ -1,0 +1,106 @@
+{% comment %}
+  * Render an image in <img> tag
+
+  *  image {object} - The Image that would be used
+  *  width {Int} - The default image width (Optional)
+  *  height {Int} - The default image height (Optional)
+  *  sizes {String} - A set of media conditions (Optional)
+  *  widths {Array} - An array of the image widths for srcset (Optional)
+  *  alt {String} - Overrides image alt value (Optional)
+  *  classes {string} - Classes and modifiers that would be used for the image and image-placeholder containers (Optional)
+  *  styles {string} - Additional styles that can be added to the image (Optional)
+  *  placeholder_svg {string} - SVG placeholder name (https://shopify.dev/api/liquid/filters#placeholder_svg_tag) (Optional)
+
+  {%- render 'image', image: section.settings.image, width: section.settings.image.width, height: section.settings.image.height, placeholder_svg: 'lifestyle-1' -%}
+{% endcomment %}
+
+{%- liquid
+  assign default_image = 'blank.svg' | asset_url
+  assign image = image | default: default_image
+  assign classes = classes | default: ''
+  assign styles = styles | default: ''
+  assign width = width | default: 3000
+  assign height = height | default: nil
+  assign sizes = sizes | default: '100vw'
+  assign widths = widths | default: '180, 360, 400, 540, 560, 590, 606, 670, 720, 738, 770, 814, 900, 1024, 1080, 1296, 1410, 1512, 1524, 1728, 1950, 2100, 2260, 2450, 2700, 2870, 3000, 3350, 3750, 4100'
+  assign loading = loading | default: 'lazy'
+  assign fetchpriority = fetchpriority | default: nil
+  assign preload = preload | default: nil
+  assign id = id | default: ''
+  assign product_media = product_media | default: false
+  assign alt = alt | default: image.alt
+  assign alt = alt | escape
+  assign image_classes = ''
+  assign no_js_classes = 'img-object-contain'
+  assign placeholder_svg = placeholder_svg | default: ''
+  assign has_image = true
+
+  if image == blank or image contains 'blank.svg'
+    assign has_image = false
+    if placeholder_svg == ''
+      assign image_classes = image_classes | append: ' ' | append: 'img-object-contain'
+    endif
+  else
+    if product_media
+      assign image_classes = 'is-loading'
+    else
+      assign image_classes = image_classes | append: ' ' | append: 'lazyload'
+    endif
+
+    capture default_srcset
+      render 'image-srcset', image: image, widths: widths
+    endcapture
+
+    assign srcset = srcset | default: default_srcset
+  endif
+
+  if classes != ''
+    assign image_classes = image_classes | append: ' ' | append: classes
+    assign no_js_classes = no_js_classes | append: ' ' | append: classes
+  endif
+
+  capture image_styles
+    if styles != ''
+      echo styles
+    endif
+  endcapture
+-%}
+
+{%- if has_image -%}
+  {%- if product_media -%}
+    <figure class="lazy-image {{ image_classes }}">
+      {{ image | image_url: width: width, height: height | image_tag: loading: loading, sizes: sizes, alt: alt, fetchpriority: fetchpriority, preload: preload, srcset: srcset, class: image_classes, style: image_styles, data-product-image: '', data-image-id: id }}
+    </figure>
+  {%- else -%}
+    {{ image | image_url: width: width, height: height | image_tag: sizes: sizes, alt: alt, srcset: srcset, class: image_classes, style: image_styles }}
+    <noscript>
+      {{ image | image_url: width: width, height: height
+        | image_tag:
+        sizes: sizes,
+        srcset: srcset,
+        alt: alt,
+        class: no_js_classes,
+        style: image_styles,
+        id: id
+      }}
+    </noscript>
+  {%- endif -%}
+{%- else -%}
+  {%- if placeholder_svg != '' -%}
+    <div class="{{ image_classes }}"
+      style="{{ image_styles }}"
+      role="img"
+      aria-label="{{ alt }}">
+      {{- placeholder_svg | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+    </div>
+  {%- else -%}
+    <img src="{{ 'blank.svg' | asset_url }}"
+      loading="lazy"
+      width="{{ width }}"
+      height="{{ height }}"
+      sizes="{{ sizes }}"
+      alt="{{ alt }}"
+      style="{{ image_styles }}"
+      class="{{ image_classes }}">
+  {%- endif -%}
+{%- endif -%}

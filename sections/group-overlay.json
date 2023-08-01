@@ -1,0 +1,25 @@
+{
+  "type": "aside",
+  "name": "Overlay",
+  "sections": {
+    "popup": {
+      "type": "popup",
+      "blocks": {
+        "popup-0": {
+          "type": "popup-with-image",
+          "disabled": true,
+          "settings": {
+          }
+        }
+      },
+      "block_order": [
+        "popup-0"
+      ],
+      "settings": {
+      }
+    }
+  },
+  "order": [
+    "popup"
+  ]
+}

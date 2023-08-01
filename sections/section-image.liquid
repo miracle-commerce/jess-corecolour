@@ -1,0 +1,184 @@
+{%-liquid
+  assign unique = section.id
+  assign section_height = section.settings.height
+  assign enable_mobile_height = section.settings.enable_mobile_height
+  assign mobile_height = section.settings.mobile_height
+  assign image = section.settings.image
+  assign image_width = image.width
+  assign image_alt = image.alt | strip_html | escape
+  assign image_stretch = section.settings.enable_stretch
+  assign image_position = section.settings.image_position
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign section_width = section.settings.width
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Image--' | append: unique
+  assign animation_delay = 150
+  assign image_widths = '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048'
+-%}
+
+{%- style -%}
+  #Image--{{ unique }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section id="Image--{{ unique }}"
+  class="section-padding section-image{% if image_stretch %} section-image--stretch{% endif %} section-image--{{ image_position }}{% if bg_color_secondary %} bg-secondary{% endif %}"
+  data-section-id="{{ unique }}"
+  data-section-type="image">
+  <div class="{{ section_width }}">
+    <div class="section-image__container {{ section_height }}{% if enable_mobile_height %} {{ mobile_height }}{% endif %}"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      {%- render 'image',
+        image: image,
+        width: image_width,
+        widths: image_widths,
+        alt: image_alt,
+        sizes: 'auto',
+        classes: 'section-image__image' -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Image",
+    "class": "Image",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Image"
+      },
+      {
+        "type": "header",
+        "content": "layout"
+      },
+      {
+        "type": "select",
+        "id": "height",
+        "label": "Height",
+        "default": "original-height",
+        "options": [
+          { "value": "full-height", "label": "Full screen" },
+          { "value": "three-quarters-height", "label": "Three quarters of screen" },
+          { "value": "two-thirds-height", "label": "Two thirds of screen" },
+          { "value": "one-half-height", "label": "One half of screen" },
+          { "value": "one-third-height", "label": "One third of screen" },
+          { "value": "one-fifth-height", "label": "One fifth of screen" },
+          { "value": "seven-fifty-height", "label": "750px" },
+          { "value": "six-fifty-height", "label": "650px" },
+          { "value": "five-fifty-height", "label": "550px" },
+          { "value": "four-fifty-height", "label": "450px" },
+          { "value": "original-height", "label": "Image height" }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_mobile_height",
+        "label": "Enable mobile height",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "mobile_height",
+        "label": "Mobile height",
+        "default": "original-height-mobile",
+        "options": [
+          { "value": "full-height-mobile", "label": "Full screen" },
+          { "value": "three-quarters-height-mobile", "label": "Three quarters of screen" },
+          { "value": "two-thirds-height-mobile", "label": "Two thirds of screen" },
+          { "value": "one-half-height-mobile", "label": "One half of screen" },
+          { "value": "one-third-height-mobile", "label": "One third of screen" },
+          { "value": "one-fifth-height-mobile", "label": "One fifth of screen" },
+          { "value": "seven-fifty-height-mobile", "label": "750px" },
+          { "value": "six-fifty-height-mobile", "label": "650px" },
+          { "value": "five-fifty-height-mobile", "label": "550px" },
+          { "value": "four-fifty-height-mobile", "label": "450px" },
+          { "value": "original-height-mobile", "label": "Image height" }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_stretch",
+        "label": "Stretch image",
+        "default": false,
+        "info": "Desktop only"
+      },
+      {
+        "type": "select",
+        "id": "image_position",
+        "label": "Image position",
+        "default": "center",
+        "info": "Applies if no stretch image checked",
+        "options": [
+          { "value": "left", "label": "Left" },
+          { "value": "center", "label": "Center" },
+          { "value": "right", "label": "Right" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper--full-padded",
+        "options": [
+          { "value": "wrapper--full", "label": "Full width" },
+          { "value": "wrapper--full-padded", "label": "Full width padded" },
+          { "value": "wrapper", "label": "Page width" },
+          { "value": "wrapper--narrow", "label": "Page width narrow" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 100
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 100
+      }
+    ],
+    "presets": [
+      {
+        "name": "Image",
+        "category": "Image"
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside"]
+    }
+  }
+{% endschema %}

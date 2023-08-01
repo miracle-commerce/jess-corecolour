@@ -1,0 +1,18 @@
+{% unless shop.enabled_payment_types == empty %}
+<ul class="payment-icon-list">
+  {% for type in shop.enabled_payment_types %}
+    {%- liquid
+      capture payment_icon
+        echo type | payment_type_svg_tag: class: 'payment-icon'
+      endcapture
+
+      assign payment_icon_label_new = payment_icon | split: 'title id="pi-' | last | split: '</title>' | first | split: '">' | last | prepend: 'aria-label="'
+      assign payment_icon_label_old = payment_icon | split: 'aria-labelledby="pi-' | last | split: '"' | first | prepend: 'aria-labelledby="pi-'
+
+      assign payment_icon = payment_icon | replace: payment_icon_label_old, payment_icon_label_new
+    -%}
+
+    <li>{{ payment_icon }}</li>
+  {% endfor %}
+</ul>
+{% endunless %}

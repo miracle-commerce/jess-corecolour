@@ -1,0 +1,1256 @@
+<!-- /sections/section-text.liquid -->
+{%- liquid
+  assign section_width = section.settings.width
+  assign unique = section.id
+  assign text_position = section.settings.text_position
+  assign text_color = section.settings.text_color
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign show_spacer_lines = settings.show_spacer_lines
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Text--' | append: unique
+  assign animation_delay = 150
+
+  assign section_class = 'text-section ' | append: text_color
+-%}
+
+{%- style -%}
+  #Text--{{ unique }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section id="Text--{{ unique }}"
+  class="section-padding {{ section_class }}{% if bg_color_secondary %} bg-secondary{% endif %}"
+  data-section-id="{{ unique }}"
+  data-section-type="text">
+  <div class="{{ section_width }} text-{{ text_position }}">
+    <div class="text">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign block_id = block.id
+            assign text = block.settings.text
+            assign text_size = block.settings.size | times: 0.01
+            assign text_size_mobile = text_size
+
+            if text_size > 1.5
+              assign text_size_mobile = text_size | times: 0.85
+            endif
+            if text_size > 2
+              assign text_size_mobile = text_size | times: 0.7
+            endif
+            if text_size > 2.5
+              assign text_size_mobile = text_size | times: 0.55
+            endif
+          -%}
+
+          {%- case block.type -%}
+            {%- when 'subheading' -%}
+              {%- style -%}
+                #Text--{{ block_id }}.text__subheading {
+                  --adjust-body: calc(var(--FONT-ADJUST-SUBHEADING) * {{ text_size_mobile }});
+                  --text-gap: {{ block.settings.margin_bottom }}px;
+                }
+                @media screen and (min-width: 1024px) {
+                  #Text--{{ block_id }}.text__subheading { --adjust-body: calc(var(--FONT-ADJUST-SUBHEADING) * {{ text_size }}); }
+                }
+              {%- endstyle -%}
+
+              {%- if text != blank -%}
+                <div id="Text--{{ block_id }}" class="text__subheading subheading-text"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}
+                  {{ block.shopify_attributes }}>{{ text }}</div>
+              {%- endif -%}
+
+            {%- when 'heading' -%}
+              {%- liquid
+                assign title = block.settings.text
+                assign heading_highlight_type = block.settings.heading_highlight_type
+                assign highlight_color = block.settings.highlight_color
+              -%}{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}{%- style -%}
+                #Text--{{ block_id }}.text__heading {
+                  --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ text_size_mobile }});
+
+                  {%- if heading_highlight_type != 'highlight' -%}
+                    --highlight-color: var(--text);
+                  {%- endif -%}
+
+                  {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+                    --highlight-color: {{ highlight_color }};
+                  {%- endif -%}
+                }
+                @media screen and (min-width: 1024px) {
+                  #Text--{{ block_id }}.text__heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ text_size }}); }
+                }
+              {%- endstyle -%}
+
+              {%- if text != blank -%}
+                <div id="Text--{{ block_id }}" class="text__heading h2{% if has_text_highlight %} {{ text_highlight_wrapper_class }}{% endif %}"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}
+                  {{ block.shopify_attributes }}>
+                  {% render 'title-with-highlights',
+                    title: title,
+                    heading_highlight_type: heading_highlight_type,
+                    highlight_color: highlight_color,
+                    has_text_highlight: has_text_highlight %}
+                </div>
+
+                {%- if show_spacer_lines and forloop.last == false -%}
+                  <hr
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-delay="{{ animation_delay }}"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}>
+                {%- endif -%}
+              {%- endif -%}
+
+            {%- when 'text' -%}
+              {%- style -%}
+                #Text--{{ block_id }}.text__content { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size_mobile }}); }
+                @media screen and (min-width: 1024px) {
+                  #Text--{{ block_id }}.text__content { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size }}); }
+                }
+              {%- endstyle -%}
+
+              {%- if text != blank -%}
+                <div id="Text--{{ block_id }}" class="text__content"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}
+                  {{ block.shopify_attributes }}>{{ text }}</div>
+              {%- endif -%}
+
+            {%- when 'split-text' -%}
+              {%- liquid
+                assign text_left = block.settings.text_left
+                assign text_size_left = block.settings.size_left | times: 0.01
+                assign text_right = block.settings.text_right
+                assign text_size_right = block.settings.size_right | times: 0.01
+                assign text_size_left_mobile = text_size_left
+                assign text_size_right_mobile = text_size_right
+
+                if text_size_left > 1.5
+                  assign text_size_left_mobile = text_size_left | times: 0.85
+                endif
+                if text_size_left > 2
+                  assign text_size_left_mobile = text_size_left | times: 0.7
+                endif
+                if text_size_left > 2.5
+                  assign text_size_left_mobile = text_size_left | times: 0.55
+                endif
+
+                if text_size_right > 1.5
+                  assign text_size_right_mobile = text_size_right | times: 0.85
+                endif
+                if text_size_right > 2
+                  assign text_size_right_mobile = text_size_right | times: 0.7
+                endif
+                if text_size_right > 2.5
+                  assign text_size_right_mobile = text_size_right | times: 0.55
+                endif
+              -%}
+
+              {%- style -%}
+                #Text--{{ block_id }} .text__split-right { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size_right_mobile }}); }
+                #Text--{{ block_id }} .text__split-left { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size_left_mobile }}); }
+                @media screen and (min-width: 1024px) {
+                  #Text--{{ block_id }} .text__split-left { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size_left }}); }
+                  #Text--{{ block_id }} .text__split-right { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size_right }}); }
+                }
+              {%- endstyle -%}
+
+              {%- if text_left != blank or text_right != blank -%}
+                <div id="Text--{{ block_id }}" class="text__split"
+                  {% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    data-aos-delay="{{ animation_delay }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}
+                  {{ block.shopify_attributes }}>
+                  <div class="text__split-left">{{ text_left }}</div>
+
+                  <div class="text__split-right">{{ text_right }}</div>
+                </div>
+              {%- endif -%}
+
+            {%- when 'button' -%}
+              {%- liquid
+                assign prev_block_index = forloop.index0 | minus: 1
+                assign next_block_index = forloop.index0 | plus: 1
+                assign prev_block_type = section.blocks[prev_block_index].type
+                assign next_block_type = section.blocks[next_block_index].type
+                assign button_text = block.settings.button_text
+                assign button_link = block.settings.button_link
+                assign button_style = block.settings.button_style
+                assign button_color = block.settings.button_color
+                assign button_size = block.settings.button_size
+              -%}
+
+              {%- capture button -%}
+                {%- if button_text != blank -%}
+                  <div class="text__button{%- render 'button-fallback-classes', primary_color: button_color, bg_color_secondary: bg_color_secondary -%}"
+                    {% if animations_enabled %}
+                      data-aos="fade-up"
+                      data-aos-anchor="{{ animation_anchor }}"
+                      data-aos-delay="{{ animation_delay }}"
+                      {%- assign animation_delay = animation_delay | plus: 150 -%}
+                    {% endif %}
+                    {{ block.shopify_attributes }}>
+                    <a href="{{ button_link | default: '#!' }}" class="btn {{ button_style }} {{ button_size }} {{ button_color }}">{{ button_text }}</a>
+                  </div>
+                {%- endif -%}
+              {%- endcapture -%}
+
+              {%- if next_block_type == 'button' -%}
+                <div class="text__buttons-wrapper">
+                  {{ button }}
+              {%- elsif prev_block_type == 'button' and forloop.index0 != 0 -%}
+                  {{ button }}
+                </div>
+              {%- else -%}
+                {{ button }}
+              {%- endif -%}
+
+            {%- when 'image' -%}
+              {%- liquid
+                assign image = block.settings.image
+                assign image_width = block.settings.image_width
+                assign retina_size = image_width | times: 2
+                assign image_link = block.settings.image_link
+                assign image_alt = image.alt | strip_html | escape
+                assign image_widths = '50, 60, 80, 100, 120, 180, 200, 240, 280, 300, 360, 400, 480, 500, 560, 600, 720, 800, 960, 1000'
+                assign animation_delay = animation_delay | plus: 150
+
+                capture styles
+                  echo 'width: ' | append: image_width | append: 'px;'
+                endcapture
+              -%}
+
+              {%- capture image_markup -%}
+                {%- if image != blank -%}
+                  {%- render 'image',
+                    image: image,
+                    width: retina_size,
+                    widths: image_widths,
+                    sizes: 'auto',
+                    styles: styles,
+                    classes: 'text__image' -%}
+                {%- else -%}
+                  <div class="text__image--placeholder placeholder-svg" style="{{ styles }}">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg-filled' }}
+                  </div>
+                {%- endif -%}
+              {%- endcapture -%}
+
+              <div class="text__image-wrapper"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}>
+                {%- if image_link != blank -%}
+                  <a href="{{ image_link }}" aria-label="{{ image_alt }}">{{ image_markup }}</a>
+                {%- else -%}
+                  {{- image_markup -}}
+                {%- endif -%}
+              </div>
+
+            {%- when 'icon' -%}
+              {%- liquid
+                assign icon_name = block.settings.icon_name
+                assign icon_color = block.settings.icon_color
+                assign icon_width = block.settings.icon_width
+              -%}
+
+              {%- capture style -%}
+                --icon-size: {{ icon_width }}px;
+
+                {%- if icon_color != 'rgba(0,0,0,0)' and icon_color != blank -%}
+                  color: {{ icon_color }};
+                {%- endif -%}
+              {%- endcapture -%}
+
+              <div class="text__icon-wrapper"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}
+                {{ block.shopify_attributes }}>
+                <div class="text__icon icon-stroke" style="{{ style }}">
+                  {%- render 'icons', icon: icon_name -%}
+                </div>
+              </div>
+
+            {%- when 'icon_row' -%}
+              <div class="text__block"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}
+                {{ block.shopify_attributes }}>
+                <div class="text__icons-row-block">
+                  {%- render 'icon-row', block_settings: block.settings -%}
+                </div>
+              </div>
+          {%- endcase -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- render 'no-blocks' -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Text",
+  "class": "text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text",
+      "default": "text-dark",
+      "options": [
+        { "value": "text-light", "label": "Light"},
+        { "value": "text-dark", "label": "Dark"}
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--narrow",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" },
+        { "value": "wrapper--narrow", "label": "Page width narrow" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Subheading</p>"
+        },
+        {
+          "type": "range",
+          "id": "size",
+          "label": "Size",
+          "min": 50,
+          "max": 300,
+          "default": 100,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "range",
+          "id": "margin_bottom",
+          "label": "Bottom spacing",
+          "min": -20,
+          "max": 50,
+          "default": 16,
+          "step": 1,
+          "unit": "px"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Our Story</p>",
+          "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below"
+        },
+        {
+          "type": "range",
+          "id": "size",
+          "label": "Size",
+          "min": 50,
+          "max": 300,
+          "default": 100,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "select",
+          "id": "heading_highlight_type",
+          "label": "Highlight type",
+          "default": "italics",
+          "options": [
+            { "value": "italics", "label": "Italics (no decoration)" },
+            { "value": "highlight", "label": "Highlight" },
+            { "value": "highlight-color", "label": "Text color" },
+            { "value": "underline", "label": "Underline" },
+            { "value": "squiggle", "label": "Squiggle" },
+            { "value": "circle", "label": "Circle" },
+            { "value": "stroke", "label": "Stroke (outlined text)" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "highlight_color",
+          "label": "Highlight color",
+          "default": "#D43747"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+        },
+        {
+          "type": "range",
+          "id": "size",
+          "label": "Size",
+          "min": 50,
+          "max": 300,
+          "default": 100,
+          "step": 5,
+          "unit": "%"
+        }
+      ]
+    },
+    {
+      "type": "split-text",
+      "name": "Split text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text_left",
+          "label": "Text left",
+          "default": "<p>Palo Alto is a powerful Shopify theme that will set you apart from the rest.</p>"
+        },
+        {
+          "type": "range",
+          "id": "size_left",
+          "label": "Size",
+          "min": 50,
+          "max": 300,
+          "default": 100,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "richtext",
+          "id": "text_right",
+          "label": "Text right",
+          "default": "<p>It features ample space to showcase your imagery with Mosaic, Image with text, and Slideshow sections ... and even this Text section itself.</p>"
+        },
+        {
+          "type": "range",
+          "id": "size_right",
+          "label": "Size",
+          "min": 50,
+          "max": 300,
+          "default": 100,
+          "step": 5,
+          "unit": "%"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default":"Read More"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "URL"
+        },
+        {
+          "type": "select",
+          "id": "button_color",
+          "label": "Color",
+          "default": "btn--black",
+          "options": [
+            { "label": "Primary", "value": "btn--primary" },
+            { "label": "Secondary", "value": "btn--secondary" },
+            { "label": "White", "value": "btn--white" },
+            { "label": "Black", "value": "btn--black" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "default": "btn--solid",
+          "options": [
+            { "label": "Solid", "value": "btn--solid" },
+            { "label": "Outline", "value": "btn--outline" },
+            { "label": "Solid with border", "value": "btn--solid-border" },
+            { "label": "Text", "value": "btn--text" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Size",
+          "default": "btn--small",
+          "options": [
+            { "label": "Large", "value": "btn--large" },
+            { "label": "Medium", "value": "btn--medium" },
+            { "label": "Small", "value": "btn--small" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "Custom image width (in pixels)",
+          "min": 50,
+          "max": 500,
+          "default": 100,
+          "step": 10,
+          "unit": "px"
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": "Image link"
+        }
+      ]
+    },
+    {
+      "type": "icon",
+      "name": "Icon",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "default": "clock",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Icon color"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "label": "Icon width",
+          "min": 20,
+          "max": 60,
+          "step": 1,
+          "unit": "px",
+          "default": 25
+        }
+      ]
+    },
+    {
+      "type": "icon_row",
+      "name": "Icon row",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Icon 1"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_1",
+          "label": "Select an icon",
+          "default": "truck",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_1",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_1",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_1",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_1",
+          "label": "Heading",
+          "default": "Free shipping"
+        },
+        {
+          "type": "header",
+          "content": "Icon 2"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_2",
+          "label": "Select an icon",
+          "default": "check",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_2",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_2",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_2",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_2",
+          "label": "Heading",
+          "default": "Free Returns"
+        },
+        {
+          "type": "header",
+          "content": "Icon 3"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_3",
+          "label": "Select an icon",
+          "default": "heart",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_3",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_3",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_3",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_3",
+          "label": "Heading",
+          "default": "1% Donated Annually"
+        },
+        {
+          "type": "header",
+          "content": "Icon 4"
+        },
+        {
+          "type": "select",
+          "id": "icon_name_4",
+          "label": "Select an icon",
+          "default": "clock",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "archive", "label": "Archive", "group": "Generic" },
+            { "value": "award", "label": "Award", "group": "Generic" },
+            { "value": "bee", "label": "Bee", "group": "Generic" },
+            { "value": "bell", "label": "Bell", "group": "Generic" },
+            { "value": "calendar", "label": "Calendar", "group": "Generic" },
+            { "value": "camera", "label": "Camera", "group": "Generic" },
+            { "value": "check", "label": "Check", "group": "Generic" },
+            { "value": "clipboard", "label": "Clipboard", "group": "Generic" },
+            { "value": "clock", "label": "Clock", "group": "Generic" },
+            { "value": "compass", "label": "Compass", "group": "Generic" },
+            { "value": "dollar-sign", "label": "Dollar sign", "group": "Generic" },
+            { "value": "download", "label": "Download", "group": "Generic" },
+            { "value": "flower", "label": "Flower", "group": "Generic" },
+            { "value": "gem", "label": "Gem", "group": "Generic" },
+            { "value": "heart", "label": "Heart", "group": "Generic" },
+            { "value": "key", "label": "Key", "group": "Generic" },
+            { "value": "leaf", "label": "Leaf", "group": "Generic" },
+            { "value": "lock", "label": "Lock", "group": "Generic" },
+            { "value": "mail", "label": "Mail", "group": "Generic" },
+            { "value": "map-pin", "label": "Map", "group": "Generic" },
+            { "value": "message", "label": "Message", "group": "Generic" },
+            { "value": "music", "label": "Music", "group": "Generic" },
+            { "value": "pencils", "label": "Pencils", "group": "Generic" },
+            { "value": "phone", "label": "Phone", "group": "Generic" },
+            { "value": "scientific", "label": "Scientific", "group": "Generic" },
+            { "value": "shield", "label": "Shield", "group": "Generic" },
+            { "value": "smile", "label": "Smile", "group": "Generic" },
+            { "value": "star", "label": "Star", "group": "Generic" },
+            { "value": "tree", "label": "Tree", "group": "Generic" },
+            { "value": "truck", "label": "Truck", "group": "Generic" },
+            { "value": "credit-card", "label": "Credit card", "group": "Commerce" },
+            { "value": "fair-trade", "label": "Fair trade", "group": "Commerce" },
+            { "value": "package", "label": "Package", "group": "Commerce" },
+            { "value": "storefront", "label": "Storefront", "group": "Commerce" },
+            { "value": "support", "label": "Support", "group": "Commerce" },
+            { "value": "eco-friendly", "label": "Eco friendly", "group": "Environment" },
+            { "value": "recycle", "label": "Recycle", "group": "Environment" },
+            { "value": "recycle-circle", "label": "Recycle circle", "group": "Environment" },
+            { "value": "reuseable", "label": "Reuseable", "group": "Environment" },
+            { "value": "cotton", "label": "Cotton", "group": "Fashion" },
+            { "value": "ethically-made", "label": "Ethically made", "group": "Fashion" },
+            { "value": "plant-based", "label": "Plant based", "group": "Fashion" },
+            { "value": "dishwasher-safe", "label": "Dishwasher safe", "group": "Food and Drink" },
+            { "value": "frozen", "label": "Frozen", "group": "Food and Drink" },
+            { "value": "non-gmo", "label": "Non GMO", "group": "Food and Drink" },
+            { "value": "organic", "label": "Organic", "group": "Food and Drink" },
+            { "value": "oven-safe", "label": "Oven safe", "group": "Food and Drink" },
+            { "value": "vegan", "label": "Vegan", "group": "Food and Drink" },
+            { "value": "vegetarian", "label": "Vegetarian", "group": "Food and Drink" },
+            { "value": "cruelty-free", "label": "Cruelty free", "group": "Health/Beauty" },
+            { "value": "fragrance-free", "label": "Fragrance free", "group": "Health/Beauty" },
+            { "value": "paw-heart", "label": "Paw heart", "group": "Health/Beauty" },
+            { "value": "phthalate-free", "label": "Phthalate free", "group": "Health/Beauty" },
+            { "value": "sulfate-free", "label": "Sulfate free", "group": "Health/Beauty" },
+            { "value": "use-by", "label": "Use by", "group": "Health/Beauty" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "icon_color_4",
+          "label": "Color"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image_4",
+          "label": "Image",
+          "info": "If set overrides the icon above"
+        },
+        {
+          "type": "range",
+          "id": "icon_width_4",
+          "label": "Width",
+          "min": 20,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "default": 20
+        },
+        {
+          "type": "text",
+          "id": "icon_text_4",
+          "label": "Heading",
+          "default": "Feature"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "subheading"
+        },
+        {
+          "type": "heading"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "button"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside"]
+  }
+}
+{% endschema %}

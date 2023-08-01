@@ -1,0 +1,62 @@
+{%- liquid
+  assign loading_appearance = settings.loading_appearance
+  assign image = settings.loading_image
+  assign image_width = settings.loading_image_width
+
+  if image != blank
+    assign image_alt = image.alt | strip_html | escape
+    assign image_width_retina = image_width | times: 2
+    assign image_widths = image_width | append: ', ' | append: image_width_retina
+    assign sizes = image_width | append: 'px'
+  endif
+-%}
+
+{%- unless loading_appearance == 'never' -%}
+  <div class="loading-overlay">
+    {%- assign image_height = image_width | divided_by: image.aspect_ratio | round -%}
+    {%- capture image_size -%}{{ image_width }}x{{ image_height }}{%- endcapture -%}
+    {%- capture image_size_2x -%}{{ image_width | times: 2 }}x{{ image_height | times: 2 }}{%- endcapture -%}
+
+    {%- style -%}
+      {%- if image != blank -%}
+        :root { --loader-image: url({{ image | img_url: image_size }}); }
+        @media screen and (-webkit-min-device-pixel-ratio: 2),
+          screen and (min-resolution: 192dpi),
+          screen and (min-resolution: 2dppx) {
+          :root { --loader-image: url({{ image | img_url: image_size_2x }}); }
+        }
+      {%- else -%}
+        :root { --loader-image: var(--loading-svg); }
+      {%- endif -%}
+    {%- endstyle -%}
+
+    <div class="loader loader--image">
+      <div class="loader__image__holder">
+        {%- if image != blank -%}
+          {{ image | image_url: width: image_width_retina
+            | image_tag:
+            widths: image_widths,
+            sizes: sizes,
+            loading: 'eager',
+            fetchpriority: 'high',
+            preload: 'true',
+            alt: image_alt,
+            class: 'loader__image'
+          }}
+          <noscript>
+            {{ image | image_url: width: image_width_retina
+              | image_tag:
+              widths: image_widths,
+              sizes: sizes,
+              loading: 'eager',
+              alt: image_alt,
+              class: 'loader__image'
+            }}
+          </noscript>
+        {%- else -%}
+          <div class="loader__image loader__image--fallback"></div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endunless -%}

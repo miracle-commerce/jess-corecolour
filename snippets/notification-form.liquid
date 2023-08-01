@@ -1,0 +1,45 @@
+{% capture data_html_notification %}
+<div class="product__notification" data-notification>
+  <h2 class="product__notification__title">{{ product_title }}</h2>
+
+  {%- unless product_subtitle == 'Default Title' -%}
+    <p class="product__notification__subtitle">{{ product_subtitle }}</p>
+  {%- endunless -%}
+
+  {%- capture notification_form -%}NotificationForm--{{ section.id }}--{{ product_id }}{%- endcapture -%}
+  {%- form 'customer', id: notification_form, data-notification-form: '' -%}
+    <div class="product__notification__message">
+      <p>{{ 'general.newsletter_form.notification_success' | t }}</p>
+    </div>
+
+    {%- if form.errors -%}
+      {{- form.errors | default_errors -}}
+    {%- endif -%}
+
+    <div class="product__notification__form">
+      <label for="Email--{{ section.id }}">{{ 'general.newsletter_form.email_label' | t }}</label>
+
+      <input type="hidden" name="contact[tags]" value="newsletter, out-of-stock-notification--{{ product_title | strip_html | escape }}"/>
+      <input type="hidden" name="contact[first_name]" value="Newsletter" />
+      <input type="hidden" name="contact[last_name]" value="Subscriber" />
+
+      <div class="input-group input-group--inline">
+        <div class="input-group__item">
+          <input type="email" value="{% if customer %}{{ customer.email }}{% endif %}" placeholder="{{ 'general.newsletter_form.email' | t }}" name="contact[email]" id="Email--{{ section.id }}" class="input-group__field input-group__field--email" aria-label="{{ 'general.newsletter_form.email' | t }}" autocorrect="off" autocapitalize="off" required data-popup-input>
+        </div>
+        <div class="input-group__item--btn">
+          <button type="submit" name="subscribe" id="SubscribeSubmit--{{ section.id }}" class="btn btn--primary btn--solid">
+            <span data-notification-button-text>{{ 'general.newsletter_form.notify' | t }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  {%- endform -%}
+
+  <button title="{{ 'general.accessibility.close' | t }} (Esc)" class="product__notification__close" data-popup-close>
+    {%- render 'icon-close' -%}
+  </button>
+</div>
+{% endcapture %}
+{% assign data_html_notification =  data_html_notification | replace: '"', "'" %}
+{{ data_html_notification | strip }}

@@ -1,0 +1,315 @@
+{%- comment -%} /sections/section-recommended-posts.liquid {%- endcomment -%}
+{%- liquid
+  assign id = 'RecommendedPosts--' | append: section.id
+  assign selector_id = '#' | append: id
+  assign blog_style = section.settings.blog_style
+  assign default_image = section.settings.default_image
+  assign default_color = section.settings.default_color
+  assign posts_type = section.settings.posts_type
+  assign article_handle = article.handle
+  assign article_tags = article.tags
+  assign title = section.settings.title
+  assign show_author = section.settings.show_author
+  assign show_date = section.settings.show_date
+  assign show_tags = section.settings.show_tags
+  assign show_comments_count = section.settings.show_comments_count
+  assign counter = 0
+  assign article_limit = 2
+  assign bg_color_secondary = section.settings.bg_color_secondary
+
+  unless show_comments_count or blog.comments_enabled?
+    assign show_comments_count = false
+  endunless
+
+  case default_color
+    when 'accent'
+      assign default_color = 'blog__post-image--accent'
+    when 'default'
+      assign default_color = 'blog__post-image--default'
+  endcase
+
+  if blog_style == 'photo'
+    assign blog_style = 'blog--photo'
+  else
+    assign blog_style = 'blog--standard'
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = selector_id
+  assign animation_delay = 150
+-%}
+
+{%- capture recommended_posts -%}
+  {%- case posts_type -%}
+    {%- when 'paging' -%}
+      {%- if blog.previous_article -%}
+        {%- assign post = articles[blog.previous_article.handle] -%}
+
+        {%- render 'blog-post-grid-item',
+          article: post,
+          animation_delay: animation_delay,
+          animation_anchor: animation_anchor,
+          default_color: default_color,
+          default_image: default_image,
+          show_author: show_author,
+          show_date: show_date,
+          show_tags: show_tags,
+          show_comments_count: show_comments_count -%}
+
+        {% if animations_enabled %}
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if blog.next_article -%}
+        {%- assign post = articles[blog.next_article.handle] -%}
+
+        {%- render 'blog-post-grid-item',
+          article: post,
+          animation_delay: animation_delay,
+          animation_anchor: animation_anchor,
+          default_color: default_color,
+          default_image: default_image,
+          show_author: show_author,
+          show_date: show_date,
+          show_tags: show_tags,
+          show_comments_count: show_comments_count -%}
+
+        {% if animations_enabled %}
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {%- endif -%}
+      {%- endif -%}
+
+    {%- when 'recent' -%}
+      {%- for post in blog.articles -%}
+        {%- if post.handle == article_handle -%}
+          {%- continue -%}
+        {%- endif -%}
+
+        {%- render 'blog-post-grid-item',
+          article: post,
+          animation_delay: animation_delay,
+          animation_anchor: animation_anchor,
+          default_color: default_color,
+          default_image: default_image,
+          show_author: show_author,
+          show_date: show_date,
+          show_tags: show_tags,
+          show_comments_count: show_comments_count -%}
+
+        {% if animations_enabled %}
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {%- endif -%}
+
+        {%- assign counter = counter | plus: 1 -%}
+
+        {%- if counter == article_limit -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+    {%- when 'related' -%}
+      {%- for post in blog.articles -%}
+        {%- assign tag_matched = false -%}
+
+        {%- for tag in post.tags -%}
+          {%- if article_tags contains tag and post.handle != article_handle -%}
+            {%- assign tag_matched = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if tag_matched == false or post.handle == article_handle -%}
+          {%- continue -%}
+        {%- endif -%}
+
+        {%- render 'blog-post-grid-item',
+          article: post,
+          animation_delay: animation_delay,
+          animation_anchor: animation_anchor,
+          default_color: default_color,
+          default_image: default_image,
+          show_author: show_author,
+          show_date: show_date,
+          show_tags: show_tags,
+          show_comments_count: show_comments_count -%}
+
+        {%- if animations_enabled -%}
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {%- endif -%}
+
+        {%- assign counter = counter | plus: 1 -%}
+
+        {%- if counter == article_limit -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+  {%- endcase -%}
+{%- endcapture -%}
+
+{%- if recommended_posts != '' -%}
+  {%- style -%}
+    .recommended-posts {
+      --PT: {{ section.settings.padding_top }}px;
+      --PB: {{ section.settings.padding_bottom }}px;
+    }
+
+    .recommended-posts .blog__post-image { padding-top: {{ section.settings.image_aspect_ratio | times: 100 | append: '%' }}; }
+  {%- endstyle -%}
+
+  <section id="{{ id }}"
+    class="recommended-posts blog {{ blog_style }} section-padding{% if bg_color_secondary %} bg-secondary{% endif %}"
+    data-section-type="recommended-posts"
+    data-section-id="{{ section.id }}">
+    <div class="wrapper">
+      {%- if title != empty or section.settings.show_rss_icon -%}
+        <h2 class="section__heading text-center"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {{ title }}
+          {%- if section.settings.show_rss_icon -%}
+            <a href="{{ shop.url }}{{ blog.url }}.atom" class="rss" target="_blank">
+              {%- render 'icon-rss' -%}
+            </a>
+          {%- endif -%}
+        </h2>
+      {%- endif -%}
+
+      <div class="blog__post blog__post--two-col">
+        {{ recommended_posts }}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Recommended posts",
+    "templates": ["article"],
+    "settings": [
+      {
+        "type": "select",
+        "id": "posts_type",
+        "label": "Posts type",
+        "options": [
+          { "value": "paging", "label": "Previous and next" },
+          { "value": "recent", "label": "Recent" },
+          { "value": "related", "label": "Related tags" }
+        ],
+        "default": "paging"
+      },
+      {
+        "label": "Heading",
+        "id": "title",
+        "type": "text"
+      },
+      {
+        "type": "image_picker",
+        "id": "default_image",
+        "label": "Default blog image",
+        "info": "Applies if the blog has no featured image"
+      },
+      {
+        "type": "select",
+        "id": "default_color",
+        "label": "Image replacement color",
+        "info": "Applies if the blog has no image set",
+        "options": [
+          { "value": "accent", "label": "Accent color" },
+          { "value": "default", "label": "Default color" },
+          { "value": "none", "label": "None" }
+        ],
+        "default": "accent"
+      },
+      {
+        "type": "select",
+        "id": "blog_style",
+        "label": "Blog style",
+        "options": [
+          { "value": "standard", "label": "Standard" },
+          { "value": "photo", "label": "Photo background" }
+        ],
+        "default": "photo"
+      },
+      {
+        "type": "range",
+        "id": "image_aspect_ratio",
+        "label": "Image aspect ratio",
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1,
+        "unit": ":1",
+        "default": 1.3
+      },
+      {
+        "type": "checkbox",
+        "id": "show_rss_icon",
+        "label": "Show RSS icon",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tags",
+        "label": "Show tags",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_comments_count",
+        "label": "Show comment count",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ]
+  }
+{% endschema %}

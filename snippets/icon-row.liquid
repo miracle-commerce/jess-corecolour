@@ -1,0 +1,66 @@
+{%- assign has_text = false -%}
+{%- for i in (1..4) -%}
+  {%- assign icon_text = 'icon_text_' | append: forloop.index -%}
+  {%- assign icon_text = block_settings[icon_text] -%}
+  {%- if icon_text != '' -%}
+    {%- assign has_text = true -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- for i in (1..4) -%}
+  {%- assign icon_name = 'icon_name_' | append: forloop.index -%}
+  {%- assign icon_name = block_settings[icon_name] -%}
+  {%- assign icon_color = 'icon_color_' | append: forloop.index -%}
+  {%- assign icon_color = block_settings[icon_color] -%}
+  {%- assign icon_image = 'icon_image_' | append: forloop.index -%}
+  {%- assign icon_image = block_settings[icon_image] -%}
+  {%- assign icon_width = 'icon_width_' | append: forloop.index -%}
+  {%- assign icon_width = block_settings[icon_width] -%}
+  {%- assign icon_text = 'icon_text_' | append: forloop.index -%}
+  {%- assign icon_text = block_settings[icon_text] -%}
+
+  {%- if icon_image != blank -%}
+    {%- assign retina_size = icon_width | times: 2 -%}
+    {%- assign image_widths = '50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150' -%}
+  {%- endif -%}
+
+  {%- capture icon_style -%}
+    --icon-size: {{ icon_width }}px;
+
+    {%- if icon_image == blank and icon_name == 'none' and icon_text != '' -%}
+      --offset-top: 0;
+    {%- endif -%}
+
+    {%- if icon_image -%}
+      --aspect-ratio: {{ 1 | divided_by: icon_image.aspect_ratio | times: 100 | round: 1 }}%;
+    {%- endif -%}
+
+    {%- if icon_color != '' and icon_color != 'rgba(0,0,0,0)' and icon_image == blank -%}
+      --icon-color: {{ icon_color }};
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- unless icon_image == blank and icon_name == 'none' and icon_text == '' -%}
+    <div class="icons-row-block__item{% unless has_text %} icons-row-block__item--center{% endunless %}" style="{{ icon_style }}">
+      {%- unless icon_image == blank and icon_name == 'none' -%}
+        <div class="icons-row-block__icon icon-stroke">
+          {%- if icon_image != blank -%}
+            <div class="icons-row-block__holder">
+              {%- render 'image',
+                image: icon_image,
+                width: retina_size,
+                widths: image_widths,
+                sizes: 'auto',
+                classes: 'icons-row-block__img' -%}
+            </div>
+          {%- else -%}
+            {%- render 'icons', icon: icon_name -%}
+          {%- endif -%}
+        </div>
+      {%- endunless -%}
+      {%- if icon_text != blank -%}
+        <span class="icons-row-block__text">{{ icon_text }}</span>
+      {%- endif -%}
+    </div>
+  {%- endunless -%}
+{%- endfor -%}

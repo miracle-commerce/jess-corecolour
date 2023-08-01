@@ -1,0 +1,1364 @@
+<!-- /sections/featured-collection.liquid -->
+{%- liquid
+  assign collection = collections[section.settings.collection] | default: false
+  assign products = collection.products
+  assign heading =  section.settings.title
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign heading_size_mobile = heading_size
+  assign text = section.settings.text
+  assign text_size = section.settings.text_size | times: 0.01
+  assign text_alignment = section.settings.text_alignment
+  assign button_text = section.settings.button_text
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign columns = settings.products_per_row_on_desktop | plus: 0
+  assign columns_small = columns | at_most: 2
+  assign columns_mobile = section.settings.columns_mobile | plus: 0
+  assign number_of_products = section.settings.number_of_products
+  assign layout = section.settings.products_layout
+  assign section_width = section.settings.width
+  assign bg_color_secondary = section.settings.bg_color_secondary
+
+  assign id = 'FeaturedCollection--' | append: section.id
+  assign selector_id = '#' | append: id
+  assign animation_anchor = selector_id
+  assign animations_enabled = settings.animations_enabled
+  assign animation_delay = 150
+
+  assign columns_mobile_class = 'featured-collection--mobile-single-column'
+
+  if columns_mobile > 1
+    assign columns_mobile_class = 'featured-collection--mobile-two-columns'
+  endif
+
+  assign carousel = false
+  if layout == 'carousel'
+    assign carousel = true
+  endif
+
+  assign is_split = false
+  if layout == 'split-left' or layout == 'split-right'
+    assign is_split = true
+  endif
+
+  assign mobile_class = ' grid--mobile'
+  if section.settings.enable_slider_mobile
+    assign mobile_class = ' carousel--mobile'
+  endif
+
+  if heading_size > 2.5
+    assign heading_size_mobile = 2.5
+  endif
+
+  assign add_collection_bottom = false
+  if text_alignment == 'text-center' and is_split == false
+    assign add_collection_bottom = true
+  elsif heading == blank and text == blank and is_split == false
+    assign add_collection_bottom = true
+  endif
+
+  capture section_classes
+    echo 'section-padding'
+    echo ' featured-collection featured-collection--' | append: layout
+    echo ' ' | append: columns_mobile_class
+    echo ' collection-items collection-items--' | append: columns
+    if bg_color_secondary
+      echo ' bg-secondary'
+    endif
+    render 'button-fallback-classes', primary_color: button_color, bg_color_secondary: bg_color_secondary
+  endcapture
+-%}
+
+{%- style -%}
+  {{ selector_id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }});
+  }
+
+  {{ selector_id }} .section__text {
+    --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size }});
+  }
+
+  @media screen and (min-width: 1024px) {
+    {{ selector_id }} {
+      --grid: repeat({{ columns }}, minmax(0, 1fr));
+
+      {%- if is_split -%}
+        --grid: repeat(2, minmax(0, 1fr));
+      {%- endif -%}
+    }
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    {{ selector_id }} {
+      --grid: repeat({{ columns_small }}, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    {{ selector_id }} {
+      --grid-mobile: repeat({{ columns_mobile }}, minmax(0, 1fr));
+      --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size_mobile }});
+    }
+    {%- if columns_mobile > 1 -%}
+      {{ selector_id }} .carousel--mobile { --item-width-mobile: calc(90% / {{ columns_mobile }} - var(--grid-gutter)); }
+    {%- endif -%}
+  }
+{%- endstyle -%}
+
+{%- capture collection_button -%}
+  {%- if button_text != blank -%}
+    <a class="btn {{ button_style }} {{ button_size }} {{ button_color }} btn--view-all" href="{{ collection.url }}">{{ button_text }}</a>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture section_heading_content -%}
+  <div class="section__header featured-collection__top__wrapper">
+    {%- if heading != blank -%}
+      <h2 class="section__heading h2"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-delay="{{ animation_delay }}"
+        data-aos-anchor="{{ animation_anchor }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+        {{- heading | escape -}}
+      </h2>
+    {%- endif -%}
+
+    {%- if settings.show_spacer_lines -%}
+      <hr class="section__heading-line"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-delay="{{ animation_delay }}"
+          data-aos-anchor="{{ animation_anchor }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+    {%- endif -%}
+
+    {%- if text != blank -%}
+      <div class="section__text"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-delay="{{ animation_delay }}"
+          data-aos-anchor="{{ animation_anchor }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {{- text -}}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if button_text != blank -%}
+    {%- if text_alignment == 'text-left' or is_split -%}
+      <div class="featured-collection__top__button"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-delay="{{ animation_delay }}"
+          data-aos-anchor="{{ animation_anchor }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {{- collection_button -}}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture section_heading -%}
+  {%- if is_split -%}
+    {%- if heading != blank or text != blank or section.settings.show_collection_button == true and collection.handle != 'all' -%}
+      <div class="featured-collection__top {{ text_alignment }}">
+        <div class="featured-collection__top-inner">
+          {{ section_heading_content }}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    {%- if heading != blank or text != blank and collection.handle != 'all' -%}
+      <div class="featured-collection__top {{ text_alignment }}">
+        {{ section_heading_content }}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{% comment %} Array of all added promo blocks {% endcomment %}
+{%- assign promos_array = '' -%}
+{%- for block in section.blocks -%}
+  {%- capture current_promo -%}
+    {%- liquid
+      assign block_id = 'CollectionPromo--' | append: block.id
+      assign promo_collection = empty
+      assign promo_position = block.settings.position
+      assign promo_width = block.settings.width
+      assign promo_width_class = 'collection-promo--two-columns'
+      assign promo_order = promo_position | append: '-' | append: forloop.index
+
+      if promo_position < 10
+        assign promo_order = promo_order | prepend: '0'
+      endif
+
+      case promo_width
+        when 'full'
+          assign promo_width_class = 'collection-promo--full'
+          assign current_promo_width = columns
+        when 'half'
+          assign current_promo_width = 2
+        when 'auto'
+          assign promo_width_class = 'collection-promo--one-column'
+          assign promo_height = settings.image_aspect_ratio | times: 100
+          assign current_promo_width = 1
+      endcase
+    -%}
+{%- liquid
+  assign promo_bg_color = block.settings.bg_color
+  assign promo_image = block.settings.image
+  assign title = block.settings.title
+  assign heading_highlight_type = block.settings.heading_highlight_type
+  assign highlight_color = block.settings.highlight_color
+  assign promo_heading_size = block.settings.heading_size | times: 0.01
+  assign promo_text_size = block.settings.text_size | times: 0.01
+  assign promo_content = block.settings.content | strip_html
+  assign promo_layout = block.settings.layout
+  assign promo_btn_text = block.settings.button_text | strip_html
+  assign promo_btn_link = block.settings.button_link
+  assign promo_button_style = block.settings.button_style
+  assign promo_button_size = block.settings.button_size
+  assign promo_button_color = block.settings.button_color
+  assign promo_text_color = block.settings.text_color
+  assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+  assign promo_height = settings.image_aspect_ratio | times: 100
+  assign show_text_shadow = settings.show_text_shadow
+  assign block_class = 'collection-promo__inner'
+  assign block_id = 'CollectionPromo--' | append: block.id
+  assign block_selector_id = '#' | append: block_id
+  assign animation_delay = 150
+  assign animation_anchor = block_selector_id
+
+  assign block_class = block_class | append: ' ' | append: promo_text_color
+
+  if promo_image != blank
+    assign block_class = block_class | append: ' collection-promo--image'
+  endif
+
+  assign whole_link = false
+  if promo_btn_text == blank and promo_btn_link != blank
+    assign whole_link = true
+    assign block_class = block_class | append: ' collection-promo--outer-link'
+  endif
+
+  capture content_position_class
+    case block.settings.text_position
+      when 'left'
+        echo 'item--left'
+      when 'center'
+        echo 'item--center'
+      when 'right'
+        echo 'item--right'
+      when 'bottom-left'
+        echo 'item--bottom-left'
+      when 'bottom-right'
+        echo 'item--bottom-right'
+      when 'top-left'
+        echo 'item--top-left'
+      when 'top-right'
+        echo 'item--top-right'
+    endcase
+  endcapture
+
+  assign block_class = block_class | append: ' ' | append: content_position_class
+
+  capture promo_layout_class
+    case promo_layout
+      when 'inline'
+        echo 'collection-promo__content--inline'
+      when 'stacked'
+        echo 'collection-promo__content--stacked'
+    endcase
+  endcapture
+-%}{% comment %}
+  Enhanced text decorations options - Liqiud variables
+
+  Dependencies:
+    - Title liquid object from settings: `assign title = section.settings.title`
+    - Highlight type from settings: `assign heading_highlight_type = section.settings.heading_highlight_type`
+    - Highlight color from settings: `assign highlight_color = section.settings.highlight_color or assign highlight_color = block.settings.highlight_color`
+    - SVG icons:
+      - icon-squiggle.svg (assets)
+      - icon-circle.liquid (snippet)
+{% endcomment %}
+
+{%- liquid
+  comment
+   Highlighted words count
+  endcomment
+  assign title_temp = title | split: '<em>'
+  assign em_arr = ''
+  if title_temp.size > 1
+    for text_part in title_temp offset: 1
+      assign em_text = text_part | split: '</em>' | first
+      assign em_arr = em_arr | append: '#separator#' | append: em_text
+    endfor
+  endif
+  assign em_arr = em_arr | split: '#separator#'
+  assign words_count_arr = ''
+  assign letters_count_arr = ''
+  if em_arr.size > 0
+    for words in em_arr offset: 1
+      assign word = words | split: ' '
+      assign words_count_arr = words_count_arr | append: word.size | append: ', '
+      assign letters_count_arr = letters_count_arr | append: words.size | append: ', '
+    endfor
+  endif
+
+  assign words_count_arr = words_count_arr | replace_last: ', ', '' | split: ', '
+  assign letters_count_arr = letters_count_arr | replace_last: ', ', '' | split: ', '
+
+  comment
+   Main highlight types logic
+  endcomment
+  assign icon_url = ''
+  assign icon_color = 'var(--text)'
+
+  if highlight_color != 'rgba(0,0,0,0)' and highlight_color != ''
+    assign icon_color = highlight_color
+  endif
+
+  capture text_highlight_icon
+    assign has_text_highlight = false
+
+    if title contains '<em>'
+      case heading_highlight_type
+        when 'squiggle'
+          assign icon_url = 'icon-squiggle.svg' | asset_url
+          echo '<span class="text-highlight__icon"></span>'
+        when 'circle'
+          echo '<span class="text-highlight__icon">'
+          render 'icon-circle', color: icon_color
+          echo '</span>'
+        when 'stroke' or 'circle' or 'squiggle' or 'highlight' or 'highlight-color' or 'underline'
+          assign has_text_highlight = true
+      endcase
+    endif
+  endcapture
+
+  capture icon_bg
+    if icon_url != ''
+      echo 'url( "' | append: icon_url | append: '" )'
+    else
+      echo 'none'
+    endif
+  endcapture
+  capture icon_styles
+    assign icon_bg = icon_bg | replace: '"', "'"
+    echo 'style="--icon-url: ' | append: icon_bg | append: ';' | append: '--icon-color: ' | append: icon_color | append: ';"'
+  endcapture
+
+  assign text_highlight_wrapper_class = 'text-highlight-wrapper' | append: ' text-highlight-wrapper--' | append: heading_highlight_type
+  capture text_highlight_start
+    echo '<span class="text-highlight" ' | append: icon_styles | append: '>'
+  endcapture
+  capture text_highlight_end
+    echo text_highlight_icon
+    echo '</span>'
+  endcapture
+
+  if title != blank and title contains '<em>'
+    case heading_highlight_type
+      when 'squiggle' or 'circle' or 'stroke' or 'highlight' or 'highlight-color' or 'underline'
+        assign title = title | replace: '<em>', text_highlight_start | replace: '</em>', text_highlight_end
+
+      when 'circle'
+        comment
+          Update icon's holder class based on the italicised words count
+        endcomment
+        assign title = title | split: 'class="text-highlight"'
+        assign title_mod = ''
+        for title_part in title offset: 1
+          assign current_part = title_part
+
+          if title_part contains 'text-highlight__icon'
+            capture highlight_icon_classes
+              echo 'text-highlight__icon'
+              assign current_count = words_count_arr[forloop.index0] | times: 1
+              assign letters_count = letters_count_arr[forloop.index0] | times: 1
+              if current_count == 1
+                echo ' text-highlight__icon--single-word'
+              endif
+              if letters_count < 6
+                echo ' text-highlight__icon--short'
+                echo ' text-highlight__icon--l' | append: letters_count
+              endif
+              if letters_count > 15
+                echo ' text-highlight__icon--long'
+              endif
+            endcapture
+
+            assign current_part = title_part | replace: 'text-highlight__icon', highlight_icon_classes
+          endif
+
+          unless forloop.last
+            assign title_mod = title_mod | append: current_part | append: 'class="text-highlight"'
+          else
+            assign title_mod = title_mod | append: current_part
+          endunless
+        endfor
+        assign title_first_part = title | first | append: 'class="text-highlight"'
+        assign title_mod = title_mod | prepend: title_first_part
+        assign title = title_mod
+    endcase
+  endif
+-%}{%- style -%}
+  {{ block_selector_id }} {
+    --overlay-opacity: {{ overlay_opacity }};
+    --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ promo_heading_size }});
+    --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ promo_text_size }});
+    --promo-height: {{ promo_height }}%;
+
+    {%- if promo_bg_color != 'rgba(0,0,0,0)' and promo_bg_color != '' and promo_image == blank -%}
+      --bg: {{ promo_bg_color }};
+    {%- endif -%}
+  }
+
+  {{ block_selector_id }} .collection-promo__heading {
+    {%- if heading_highlight_type != 'highlight' -%}
+      --highlight-color: var(--text);
+    {%- endif -%}
+
+    {%- if highlight_color != 'rgba(0,0,0,0)' and highlight_color != '' -%}
+      --highlight-color: {{ highlight_color }};
+    {%- endif -%}
+  }
+{%- endstyle -%}
+
+<div class="{{ block_class }}" {{ block.shopify_attributes }}>
+  {%- if whole_link -%}
+    <a class="collection-promo__link" href="{{ promo_btn_link }}">
+        <span class="visually-hidden">{{ title | strip_html | strip }}</span>
+    </a>
+  {%- endif -%}
+
+  <div class="collection-promo__bg">
+    {%- if promo_image != blank -%}
+      {%- render 'image-fill', is_background: true, img_object: promo_image, classes: 'collection-promo__image' -%}
+    {%- endif -%}
+  </div>
+
+  {%- if promo_image != blank -%}
+    <div class="overlay"></div>
+  {%- endif -%}
+
+  <div class="collection-promo__content {{ promo_layout_class }}{% if show_text_shadow and promo_image != blank %} backdrop--radial{% endif %}">
+    <div class="collection-promo__body">
+      {%- if title != blank -%}
+
+        {%- liquid
+          assign title = title | replace: '%', '<sup>%</sup>'
+          assign title = title | replace: '<sup>%</sup> off', '<sup>%</sup> <small>off</small>'
+          assign title = title | replace: '<sup>%</sup> OFF', '<sup>%</sup> <small>OFF</small>'
+          assign title = title | replace: '<sup>%</sup> Off', '<sup>%</sup> <small>Off</small>'
+        -%}
+
+        <h3 class="collection-promo__heading{% if has_text_highlight %} {{ text_highlight_wrapper_class }}{% endif %}"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {%- render 'title-with-highlights',
+            title: title,
+            heading_highlight_type: heading_highlight_type,
+            highlight_color: highlight_color,
+            has_text_highlight: has_text_highlight
+          -%}
+        </h3>
+      {%- endif -%}
+
+      {%- if promo_content != blank -%}
+        <div class="collection-promo__text"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {{- promo_content -}}
+        </div>
+      {%- endif -%}
+
+      {%- if promo_btn_text != blank -%}
+        <div class="collection-promo__button"
+          {% if settings.animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          <a class="btn {{ promo_button_style }} {{ promo_button_size }} {{ promo_button_color }}" href="{{ promo_btn_link }}">{{ promo_btn_text }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{%- endcapture -%}
+
+  {%- assign promos_array = promos_array | append: promo_order | append: '#promo_position#' | append: promo_position | append: '#promo_html#' | append: current_promo | append: '#block_id#' | append: block_id | append: '#promo_collection#' | append: promo_collection | append: '#promo_width#' | append: current_promo_width | append: '#promo_width_class#' | append: promo_width_class | append: '@@' -%}
+{%- endfor -%}
+
+{%- assign promos_array = promos_array | split: '@@' | sort -%}
+
+{%- capture collection_items -%}
+  {% comment %} Check if there are any products in the collection {% endcomment %}
+  {%- if products.size > 0 -%}
+      {%- assign tablet_counter = 1 -%}
+      {%- assign mobile_counter = 1 -%}
+      {%- if promos_array.size > 0 -%}
+        {%- liquid
+          assign counter_grid = 1
+          assign counter_delay = 0
+          assign added_promos_index = ''
+          assign items_on_row_remaining = columns
+        -%}
+
+        {%- for product in collection.products limit: number_of_products -%}
+          {%- if carousel -%}
+            {%- assign animation_delay = forloop.index0 -%}
+          {%- else -%}
+            {%- assign columns = settings.products_per_row_on_desktop | plus: 0 -%}
+            {%- assign animation_delay = forloop.index0 | modulo: columns | times: 1 -%}
+          {%- endif -%}{%- for promo in promos_array -%}
+  {%- liquid
+    if promo == ''
+      continue
+    endif
+
+    assign promo_index = forloop.index
+    assign current_promo_markup = promo | split: '#promo_html#' | last | split: '#block_id#' | first
+    assign block_id = promo | split: '#block_id#' | last | split: '#promo_collection#' | first
+    assign promo_collection = promo | split: '#promo_collection#' | last | split: '#promo_width#' | first
+    assign promo_position = promo | split: '#promo_position#' | last | split: '#promo_html#' | first | times: 1
+    assign promo_width = promo | split: '#promo_width#' | last | split: '#promo_width_class#' | first | times: 1
+    assign promo_width_class = promo | split: '#promo_width_class#' | last
+    assign promo_index_tag = '@' | append: promo_index | append: '@'
+    assign block_class = 'collection-promo' | append: ' ' | append: promo_width_class
+    assign block_tablet_class = ''
+    assign promo_tablet_class = 'collection-promo--'
+    assign tablet_class = 'tablet-grid'
+    assign tablet_even_class = tablet_class | append: ' collection-promo--grid-even'
+    assign tablet_second_class = ' collection-promo--grid-second'
+    assign tablet_third_class = ' collection-promo--grid-third'
+    assign tablet_full_class = 'tablet-full'
+    assign animation_delay = counter_delay | modulo: columns | times: 1
+
+    if carousel
+      assign block_class = block_class | append: ' carousel__item'
+
+      case columns
+        when 2
+          assign block_class = block_class | append: ' one-half'
+        when 3
+          assign block_class = block_class | append: ' one-third'
+        when 4
+          assign block_class = block_class | append: ' one-quarter'
+      endcase
+    else
+      assign block_class = block_class | append: ' grid__item'
+    endif
+  -%}
+
+  {%- if promo_position <= counter_grid -%}
+    {%- unless added_promos_index contains promo_index_tag -%}
+      {%- if promo_collection == empty or promo_collection == collection.handle -%}
+        {%- liquid
+          if items_on_row_remaining < promo_width
+            assign animation_delay = 0
+            assign counter_delay = 0
+            assign items_on_row_remaining = columns
+          endif
+
+          assign promo_even = mobile_counter | modulo: 2
+          assign promo_second = tablet_counter | plus: 1 | modulo: 3
+          assign promo_third = tablet_counter | modulo: 3
+          assign counter_grid = counter_grid | plus: promo_width
+          assign items_on_row_remaining = items_on_row_remaining | minus: promo_width
+          assign counter_delay = counter_delay | plus: promo_width
+          assign block_tablet_class = tablet_class
+
+          case promo_width
+            when 1
+              if promo_even == 0
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: 1
+              assign mobile_counter = mobile_counter | plus: 1
+
+            when columns
+              assign counter_delay = 0
+              assign items_on_row_remaining = columns
+
+            when 2 or columns
+              assign counter_increase_mobile = 2
+              assign block_tablet_class = tablet_full_class
+
+              if promo_even == 0
+                assign counter_increase_mobile = 1
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign counter_increase_tablet = 2
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign counter_increase_tablet = 1
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                else
+                  if promo_width == 2
+                    assign counter_increase_tablet = 2
+                  else
+                    assign counter_increase_tablet = 3
+                  endif
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: counter_increase_tablet
+              assign mobile_counter = mobile_counter | plus: counter_increase_mobile
+          endcase
+
+          assign promo_tablet_class = promo_tablet_class | append: block_tablet_class
+          assign added_promos_index = added_promos_index | append: '@' | append: promo_index | append: '@#'
+        -%}
+        <div id="{{ block_id }}"
+          class="{{ block_class }} {{ promo_tablet_class }}"
+          {% if carousel %} data-slide{% endif %}
+          {% if animations_enabled %}
+            data-aos="fade"
+            data-aos-delay="{{ animation_delay | times: 150 }}"
+          {% endif %}
+          data-promo>
+          {{ current_promo_markup }}
+        </div>
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- liquid
+    assign mod = counter_delay | modulo: columns
+    if mod < 1
+      assign items_on_row_remaining = columns
+      assign counter_delay = 0
+    endif
+  -%}
+{%- endfor -%}
+
+{%- liquid
+  assign animation_delay = counter_delay | modulo: columns | times: 1
+  assign counter_delay = counter_delay | plus: 1
+  assign counter_grid = counter_grid | plus: 1
+  assign items_on_row_remaining = items_on_row_remaining | minus: 1
+
+  if collection
+    render 'product-grid-item', product: product, animation_delay: animation_delay, tablet_counter: tablet_counter, mobile_counter: mobile_counter, carousel: carousel
+  else
+    render 'product-grid-item--onboarding', columns_mobile: columns_mobile, carousel: carousel, index: index, animation_delay: animation_delay
+  endif
+
+  assign tablet_counter = tablet_counter | plus: 1
+  assign mobile_counter = mobile_counter | plus: 1
+
+  assign mod = counter_delay | modulo: columns
+  if mod < 1
+    assign items_on_row_remaining = columns
+    assign counter_delay = 0
+  endif
+-%}{%- endfor -%}
+      {%- else -%}
+        {%- liquid
+          for product in collection.products limit: number_of_products
+            if carousel
+              assign animation_delay = forloop.index0
+            else
+              assign columns = settings.products_per_row_on_desktop | plus: 0
+              assign animation_delay = forloop.index0 | modulo: columns | times: 1
+            endif
+              render 'product-grid-item', columns_mobile: columns_mobile, product: product, carousel: carousel, animation_delay: animation_delay, tablet_counter: tablet_counter, mobile_counter: mobile_counter
+            unless carousel
+              assign tablet_counter = tablet_counter | plus: 1
+              assign mobile_counter = mobile_counter | plus: 1
+            endunless
+          endfor
+        -%}
+      {%- endif -%}
+  {%- else -%}
+    <div class="featured-collection--no-results {{ text_alignment }}">
+      <p>{{ 'collections.general.no_matches' | t }}</p>
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture collection_onboarding -%}
+  {%- if promos_array.size > 0 -%}
+    {%- liquid
+      assign counter_grid = 1
+      assign counter_delay = 0
+      assign added_promos_index = ''
+      assign items_on_row_remaining = columns
+      assign tablet_counter = 1
+      assign mobile_counter = 1
+    -%}
+    {%- for i in (1..number_of_products) -%}
+      {%- capture index -%}{%- cycle 1, 2, 3, 4, 5, 6 -%}{%- endcapture -%}
+      {%- if carousel -%}
+        {%- assign animation_delay = forloop.index0 -%}
+      {%- else -%}
+        {%- assign columns = settings.products_per_row_on_desktop | plus: 0 -%}
+        {%- assign animation_delay = forloop.index0 | modulo: columns | times: 1 -%}
+      {%- endif -%}{%- for promo in promos_array -%}
+  {%- liquid
+    if promo == ''
+      continue
+    endif
+
+    assign promo_index = forloop.index
+    assign current_promo_markup = promo | split: '#promo_html#' | last | split: '#block_id#' | first
+    assign block_id = promo | split: '#block_id#' | last | split: '#promo_collection#' | first
+    assign promo_collection = promo | split: '#promo_collection#' | last | split: '#promo_width#' | first
+    assign promo_position = promo | split: '#promo_position#' | last | split: '#promo_html#' | first | times: 1
+    assign promo_width = promo | split: '#promo_width#' | last | split: '#promo_width_class#' | first | times: 1
+    assign promo_width_class = promo | split: '#promo_width_class#' | last
+    assign promo_index_tag = '@' | append: promo_index | append: '@'
+    assign block_class = 'collection-promo' | append: ' ' | append: promo_width_class
+    assign block_tablet_class = ''
+    assign promo_tablet_class = 'collection-promo--'
+    assign tablet_class = 'tablet-grid'
+    assign tablet_even_class = tablet_class | append: ' collection-promo--grid-even'
+    assign tablet_second_class = ' collection-promo--grid-second'
+    assign tablet_third_class = ' collection-promo--grid-third'
+    assign tablet_full_class = 'tablet-full'
+    assign animation_delay = counter_delay | modulo: columns | times: 1
+
+    if carousel
+      assign block_class = block_class | append: ' carousel__item'
+
+      case columns
+        when 2
+          assign block_class = block_class | append: ' one-half'
+        when 3
+          assign block_class = block_class | append: ' one-third'
+        when 4
+          assign block_class = block_class | append: ' one-quarter'
+      endcase
+    else
+      assign block_class = block_class | append: ' grid__item'
+    endif
+  -%}
+
+  {%- if promo_position <= counter_grid -%}
+    {%- unless added_promos_index contains promo_index_tag -%}
+      {%- if promo_collection == empty or promo_collection == collection.handle -%}
+        {%- liquid
+          if items_on_row_remaining < promo_width
+            assign animation_delay = 0
+            assign counter_delay = 0
+            assign items_on_row_remaining = columns
+          endif
+
+          assign promo_even = mobile_counter | modulo: 2
+          assign promo_second = tablet_counter | plus: 1 | modulo: 3
+          assign promo_third = tablet_counter | modulo: 3
+          assign counter_grid = counter_grid | plus: promo_width
+          assign items_on_row_remaining = items_on_row_remaining | minus: promo_width
+          assign counter_delay = counter_delay | plus: promo_width
+          assign block_tablet_class = tablet_class
+
+          case promo_width
+            when 1
+              if promo_even == 0
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: 1
+              assign mobile_counter = mobile_counter | plus: 1
+
+            when columns
+              assign counter_delay = 0
+              assign items_on_row_remaining = columns
+
+            when 2 or columns
+              assign counter_increase_mobile = 2
+              assign block_tablet_class = tablet_full_class
+
+              if promo_even == 0
+                assign counter_increase_mobile = 1
+                assign block_tablet_class = tablet_even_class
+              endif
+
+              if columns > 2
+                if promo_second == 0
+                  assign counter_increase_tablet = 2
+                  assign block_tablet_class = block_tablet_class | append: tablet_second_class
+                elsif promo_third == 0
+                  assign counter_increase_tablet = 1
+                  assign block_tablet_class = block_tablet_class | append: tablet_third_class
+                else
+                  if promo_width == 2
+                    assign counter_increase_tablet = 2
+                  else
+                    assign counter_increase_tablet = 3
+                  endif
+                endif
+              endif
+
+              assign tablet_counter = tablet_counter | plus: counter_increase_tablet
+              assign mobile_counter = mobile_counter | plus: counter_increase_mobile
+          endcase
+
+          assign promo_tablet_class = promo_tablet_class | append: block_tablet_class
+          assign added_promos_index = added_promos_index | append: '@' | append: promo_index | append: '@#'
+        -%}
+        <div id="{{ block_id }}"
+          class="{{ block_class }} {{ promo_tablet_class }}"
+          {% if carousel %} data-slide{% endif %}
+          {% if animations_enabled %}
+            data-aos="fade"
+            data-aos-delay="{{ animation_delay | times: 150 }}"
+          {% endif %}
+          data-promo>
+          {{ current_promo_markup }}
+        </div>
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endif -%}
+
+  {%- liquid
+    assign mod = counter_delay | modulo: columns
+    if mod < 1
+      assign items_on_row_remaining = columns
+      assign counter_delay = 0
+    endif
+  -%}
+{%- endfor -%}
+
+{%- liquid
+  assign animation_delay = counter_delay | modulo: columns | times: 1
+  assign counter_delay = counter_delay | plus: 1
+  assign counter_grid = counter_grid | plus: 1
+  assign items_on_row_remaining = items_on_row_remaining | minus: 1
+
+  if collection
+    render 'product-grid-item', product: product, animation_delay: animation_delay, tablet_counter: tablet_counter, mobile_counter: mobile_counter, carousel: carousel
+  else
+    render 'product-grid-item--onboarding', columns_mobile: columns_mobile, carousel: carousel, index: index, animation_delay: animation_delay
+  endif
+
+  assign tablet_counter = tablet_counter | plus: 1
+  assign mobile_counter = mobile_counter | plus: 1
+
+  assign mod = counter_delay | modulo: columns
+  if mod < 1
+    assign items_on_row_remaining = columns
+    assign counter_delay = 0
+  endif
+-%}{%- endfor -%}
+  {%- else -%}
+    {%- for i in (1..number_of_products) -%}
+      {%- capture index -%}{%- cycle 1, 2, 3, 4, 5, 6 -%}{%- endcapture -%}
+      {%- if carousel -%}
+        {%- assign animation_delay = forloop.index0 -%}
+      {%- else -%}
+        {%- assign columns = settings.products_per_row_on_desktop | plus: 0 -%}
+        {%- assign animation_delay = forloop.index0 | modulo: columns | times: 1 -%}
+      {%- endif -%}
+
+      {%- assign index = index | plus: 0 -%}
+      {%- render 'product-grid-item--onboarding',
+        columns_mobile: columns_mobile,
+        carousel: carousel,
+        index: index,
+        animation_delay: animation_delay -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture collection_container -%}
+  <div class="featured-collection__container {% if carousel %}carousel__container{% else %}grid__container{% endif %}">
+    <div class="{% if carousel %}carousel{% else %}grid{% endif %}{{ mobile_class }}{% if products.size == 0 %} featured-collection--empty{% endif %}"
+      {% if carousel %}
+        data-slider
+        data-slider-id="slider--{{ section.id }}"
+      {% endif %}>
+      {%- if collection -%}
+        {{ collection_items }}
+      {%- else -%}
+        {{ collection_onboarding }}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endcapture -%}
+
+{%- capture collection_bottom -%}
+  {%- if collection_button != blank -%}
+    <div class="featured-collection__bottom"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-delay="{{ columns | plus: 1 | times: 150 }}"
+        data-aos-anchor="{{ animation_anchor }}"
+      {% endif %}>
+      {{- collection_button -}}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
+<section
+  id="{{ id }}"
+  class="{{ section_classes }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="featured-collection"
+  data-columns="{{ columns }}">
+  <div class="{{ section_width }}">
+    {%- if is_split -%}
+      <div class="featured-collection__inner{% if layout == 'split-right' %} featured-collection__inner--splitright{% endif %}">
+    {%- endif -%}
+
+      {{ section_heading }}
+      {{ collection_container }}
+
+    {%- if is_split -%}
+      </div>
+    {%- endif -%}
+
+    {%- if add_collection_bottom -%}
+      {{ collection_bottom }}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "products_layout",
+      "label": "Layout",
+      "default": "grid",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" },
+        { "value": "split-left", "label": "Split left" },
+        { "value": "split-right", "label": "Split right" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "number_of_products",
+      "label": "Products",
+      "default":8,
+      "min": 1,
+      "max": 48,
+      "step": 1
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "text-left",
+      "options": [
+        { "label": "Center", "value": "text-center" },
+        { "label": "Left", "value": "text-left" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Best Sellers"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": 100,
+      "min": 75,
+      "max": 350,
+      "step": 5,
+      "unit": "%"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Use this text to share information about your collection with your customers.</p>"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "default": 100,
+      "min": 75,
+      "max": 250,
+      "step": 5,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "btn--black",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--text",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--large",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_slider_mobile",
+      "label": "Enable slider",
+      "default": true,
+      "info": "Horizontal slider in mobile layout."
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Products per row",
+      "default": "2",
+      "options": [
+        { "label": "1", "value": "1" },
+        { "label": "2", "value": "2" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper", "label": "Page width" },
+        { "value": "wrapper--full-padded", "label": "Full width padded" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+   "blocks": [
+    {
+      "type": "promo",
+      "name": "Promo",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "range",
+          "id": "position",
+          "label": "Show in position",
+          "min": 1,
+          "max": 48,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Width",
+          "default": "auto",
+          "options": [
+            { "value": "full", "label": "Full width" },
+            { "value": "half", "label": "2 grid items" },
+            { "value": "auto", "label": "Grid item" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Heading",
+          "default": "<p>Promotion title</p>",
+          "info": "Highlight one or two key words in your heading by italicizing them, then choose the highlight option below"
+        },
+        {
+          "type": "select",
+          "id": "heading_highlight_type",
+          "label": "Highlight type",
+          "default": "circle",
+          "options": [
+            { "value": "italics", "label": "Italics (no decoration)" },
+            { "value": "highlight", "label": "Highlight" },
+            { "value": "highlight-color", "label": "Text color" },
+            { "value": "underline", "label": "Underline" },
+            { "value": "squiggle", "label": "Squiggle" },
+            { "value": "circle", "label": "Circle" },
+            { "value": "stroke", "label": "Stroke (outlined text)" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "highlight_color",
+          "label": "Highlight color",
+          "default": "#D43747"
+        },
+        {
+          "type": "range",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": 100,
+          "min": 100,
+          "max": 200,
+          "step": 10,
+          "unit": "%"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Text",
+          "default": "Advertise a promotion or a sale"
+        },
+        {
+          "type": "range",
+          "id": "text_size",
+          "label": "Text size",
+          "default": 100,
+          "min": 100,
+          "max": 200,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "text-light",
+          "options": [
+            {
+              "value": "text-light",
+              "label": "Light"
+            },
+            {
+              "value": "text-dark",
+              "label": "Dark"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Content position",
+          "default": "center",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-right", "label": "Bottom right" },
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-right", "label": "Top right" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Content layout",
+          "default": "stacked",
+          "options": [
+            { "label": "Inline", "value": "inline" },
+            { "label": "Stacked", "value": "stacked" }
+          ],
+          "info": "The 'Inline' option only applies on desktop when the promo width is 'Full width'"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Text contrast",
+          "info": "Improves readability of text",
+          "min": 0,
+          "max": 95,
+          "step": 5,
+          "unit": "%",
+          "default": 10
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background color",
+          "default": "#D3D3D3",
+          "info": "Applies if no image is chosen"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "info": "Leave blank to link entire image"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button URL"
+        },
+        {
+          "type": "select",
+          "id": "button_color",
+          "label": "Button color",
+          "default": "btn--white",
+          "options": [
+            { "label": "Primary", "value": "btn--primary" },
+            { "label": "Secondary", "value": "btn--secondary" },
+            { "label": "White", "value": "btn--white" },
+            { "label": "Black", "value": "btn--black" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "default": "btn--solid-border",
+          "options": [
+            { "label": "Solid", "value": "btn--solid" },
+            { "label": "Outline", "value": "btn--outline" },
+            { "label": "Solid with border", "value": "btn--solid-border" },
+            { "label": "Text", "value": "btn--text" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Size",
+          "default": "btn--small",
+          "options": [
+            { "label": "Large", "value": "btn--large" },
+            { "label": "Medium", "value": "btn--medium" },
+            { "label": "Small", "value": "btn--small" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "category": "Collection"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside"]
+  }
+}
+{% endschema %}

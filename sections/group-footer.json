@@ -1,0 +1,55 @@
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "footer-block-0": {
+          "type": "logo",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/finallogo-wordmarkwhitepurple-400.png",
+            "logo_width": 170,
+            "show_shop_name": false,
+            "text": ""
+          }
+        },
+        "footer-block-2": {
+          "type": "link",
+          "settings": {
+            "menu": "footer",
+            "title": "Helpful Links"
+          }
+        },
+        "footer-block-3": {
+          "type": "newsletter",
+          "settings": {
+            "title": "Join CORECOLOUR",
+            "text": "<p>Stay up to date with the new collections, products and exclusive offers.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "footer-block-0",
+        "footer-block-2",
+        "footer-block-3"
+      ],
+      "settings": {
+        "width": "wrapper",
+        "show_footer_wave": false,
+        "show_social_links": true,
+        "show_payment_icons": true,
+        "bottom_menu": "",
+        "color_text": "#ffffff",
+        "color_bg": "#000000",
+        "color_border": "#ffffff",
+        "show_locale_selector": true,
+        "show_currency_selector": true,
+        "currency_type": "country"
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

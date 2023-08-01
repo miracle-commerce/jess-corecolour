@@ -1,0 +1,88 @@
+<!-- /snippets/inventory-countdown.liquid -->
+
+{% comment %}
+
+  This snippet is used to show the remaining number of products on PDP, FP and Quickview.
+
+{% endcomment %}
+
+{%- liquid
+  assign show_remaining_class = 'count-is-in'
+  assign current_inventory = 0
+
+  if max_inventory == blank
+    assign max_inventory = settings.max_inventory
+  endif
+
+  if max_inventory == blank
+    assign hide_inventory_count = settings.hide_inventory_count
+  endif
+
+  comment
+    Set a limit of the max inventory quantity to prevent a real quantity exposure
+  endcomment
+  assign max_inventory_quantity = max_inventory | plus: 1
+
+  if current_variant.inventory_management  and  current_variant.inventory_policy == 'deny'
+    if current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= max_inventory
+      assign show_remaining_class = 'count-is-low'
+      assign current_inventory = current_variant.inventory_quantity | at_most: max_inventory_quantity
+    elsif current_variant.inventory_quantity > 0 and current_variant.inventory_quantity > max_inventory
+      assign show_remaining_class = 'count-is-in'
+    else
+      assign show_remaining_class = 'count-is-out'
+    endif
+  else
+    assign show_remaining_class = 'count-is-in'
+  endif
+-%}
+
+<script data-product-remaining-json type="application/json">
+  {
+    {%- liquid
+      for variant in product_variants
+        assign variant_id = variant.id | json
+
+        if variant.inventory_management and variant.inventory_policy == 'deny'
+          assign quantity = variant.inventory_quantity | at_most: max_inventory_quantity
+
+          if hide_inventory_count
+            if quantity < 1
+              assign remaining_value = 'out'
+            elsif quantity > 0 and quantity < max_inventory
+              assign remaining_value = 'low'
+            else
+              assign remaining_value = 'in'
+            endif
+          else
+            assign remaining_value = quantity
+          endif
+        else
+          assign remaining_value = 'in'
+        endif
+
+        echo '"' | append: variant_id | append: '": "' | append: remaining_value | append: '"'
+
+        unless forloop.last
+          echo ','
+        endunless
+      endfor
+    -%}
+  }
+</script>
+
+{%- capture inventory -%}
+  <span data-remaining-count>{{ current_inventory | default: 0 }}</span>
+{%- endcapture -%}
+
+<div class="variant__countdown {{ show_remaining_class }}" data-remaining-max="{{ max_inventory }}" data-remaining-wrapper>
+  <span class="variant__countdown--in">{{ 'products.product.in_stock' | t }}</span>
+  {%- if hide_inventory_count -%}
+    <span class="variant__countdown--low">{{ 'products.product.remaining_no_count' | t }}</span>
+  {%- else -%}
+    <span class="variant__countdown--low">{{ 'products.product.remaining_html' | t: inventory: inventory }}</span>
+  {%- endif -%}
+
+  <span class="variant__countdown--out">{{ 'products.product.out_of_stock' | t }}</span>
+  <span class="variant__countdown--unavailable">{{ 'products.product.item_unavailable' | t }}</span>
+</div>

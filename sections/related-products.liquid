@@ -1,0 +1,149 @@
+{%- liquid
+  assign heading = section.settings.product_recommendations_heading
+  assign limit = section.settings.limit
+  assign columns = settings.products_per_row_on_desktop
+  assign bg_color = section.settings.bg_color
+  assign section_width = section.settings.width
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#RelatedProducts--' | append: section.id
+  assign animation_delay = 150
+-%}
+
+{%- style -%}
+  #RelatedProducts--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+
+  {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+    #RelatedProducts--{{ section.id }} { background-color: {{ bg_color }}; }
+    #RelatedProducts--{{ section.id }} .product-grid-item { --bg: {{ bg_color }}; }
+  {%- endif -%}
+{%- endstyle -%}
+
+<section
+  id="RelatedProducts--{{ section.id }}"
+  data-section-type="related-products"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-limit="{{ limit }}"
+  data-columns="{{ columns }}">
+
+  <div class="related-products section-padding" data-related-products>
+    {%- if recommendations.performed -%}
+      {%- if recommendations.products_count > 0 -%}
+        <div class="{{ section_width }}">
+          {%- if heading != blank -%}
+            <div class="section__header featured-collection__top">
+              <h2 class="section__heading h3"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-delay="{{ animation_delay }}"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}>
+                {{- heading -}}
+              </h2>
+
+              {%- if settings.show_spacer_lines -%}
+                <hr class="section__heading-line"{% if animations_enabled %}
+                    data-aos="fade-up"
+                    data-aos-delay="{{ animation_delay }}"
+                    data-aos-anchor="{{ animation_anchor }}"
+                    {%- assign animation_delay = animation_delay | plus: 150 -%}
+                  {% endif %}>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          <div class="carousel__container">
+            <div class="carousel carousel--inactive carousel--mobile"
+              data-slider
+              data-slider-id="slider--{{ section.id }}">
+              {%- for product in recommendations.products -%}
+                {%- assign animation_delay = forloop.index0 -%}
+                {%- render 'product-grid-item',
+                  product: product,
+                  carousel: true,
+                  animation_delay: animation_delay,
+                  animation_anchor: animation_anchor -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <div class="related__placeholder"></div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Dynamic recommendations change and improve with time. [Learn more](https://help.shopify.com/en/themes/development/recommended-products)"
+    },
+    {
+      "type":    "range",
+      "id":      "limit",
+      "min":     1,
+      "max":     6,
+      "step":    1,
+      "label":   "Product limit",
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "product_recommendations_heading",
+      "label": "Heading",
+      "default": "You May Also Like"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background"
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ]
+}
+{% endschema %}

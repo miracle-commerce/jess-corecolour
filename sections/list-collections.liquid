@@ -1,0 +1,247 @@
+{%- render 'list-collections' -%}
+
+{% schema %}
+  {
+    "name": "Collection list",
+    "class": "collection-list",
+    "max_blocks": 12,
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "All collections will be shown if no blocks added"
+      },
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "select",
+        "id": "layout",
+        "label": "Layout",
+        "default": "grid",
+        "options": [
+          { "value": "grid", "label": "Grid" },
+          { "value": "carousel", "label": "Carousel" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "alignment",
+        "label": "Alignment",
+        "default": "left",
+        "options": [
+          { "value": "left", "label": "Left" },
+          { "value": "center", "label": "Center" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "image_shape",
+        "label": "Image shape",
+        "default": "circle",
+        "options": [
+          { "label": "Circles", "value": "circle" },
+          { "label": "Squares", "value": "square" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "image_width",
+        "label": "Width",
+        "min": 100,
+        "max": 300,
+        "step": 25,
+        "unit": "px",
+        "default": 200
+      },
+      {
+        "type": "range",
+        "id": "image_height",
+        "label": "Height",
+        "min": 25,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "default": 100,
+        "info": "Squares only"
+      },
+      {
+        "type": "header",
+        "content": "Text"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Collections"
+      },
+      {
+        "type": "range",
+        "id": "heading_size",
+        "label": "Heading size",
+        "default": 100,
+        "min": 50,
+        "max": 200,
+        "step": 5,
+        "unit": "%"
+      },
+      {
+        "type": "range",
+        "id": "text_size",
+        "label": "Collection title size",
+        "default": 110,
+        "min": 75,
+        "max": 200,
+        "step": 5,
+        "unit": "%"
+      },
+      {
+        "type": "checkbox",
+        "id": "overlay_text",
+        "label": "Overlay text",
+        "info": "Text over images",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Mobile layout"
+      },
+      {
+        "type": "select",
+        "id": "layout_mobile",
+        "label": "Mobile layout",
+        "default": "carousel",
+        "options": [
+          { "value": "grid", "label": "Grid" },
+          { "value": "carousel", "label": "Carousel" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "image_width_mobile",
+        "label": "Width",
+        "min": 100,
+        "max": 300,
+        "step": 25,
+        "unit": "px",
+        "default": 150
+      },
+      {
+        "type": "range",
+        "id": "image_height_mobile",
+        "label": "Height",
+        "min": 25,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "default": 100,
+        "info": "Squares only"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "label": "Text",
+        "default": "text-dark",
+        "info": "Applies to text not overlaid on images",
+        "options": [
+          { "value": "text-light", "label": "Light" },
+          { "value": "text-dark", "label": "Dark" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper",
+        "options": [
+          { "value": "wrapper--full", "label": "Full width" },
+          { "value": "wrapper--full-padded", "label": "Full width padded" },
+          { "value": "wrapper", "label": "Page width" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection",
+        "name": "Collection",
+        "settings": [
+          {
+            "label": "Collection",
+            "id": "collection",
+            "type": "collection"
+          },
+          {
+            "type": "image_picker",
+            "id": "custom_collection_image",
+            "label": "Image"
+          },
+          {
+            "type": "header",
+            "content": "Colors"
+          },
+          {
+            "type": "color",
+            "id": "bg_color",
+            "label": "Background"
+          },
+          {
+            "type": "select",
+            "id": "text_color",
+            "label": "Text",
+            "default": "text-light",
+            "info": "Applies only to text overlaid on images",
+            "options": [
+              { "value": "text-light", "label": "Light" },
+              { "value": "text-dark", "label": "Dark" }
+            ]
+          },
+          {
+            "type": "range",
+            "id": "overlay_opacity",
+            "label": "Contrast",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": "%",
+            "default": 0
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

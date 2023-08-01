@@ -1,0 +1,191 @@
+{%- comment -%}
+  Renders a media element for the product gallery.
+  Media types include: image, video, external_video and model.
+  Accepts:
+  - media: {Object} Media Liquid object (required)
+  - featured_media: {Object} Media Liquid object (required) - featured media of a given product or variant
+  - image_width: {Number} - Image width on desktop based on section settings
+  - unique: {String} Section id
+  - hide_controls: {Boolean} True or false - Hide video controls
+
+  Usage:
+  {%- for media in product.media -%}
+    {% render 'media', media: media, featured_media: featured_media, unique: unique, hide_controls: hide_controls %}
+  {%- endfor -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign image_size = '1024x1024'
+  assign image_zoom_size = '2048x2048'
+  capture media_wrapper_id
+    echo 'FeaturedMedia-' | append: unique | append: '-' | append: media.id
+  endcapture
+
+  assign media_aspect_ratio = media.aspect_ratio
+  unless media_aspect_ratio
+    assign media_aspect_ratio = 1
+  endunless
+  assign media_padding_top = 1 | divided_by: media_aspect_ratio | times: 100 | round: 1
+
+  if section.settings.image_aspect_ratio
+    assign media_padding_top = section.settings.image_aspect_ratio | times: 100 | round: 1
+  endif
+
+  assign controls = true
+  if hide_controls
+    assign controls = false
+  endif
+
+  capture image
+    assign loading = loading | default: 'lazy'
+    assign preload = nil
+    assign fetchpriority = nil
+    assign image_alt = media.alt | strip_html | escape
+
+    if template.name == 'product' and media == featured_media
+      assign loading = 'eager'
+      assign fetchpriority = 'high'
+    endif
+
+    assign sizes = '(min-width: 1400px) ' | append: image_width | append: ', (min-width: 768px) calc((100vw - 40px) * 0.6 - 30px), calc(100vw - 40px)'
+
+    if section_type == 'quickview'
+      case settings.quick_buy_image_layout
+        when 'large'
+          assign sizes = '(min-width: 768px) 315px, calc((100vw - 50px) / 2 - 17px)'
+        when 'small'
+          assign sizes = '(min-width: 768px) 163px, calc((100vw - 50px) / 2 - 17px)'
+      endcase
+      assign widths = '150, 300, 315, 330, 360, 480, 540, 630, 720'
+      assign loading = 'eager'
+      assign fetchpriority = 'high'
+      assign preload = 'true'
+    endif
+
+    render 'image', image: media.preview_image, sizes: sizes, loading: loading, fetchpriority: fetchpriority, preload: preload, widths: widths, id: media.id, alt: image_alt, product_media: true
+  endcapture
+-%}
+
+<div id="{{ media_wrapper_id }}"
+  class="product-single__media-slide{% unless featured_media == media %} media--hidden{% endunless %}"
+  data-product-slide
+  data-id="{{ media.id }}"
+  data-aspectratio="{{ media_aspect_ratio }}"
+  data-media-id="{{ unique }}-{{ media.id }}"
+  data-type="{{ media.media_type }}"
+  {% if media.media_type == 'video' or media.media_type == 'external_video' %}
+    data-video
+    data-video-id="{{ media.id }}"
+    data-enable-video-looping="{{ enable_video_looping }}"
+  {% endif %}
+  {% if media.media_type == 'model' %}
+    data-model
+    data-model-id="{{ media.id }}"
+  {% endif %}
+  {% if media.media_type == 'external_video' %}
+    data-youtube-id="{{ media.external_id }}"
+  {% endif %}
+  data-product-single-media-wrapper>
+  {%- if media.media_type == 'image' -%}
+    <div class="product-single__media product-single__media--image">
+      <div class="product-single__media--image-height" style="padding-top: {{ media_padding_top }}%;"></div>
+
+      {{ image }}
+
+      {%- if enable_zoom and section_type != 'quickview' -%}
+        <a href="{{ media | product_img_url: image_zoom_size }}"
+          class="product-single__media-link"
+          rel="lightbox"
+          data-zoom-wrapper
+          data-image-width="{{ media.width }}"
+          data-image-height="{{ media.height }}">
+          <span class="visually-hidden">{{ 'general.accessibility.product_image_lightbox' | t }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+  {%- else -%}
+
+    {%- case media.media_type -%}
+      {%- when 'external_video' -%}
+        <deferred-media class="product-single__media product-single__media--video deferred-media" data-deferred-media style="padding-top: {{ media_padding_top }}%;">
+          <button type="button" class="deferred-media__poster" aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}" data-deferred-media-button>
+            <span class="deferred-media__poster-button">
+              {%- render 'icon-media-video' -%}
+            </span>
+
+            <img
+              srcset="{% if media.preview_image.width >= 288 %}{{ media.preview_image | img_url: '288x' }} 288w,{% endif %}
+                      {% if media.preview_image.width >= 576 %}{{ media.preview_image | img_url: '576x' }} 576w,{% endif %}
+                      {% if media.preview_image.width >= 550 %}{{ media.preview_image | img_url: '550x' }} 550w,{% endif %}
+                      {% if media.preview_image.width >= 1100 %}{{ media.preview_image | img_url: '1100x' }} 1100w{% endif %}"
+              src="{{ media | img_url: '550x550' }}"
+              sizes="(min-width: 1200px) calc((1200px - 10rem) / 2), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+              loading="lazy"
+              width="576"
+              height="{{ 576 | divided_by: media.preview_image.aspect_ratio }}"
+              alt="{{ media.preview_image.alt | escape }}">
+          </button>
+
+          <template>
+            {%- if media.host == 'youtube' -%}
+              {{ media | external_video_url: autoplay: true, mute: true, playsinline: true, controls: controls, loop: enable_video_looping, playlist: media.external_id | external_video_tag: loading: 'lazy' }}
+            {%- else -%}
+              {{ media | external_video_url: autoplay: true, muted: true, playsinline: true, controls: controls, loop: enable_video_looping | external_video_tag: loading: 'lazy' }}
+            {%- endif -%}
+          </template>
+        </deferred-media>
+      {%- when 'video' -%}
+        <deferred-media class="product-single__media product-single__media--video product-single__media--{{ media.id }} deferred-media" data-deferred-media style="padding-top: {{ media_padding_top }}%;" data-loop="{{ enable_video_looping }}">
+          <button type="button" class="deferred-media__poster" aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}" data-deferred-media-button>
+            <span class="deferred-media__poster-button">
+              {%- render 'icon-media-video' -%}
+            </span>
+
+            <img
+              srcset="{% if media.preview_image.width >= 288 %}{{ media.preview_image | img_url: '288x' }} 288w,{% endif %}
+                      {% if media.preview_image.width >= 576 %}{{ media.preview_image | img_url: '576x' }} 576w,{% endif %}
+                      {% if media.preview_image.width >= 550 %}{{ media.preview_image | img_url: '550x' }} 550w,{% endif %}
+                      {% if media.preview_image.width >= 1100 %}{{ media.preview_image | img_url: '1100x' }} 1100w{% endif %}"
+              src="{{ media | img_url: '550x550' }}"
+              sizes="(min-width: 1200px) calc((1200px - 10rem) / 2), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+              loading="lazy"
+              width="576"
+              height="{{ 576 | divided_by: media.preview_image.aspect_ratio }}"
+              alt="{{ media.preview_image.alt | escape }}">
+          </button>
+
+          <template>
+            {{ media | media_tag: image_size: image_size, class: 'media-video', autoplay: true, muted: true, loop: enable_video_looping, controls: controls }}
+          </template>
+        </deferred-media>
+      {%- when 'model' -%}
+        <deferred-media class="product-single__media product-single__media--model product-single__media--{{ media.id }} deferred-media" data-deferred-media style="padding-top: {{ media_padding_top }}%;" data-loop="{{ enable_video_looping }}">
+          <button type="button" class="deferred-media__poster" aria-label="{{ 'general.accessibility.view' | t }} {{ media.alt | strip_html | escape }}" data-deferred-media-button>
+            <span class="deferred-media__poster-button">
+              {%- render 'icon-media-model' -%}
+            </span>
+
+            <img
+              srcset="{% if media.preview_image.width >= 288 %}{{ media.preview_image | img_url: '288x' }} 288w,{% endif %}
+                      {% if media.preview_image.width >= 576 %}{{ media.preview_image | img_url: '576x' }} 576w,{% endif %}
+                      {% if media.preview_image.width >= 550 %}{{ media.preview_image | img_url: '550x' }} 550w,{% endif %}
+                      {% if media.preview_image.width >= 1100 %}{{ media.preview_image | img_url: '1100x' }} 1100w{% endif %}"
+              src="{{ media | img_url: '550x550' }}"
+              sizes="(min-width: 1200px) calc((1200px - 10rem) / 2), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+              loading="lazy"
+              width="576"
+              height="{{ 576 | divided_by: media.preview_image.aspect_ratio }}"
+              alt="{{ media.preview_image.alt | escape }}">
+          </button>
+
+          <template>
+            {{ media | model_viewer_tag: image_size: image_size, toggleable: true, data-model-id: media.id }}
+          </template>
+        </deferred-media>
+      {%- else -%}
+        <div class="product-single__media" style="padding-top: {{ media_padding_top }}%;">
+          {{ media | media_tag: class: 'media-item', image_size: image_size }}
+        </div>
+    {%- endcase -%}
+  {%- endif -%}
+</div>

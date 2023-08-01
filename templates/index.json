@@ -1,0 +1,688 @@
+{
+  "sections": {
+    "f65731be-fed8-4ca8-825e-2c8bce9ebe5b": {
+      "type": "section-slideshow",
+      "blocks": {
+        "04dbb7ca-d15a-4e78-aeba-0ee0122c931d": {
+          "type": "image",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/promobanner2-straightcase.jpg",
+            "image_mobile": "shopify:\/\/shop_images\/promobanner2portrait-straightcase-2.jpg",
+            "overlay_opacity": 0,
+            "text_width": "normal",
+            "text_position": "bottom-left",
+            "text_color": "text-light",
+            "subheading": "",
+            "title": "",
+            "text": "",
+            "button_1_text": "Shop Sale",
+            "button_1_link": "shopify:\/\/collections\/sale",
+            "button_1_color": "btn--black",
+            "button_1_style": "btn--solid",
+            "button_1_size": "btn--medium",
+            "button_2_text": "",
+            "button_2_link": "",
+            "button_2_color": "btn--black",
+            "button_2_style": "btn--solid",
+            "button_2_size": "btn--large",
+            "video_text": "",
+            "video_link": ""
+          }
+        },
+        "d178d776-15d3-4477-872e-644841c22105": {
+          "type": "image",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/purplebutterflybanner.jpg",
+            "image_mobile": "shopify:\/\/shop_images\/7070E7A7-E6CC-4ac4-ABC8-8A724749315E.png",
+            "overlay_opacity": 25,
+            "text_width": "normal",
+            "text_position": "bottom-left",
+            "text_color": "text-light",
+            "subheading": "",
+            "title": "GLAM UP YOUR CASE",
+            "text": "Shine and shimmer all the way through",
+            "button_1_text": "Shop All",
+            "button_1_link": "shopify:\/\/collections\/glitter-cases",
+            "button_1_color": "btn--primary",
+            "button_1_style": "btn--solid",
+            "button_1_size": "btn--medium",
+            "button_2_text": "",
+            "button_2_link": "",
+            "button_2_color": "btn--secondary",
+            "button_2_style": "btn--solid",
+            "button_2_size": "btn--large",
+            "video_text": "",
+            "video_link": ""
+          }
+        },
+        "template--18952593899841__f65731be-fed8-4ca8-825e-2c8bce9ebe5b-168312590450cae23f-0": {
+          "type": "image",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/bannerlatenightdrive.jpg",
+            "image_mobile": "shopify:\/\/shop_images\/bannerlatenightdrivemobile.jpg",
+            "overlay_opacity": 25,
+            "text_width": "normal",
+            "text_position": "bottom-right",
+            "text_color": "text-light",
+            "subheading": "",
+            "title": "STYLISH & DURABLE",
+            "text": "Give Your iPhone 14 Pro The Love It Deserves",
+            "button_1_text": "SHOP RANGE",
+            "button_1_link": "shopify:\/\/collections\/iphone-14-pro",
+            "button_1_color": "btn--primary",
+            "button_1_style": "btn--solid",
+            "button_1_size": "btn--small",
+            "button_2_text": "",
+            "button_2_link": "",
+            "button_2_color": "btn--secondary",
+            "button_2_style": "btn--solid",
+            "button_2_size": "btn--large",
+            "video_text": "",
+            "video_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "04dbb7ca-d15a-4e78-aeba-0ee0122c931d",
+        "d178d776-15d3-4477-872e-644841c22105",
+        "template--18952593899841__f65731be-fed8-4ca8-825e-2c8bce9ebe5b-168312590450cae23f-0"
+      ],
+      "settings": {
+        "slide_height": "full-height",
+        "enable_mobile_height": true,
+        "mobile_slide_height": "seven-fifty-height-mobile",
+        "show_nav_dots": true,
+        "show_nav_arrows": true,
+        "show_arrow_down": false,
+        "autoplay": true,
+        "duration": 8,
+        "transition": "fade",
+        "enable_zoom_animation": true,
+        "heading_size": 120
+      }
+    },
+    "9e58ac81-e88d-4b2e-a006-c6d620af2258": {
+      "type": "section-grid",
+      "blocks": {
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-1": {
+          "type": "image",
+          "settings": {
+            "width": "33.33",
+            "image": "shopify:\/\/shop_images\/MS_case.png",
+            "overlay_opacity": 40,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "SHOCKPROOF",
+            "text": "Certified 10ft drop for the ultimate protection.",
+            "button_1_text": "Shop Now",
+            "button_1_link": "shopify:\/\/collections\/shockproof-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        },
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-2": {
+          "type": "image",
+          "settings": {
+            "width": "33.33",
+            "image": "shopify:\/\/shop_images\/skateboardsiliconecases.jpg",
+            "overlay_opacity": 40,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "SUPER GRIP",
+            "text": "Extra grip for those slippery situations.",
+            "button_1_text": "Shop Now",
+            "button_1_link": "shopify:\/\/collections\/the-grippiest-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        },
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-3": {
+          "type": "image",
+          "settings": {
+            "width": "33.33",
+            "image": "shopify:\/\/shop_images\/pinkphonecase.jpg",
+            "overlay_opacity": 40,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "UNIQUE DESIGNS",
+            "text": "Head turning designs you won't find anywhere else.",
+            "button_1_text": "Shop Now",
+            "button_1_link": "shopify:\/\/collections\/printed-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        }
+      },
+      "block_order": [
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-1",
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-2",
+        "template--18952593899841__9e58ac81-e88d-4b2e-a006-c6d620af2258-168312639266b8b01a-3"
+      ],
+      "settings": {
+        "height": "650",
+        "heading_size": 110,
+        "button_1_color": "btn--white",
+        "button_1_style": "btn--text",
+        "button_1_size": "btn--small",
+        "button_2_color": "btn--black",
+        "button_2_style": "btn--text",
+        "button_2_size": "btn--small",
+        "bg_color_secondary": false,
+        "enable_slider_mobile": true,
+        "width": "wrapper--full-padded",
+        "add_gutter": true,
+        "padding_top": 20,
+        "padding_bottom": 70
+      }
+    },
+    "2158316a-7e05-40d1-a29e-a377713e45db": {
+      "type": "section-image-with-text",
+      "settings": {
+        "section_height": "six-fifty-height",
+        "layout": "inline",
+        "image_location": "left",
+        "image_width": "standard",
+        "image": "shopify:\/\/shop_images\/guardian.jpg",
+        "subheading": "Just Landed:",
+        "title": "<p>What's Hot Right Now!<\/p>",
+        "heading_highlight_type": "circle",
+        "highlight_color": "#9585ff",
+        "heading_size": 110,
+        "text_content": "Stalk Our Latest Designs ...",
+        "text_alignment": "left",
+        "button_text": "CHECK IT OUT",
+        "button_link": "shopify:\/\/collections\/new",
+        "button_color": "btn--black",
+        "button_style": "btn--solid",
+        "button_size": "btn--medium",
+        "video_link": "",
+        "text_color": "text-dark",
+        "bg_color": "rgba(0,0,0,0)",
+        "section_width": "wrapper--full-padded",
+        "padding_top": 68,
+        "padding_bottom": 68
+      }
+    },
+    "4cf35844-daa9-481f-b090-8c1bf37ee05d": {
+      "type": "section-collection",
+      "blocks": {
+        "73237c64-6f39-4429-a676-a44d096037c0": {
+          "type": "promo",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/leatherdarkbluecase.png",
+            "position": 1,
+            "width": "auto",
+            "title": "<p>Don't miss out on our popular items!<\/p>",
+            "heading_highlight_type": "circle",
+            "highlight_color": "rgba(0,0,0,0)",
+            "heading_size": 100,
+            "content": "",
+            "text_size": 100,
+            "text_color": "text-light",
+            "text_position": "bottom-left",
+            "layout": "stacked",
+            "overlay_opacity": 40,
+            "bg_color": "#f7f7f7",
+            "button_text": "",
+            "button_link": "",
+            "button_color": "btn--white",
+            "button_style": "btn--solid-border",
+            "button_size": "btn--small"
+          }
+        }
+      },
+      "block_order": [
+        "73237c64-6f39-4429-a676-a44d096037c0"
+      ],
+      "settings": {
+        "collection": "best-sellers",
+        "products_layout": "carousel",
+        "number_of_products": 8,
+        "text_alignment": "text-left",
+        "title": "BEST SELLERS",
+        "heading_size": 170,
+        "text": "<p>Here Today, Out Of Stock Tomorrow.<\/p>",
+        "text_size": 85,
+        "button_text": "SHOP ALL BEST SELLERS",
+        "button_color": "btn--black",
+        "button_style": "btn--text",
+        "button_size": "btn--small",
+        "bg_color_secondary": false,
+        "enable_slider_mobile": true,
+        "columns_mobile": "2",
+        "width": "wrapper--full-padded",
+        "padding_top": 68,
+        "padding_bottom": 68
+      }
+    },
+    "5a421ee0-365a-441d-a024-c1be356cc89e": {
+      "type": "section-collection",
+      "settings": {
+        "collection": "limited-free-shipping-range",
+        "products_layout": "carousel",
+        "number_of_products": 8,
+        "text_alignment": "text-left",
+        "title": "SHIPPED FREE TO YOU",
+        "heading_size": 95,
+        "text": "<p>For a limited time only, pay NOTHING for standard shipping on selected phone cases! <\/p>",
+        "text_size": 80,
+        "button_text": "SHOP ALL",
+        "button_color": "btn--black",
+        "button_style": "btn--text",
+        "button_size": "btn--small",
+        "bg_color_secondary": false,
+        "enable_slider_mobile": true,
+        "columns_mobile": "2",
+        "width": "wrapper--full-padded",
+        "padding_top": 68,
+        "padding_bottom": 68
+      }
+    },
+    "section-look": {
+      "type": "section-look",
+      "blocks": {
+        "e2f829a3-d786-40e9-9e96-00cc5177c9c1": {
+          "type": "product",
+          "settings": {
+            "product": "4-in-1-magnetic-wireless-charger",
+            "position_x": 52,
+            "position_y": 67
+          }
+        },
+        "section-look-0": {
+          "type": "product",
+          "settings": {
+            "product": "macbook-case-with-paw-sitive-pals-macbook-pro-14-2021-2023",
+            "position_x": 21,
+            "position_y": 19
+          }
+        },
+        "section-look-1": {
+          "type": "product",
+          "settings": {
+            "product": "ipad-case-a-purr-fect-day-ipad-pro-11-1st-gen-2018-ipad-air-10-9-4th-5th-gen",
+            "position_x": 20,
+            "position_y": 54
+          }
+        },
+        "f0a58777-b163-4f87-bc71-c011c30096d9": {
+          "type": "product",
+          "settings": {
+            "product": "iphone-13-pro-max-a-purr-fect-day-phone-case",
+            "position_x": 19,
+            "position_y": 84
+          }
+        }
+      },
+      "block_order": [
+        "e2f829a3-d786-40e9-9e96-00cc5177c9c1",
+        "section-look-0",
+        "section-look-1",
+        "f0a58777-b163-4f87-bc71-c011c30096d9"
+      ],
+      "settings": {
+        "image": "shopify:\/\/shop_images\/macbookipadcases.jpg",
+        "enable_aspect_ratio": true,
+        "main_image_aspect_ratio": 1.1,
+        "title": "IT’S A MATCH!",
+        "text": "<p>Coordinate (Or Clash) Your CORECOLOUR Phone Case With Our Range Of Macbook And Airpod Cases.<\/p>",
+        "text_alignment": "text-left",
+        "show_hotspots": true,
+        "content_color": "text-dark",
+        "hotspot_color": "",
+        "bg_color_secondary": false,
+        "width": "wrapper",
+        "padding_top": 66,
+        "padding_bottom": 66
+      }
+    },
+    "e2ceca16-8ed7-4a2a-82a5-89a1b93fa502": {
+      "type": "section-video",
+      "disabled": true,
+      "settings": {
+        "video_height": "seven-fifty-height",
+        "text_position": "bottom-left",
+        "video_link_bg": "",
+        "video_link": "",
+        "image": "shopify:\/\/shop_images\/ecocases.jpg",
+        "overlay_opacity": 10,
+        "text_color": "text-light",
+        "title": "<p>ECO-FRIENDLY CASES<\/p>",
+        "heading_highlight_type": "italics",
+        "highlight_color": "#e0ff85",
+        "text": "100% compostable, 100% biodegradable",
+        "heading_size": 100,
+        "button_text": "DISCOVER MORE",
+        "button_link": "shopify:\/\/collections\/eco-cases",
+        "button_color": "btn--white",
+        "button_style": "btn--solid",
+        "button_size": "btn--medium"
+      }
+    },
+    "77162095-4d28-4059-a133-b5065a7d213f": {
+      "type": "section-banner-image",
+      "blocks": {
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>ECO-FRIENDLY CASES<\/p>",
+            "size": 100,
+            "heading_highlight_type": "italics",
+            "highlight_color": "#d43747"
+          }
+        },
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-2": {
+          "type": "text",
+          "settings": {
+            "text": "<p>100% biodegradable, 100% compostable<\/p>",
+            "size": 100
+          }
+        },
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-3": {
+          "type": "button",
+          "settings": {
+            "button_1_text": "DISCOVER MORE",
+            "button_1_link": "shopify:\/\/collections\/eco-friendly-cases",
+            "button_1_color": "btn--white",
+            "button_1_style": "btn--solid-border",
+            "button_1_size": "btn--small",
+            "button_2_text": "",
+            "button_2_link": "",
+            "button_2_color": "btn--black",
+            "button_2_style": "btn--solid",
+            "button_2_size": "btn--small"
+          }
+        }
+      },
+      "block_order": [
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-1",
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-2",
+        "template--19407993241878__77162095-4d28-4059-a133-b5065a7d213f-168739576319f97bcb-3"
+      ],
+      "settings": {
+        "height": "seven-fifty-height",
+        "enable_mobile_height": true,
+        "mobile_height": "four-fifty-height-mobile",
+        "image": "shopify:\/\/shop_images\/ecocases.jpg",
+        "image_mobile": "shopify:\/\/shop_images\/ecocases.jpg",
+        "overlay_opacity": 10,
+        "enable_zoom_animation": true,
+        "text_width": "normal",
+        "text_position": "bottom-left",
+        "text_color": "text-light"
+      }
+    },
+    "e4e4b5ec-149f-4f0b-bcdd-985d7cf8cf72": {
+      "type": "section-divider",
+      "settings": {
+        "show_line": false,
+        "width": "wrapper",
+        "padding_top": 10,
+        "padding_bottom": 10
+      }
+    },
+    "bd3ff1f5-8eda-4c33-a046-c79e6c9625ee": {
+      "type": "section-testimonials",
+      "blocks": {
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-0": {
+          "type": "text",
+          "settings": {
+            "heading": "See what our customer have to say about us!",
+            "text_size": 125,
+            "subheading": "<p>4.98 average<br\/>5000 product reviews<\/p>",
+            "block_color": "#000000",
+            "text_color": "text-light",
+            "text_alignment": "text-left"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-1": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>Good product. Perfect delivery and condition.<\/p>",
+            "customer_name": "Eric R",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-2": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>Maybe not the sturdiest or most durable, but it sure is one of the cutest! the colours are nice and vibrant!<\/p>",
+            "customer_name": "Keyla P",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-3": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>Bought this as requested by my niece. She is using it on her phone now and is happy with it.<\/p>",
+            "customer_name": "Renee T",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-4": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>I love this case so much!! it's such great quality and also so cute and trendy. can't wait to purchase more glimmer cases in the future.<\/p>",
+            "customer_name": "Chloe V",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-5": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>This case is beautiful and my daughter loves it on her new phone.<\/p>",
+            "customer_name": "Alexandra H",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        },
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-6": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "text": "<p>I didn't want to spend much money on a case This case is everything I hoped for. Great design. Very durable and gives great protection for my phone.<\/p>",
+            "customer_name": "Harry D",
+            "subheading": "<p>Verified Buyer<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-0",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-1",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-2",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-3",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-4",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-5",
+        "template--19407993241878__bd3ff1f5-8eda-4c33-a046-c79e6c9625ee-1686785356e65ac739-6"
+      ],
+      "settings": {
+        "title": "WHAT OUR CUSTOMERS SAY",
+        "text_size": 100,
+        "text_alignment": "text-left",
+        "bg_color": "",
+        "testimonial_block_color": "",
+        "testimonial_text_color": "text-dark",
+        "width": "wrapper--full-padded",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "60f2ff14-dbd9-4268-a6d2-e68e1bf436d1": {
+      "type": "section-text",
+      "blocks": {
+        "template--19407993241878__60f2ff14-dbd9-4268-a6d2-e68e1bf436d1-1687149017355cbdaf-1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>BE INSPIRED #CORECOLOUR<\/p>",
+            "size": 80,
+            "heading_highlight_type": "squiggle",
+            "highlight_color": "#d43747"
+          }
+        }
+      },
+      "block_order": [
+        "template--19407993241878__60f2ff14-dbd9-4268-a6d2-e68e1bf436d1-1687149017355cbdaf-1"
+      ],
+      "settings": {
+        "text_position": "left",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper",
+        "padding_top": 68,
+        "padding_bottom": 0
+      }
+    },
+    "7da9cda7-6eb9-4ac5-adbf-f20c21b7b879": {
+      "type": "section-grid",
+      "blocks": {
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-1": {
+          "type": "image",
+          "settings": {
+            "width": "25",
+            "image": "shopify:\/\/shop_images\/kol-teems-js.jpg",
+            "overlay_opacity": 20,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "",
+            "text": "@teems.js",
+            "button_1_text": "",
+            "button_1_link": "shopify:\/\/products\/iphone-14-pro-max-ghost-squad-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        },
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-2": {
+          "type": "image",
+          "settings": {
+            "width": "25",
+            "image": "shopify:\/\/shop_images\/kol-kaylapretlove.jpg",
+            "overlay_opacity": 10,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "",
+            "text": "@kaylapretlove",
+            "button_1_text": "",
+            "button_1_link": "shopify:\/\/products\/iphone-14-pro-max-late-night-drive-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        },
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-3": {
+          "type": "image",
+          "settings": {
+            "width": "25",
+            "image": "shopify:\/\/shop_images\/kol-_miis2_vinna.jpg",
+            "overlay_opacity": 10,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "",
+            "text": "@_miis2_vinna",
+            "button_1_text": "",
+            "button_1_link": "shopify:\/\/products\/iphone-14-pro-max-warm-whisky-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        },
+        "1b9dfb8a-15cd-4278-9c3d-fd0b75cefe36": {
+          "type": "image",
+          "settings": {
+            "width": "25",
+            "image": "shopify:\/\/shop_images\/kol-olivia.dryden.jpg",
+            "overlay_opacity": 10,
+            "text_position": "bottom-left",
+            "subheading": "",
+            "title": "",
+            "text": "@olivia.dryden",
+            "button_1_text": "",
+            "button_1_link": "shopify:\/\/products\/iphone-14-pro-max-countess-camellia-phone-case",
+            "button_2_text": "",
+            "button_2_link": "",
+            "text_color": "text-light"
+          }
+        }
+      },
+      "block_order": [
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-1",
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-2",
+        "template--19407993241878__7da9cda7-6eb9-4ac5-adbf-f20c21b7b879-1688444251a8447c99-3",
+        "1b9dfb8a-15cd-4278-9c3d-fd0b75cefe36"
+      ],
+      "settings": {
+        "height": "350",
+        "heading_size": 100,
+        "button_1_color": "btn--white",
+        "button_1_style": "btn--text",
+        "button_1_size": "btn--small",
+        "button_2_color": "btn--black",
+        "button_2_style": "btn--text",
+        "button_2_size": "btn--small",
+        "bg_color_secondary": false,
+        "enable_slider_mobile": true,
+        "width": "wrapper",
+        "add_gutter": true,
+        "padding_top": 38,
+        "padding_bottom": 60
+      }
+    },
+    "a397aae4-365a-4957-acf4-8cca68e217a3": {
+      "type": "section-text",
+      "blocks": {
+        "c0bf7803-aef7-4b0f-ac2b-f233e36244de": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>TAG US @CORECOLOUROFFICIAL<\/p>",
+            "size": 80,
+            "heading_highlight_type": "squiggle",
+            "highlight_color": "#d43747"
+          }
+        }
+      },
+      "block_order": [
+        "c0bf7803-aef7-4b0f-ac2b-f233e36244de"
+      ],
+      "settings": {
+        "text_position": "left",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper",
+        "padding_top": 68,
+        "padding_bottom": 0
+      }
+    },
+    "2343eea1-4a76-45ea-8cd6-f1226e1ab872": {
+      "type": "section-custom-html",
+      "settings": {
+        "custom_code": "<div id=\"insta-feed\"><\/div>",
+        "width": "wrapper",
+        "padding_top": 0,
+        "padding_bottom": 68
+      }
+    }
+  },
+  "order": [
+    "f65731be-fed8-4ca8-825e-2c8bce9ebe5b",
+    "9e58ac81-e88d-4b2e-a006-c6d620af2258",
+    "2158316a-7e05-40d1-a29e-a377713e45db",
+    "4cf35844-daa9-481f-b090-8c1bf37ee05d",
+    "5a421ee0-365a-441d-a024-c1be356cc89e",
+    "section-look",
+    "e2ceca16-8ed7-4a2a-82a5-89a1b93fa502",
+    "77162095-4d28-4059-a133-b5065a7d213f",
+    "e4e4b5ec-149f-4f0b-bcdd-985d7cf8cf72",
+    "bd3ff1f5-8eda-4c33-a046-c79e6c9625ee",
+    "60f2ff14-dbd9-4268-a6d2-e68e1bf436d1",
+    "7da9cda7-6eb9-4ac5-adbf-f20c21b7b879",
+    "a397aae4-365a-4957-acf4-8cca68e217a3",
+    "2343eea1-4a76-45ea-8cd6-f1226e1ab872"
+  ]
+}

@@ -1,0 +1,92 @@
+{%- comment -%} sections/main-page.liquid {%- endcomment -%}
+{%- liquid
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Page--' | append: section.id
+  assign animation_delay = 150
+  assign bg_color_secondary = section.settings.bg_color_secondary
+-%}
+
+{%- style -%}
+  #Page--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+{%- if section.settings.show_page_title or page.content != blank -%}
+  <section id="Page--{{ section.id }}" class="section-default section-padding{% if bg_color_secondary %} bg-secondary{% endif %}">
+    <div class="wrapper">
+      {%- if section.settings.show_page_title -%}
+        <h1 class="page-title text-center"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          {{- page.title -}}
+        </h1>
+      {%- endif -%}
+
+      <div class="rte"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {{- page.content -}}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Page",
+    "class": "shopify-section--page",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_page_title",
+        "label": "Show page title",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ]
+  }
+{% endschema %}

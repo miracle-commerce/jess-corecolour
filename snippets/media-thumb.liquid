@@ -1,0 +1,67 @@
+{%- comment -%}
+  Renders a thumbnail element for a media.
+  Media types include: image, video, external_video and model.
+  Accepts:
+  - media: {Object} Media Liquid object (required)
+  - featured_media: {Object} Media Liquid object (required) - featured media of a given product or variant
+  - unique: {String} Unique id for the media
+  - has_link: {Boolean} true or false - Wrap the element in a hyperlink tag in order to be clickable and tabbable
+  - product_title: {String} Product title used for `aria-label` attribute
+
+  Usage:
+  {%- for media in product.media -%}
+    {%- render 'media-thumb', media: media, featured_media: featured_media, has_link: true, product_title: product.title -%}
+  {%- endfor -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign thumbnail = media.preview_image
+  assign url_pattern = thumbnail | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+  assign widths = '[98, 196, 294, 392, 588]'
+  assign media_id = media.id
+  assign unique = unique | default: section.id
+
+  capture thumbnail_id
+    echo unique | append: '-' | append: media_id
+  endcapture
+-%}
+
+{%- capture thumbnail_markup -%}
+  <img src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+    class="product-single__thumbnail-img lazyload"
+    data-src="{{ url_pattern }}"
+    data-widths= "{{ widths }}"
+    data-aspectratio="{{ thumbnail.aspect_ratio }}"
+    data-sizes="auto"
+    width="98"
+    height="98"
+    data-object-fit="cover"
+    alt="{{ thumbnail.alt | escape }}">
+
+  <noscript>
+    <img src="{{ thumbnail.src | img_url: '98x' }}" alt="{{ thumbnail.alt | escape }}" class="product-single__thumbnail-img">
+  </noscript>
+{%- endcapture -%}
+
+{%- capture additional_icons -%}
+  {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+    {%- render 'icon-media-video' -%}
+  {%- elsif media.media_type == 'model' -%}
+    {%- render 'icon-media-model' -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<div class="product-single__thumbnail" data-id="{{ media_id }}" data-thumbnail-id="{{ thumbnail_id }}">
+  {%- if has_link -%}
+    <a href="{{ thumbnail | img_url: '2048x' }}"
+      class="product-single__thumbnail-link"
+      aria-label="{{ product_title | strip_html | escape }}">
+  {%- endif -%}
+
+    {{- thumbnail_markup -}}
+    {{- additional_icons -}}
+
+  {%- if has_link -%}
+    </a>
+  {%- endif -%}
+</div>

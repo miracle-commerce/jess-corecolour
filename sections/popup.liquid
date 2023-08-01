@@ -1,0 +1,590 @@
+<!-- /sections/popups.liquid -->
+{%- unless request.path == '/challenge' -%}
+  {%- if section.blocks.size > 0 -%}
+    <div data-section-id="{{ section.id }}" data-section-type="popups">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign classes = ''
+          assign target_url = block.settings.target_url
+          assign target_url_enabled = block.settings.target_url_enabled
+          assign target_referrer = block.settings.target_referrer
+          assign target_referrer_enabled = block.settings.target_referrer_enabled
+          assign target_device = block.settings.target_device
+          assign target_device_enabled = block.settings.target_device_enabled
+          assign image = block.settings.image
+          assign image_aspect_ratio = block.settings.image_aspect_ratio
+          assign title = block.settings.title
+          assign text = block.settings.text
+          assign height = block.settings.height
+          assign text_color = block.settings.text_color
+          assign bg_color = block.settings.bg_color
+          assign position = block.settings.position
+          assign button_text = block.settings.button_text
+
+          if image != blank
+            assign image_padding_top = 1 | divided_by: image.aspect_ratio | times: 100 | round: 1
+          endif
+
+          if block.type == 'cookie'
+            assign classes = 'cookies '
+          endif
+
+          if target_device_enabled
+            if target_device == 'mobile'
+              assign classes = classes | append: ' mobile'
+            endif
+
+            if target_device == 'desktop'
+              assign classes = classes | append: ' desktop'
+            endif
+          endif
+
+          assign show_popup = true
+
+          if target_url_enabled or target_referrer_enabled
+            assign show_popup = false
+          endif
+
+          if target_url_enabled and target_url != blank
+            if target_url == request.path
+              assign show_popup = true
+            endif
+          endif
+        -%}
+
+        {%- capture style -%}
+          {%- if image_aspect_ratio -%}
+            --image-aspect-ratio: {{ image_aspect_ratio | times: 100 | round: 1 }}%;
+          {%- endif -%}
+
+          {%- if bg_color != blank and bg_color != 'rgba(0,0,0,0)' -%}
+            --bg: {{ bg_color }};
+          {%- endif -%}
+        {%- endcapture -%}
+
+        {%- if target_referrer_enabled and target_referrer != blank -%}
+          {%- capture target_referrer_attribute -%}
+            data-target-referrer="{{ target_referrer }}"
+          {%- endcapture -%}
+
+          {%- assign show_popup = true -%}
+        {%- endif -%}
+
+        {%- capture block_attributes -%}
+          data-block-id="{{ block.id }}"
+          data-popup
+          data-popup-delay="{{ block.settings.trigger }}"
+          {% if style != blank %}
+            style="{{ style }}"
+          {% endif %}
+          data-enable="{{ block.settings.show_cookies_popup }}"
+          data-cookie-name="{{ block.type }}-{{ forloop.index }}-{{ section.id }}"
+          {{ target_referrer_attribute }}
+          {% if classes != '' %}
+            class="{{ classes }}"
+          {% endif %}
+          {{ block.shopify_attributes }}
+        {%- endcapture -%}
+
+        {%- if 'popup-with-image' -%}
+          {%- capture popup_content -%}
+            <div class="popup__content">
+              <div class="popup__inner">
+                {%- if title != blank and text != blank -%}
+                  <div class="popup__text">
+                    {%- unless title == blank -%}
+                      <h3 class="popup__title">{{ title | strip_html | escape }}</h3>
+                    {%- endunless -%}
+
+                    {%- unless text == blank -%}
+                      <div class="popup__description rte">{{ text }}</div>
+                    {%- endunless -%}
+                  </div>
+                {%- endif -%}
+
+                {%- if block.settings.show_newsletter_form -%}
+                  <div class="popup__form">
+                    {%- render 'newsletter-form'
+                      unique: block.id,
+                      extra_fields: block.settings.extra_fields,
+                      button_text: button_text,
+                      is_popup: true -%}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endcapture -%}
+        {%- endif -%}
+
+        {%- if show_popup -%}
+          {%- case block.type -%}
+            {%- when 'popup-with-image' -%}
+              <div data-large-promo {{ block_attributes }}>
+                <div class="popup popup--large popup--{% if image %}has-image{% else %}no-image{% endif %} {{ text_color }}" id="popup--{{ block.id }}" data-large-promo-inner>
+                  <div class="popup__wrapper popup__wrapper--{{ position }}">
+                    <div class="popup__body" data-popup-body>
+                      <div class="popup__container">
+                        {%- if image -%}
+                          <div class="popup__image">
+                            <div class="popup__image__outer {{ height }}">
+                              <div class="popup__image__mobile" style="padding-top: {{ image_padding_top }}%;"></div>
+
+                              {%- render 'image-fill',
+                                is_background: true,
+                                img_object: image,
+                                classes: 'popup__image__img' -%}
+                            </div>
+                          </div>
+                        {%- endif -%}
+
+                        {{- popup_content -}}
+                      </div>
+
+                      <button class="popup__close" type="button" data-popup-close>
+                        <span class="visually-hidden">{{ 'general.accessibility.close' | t }}</span>
+                        {%- render 'icon-close' -%}
+                      </button>
+                    </div>
+
+                    <div class="popup__underlay" data-popup-underlay></div>
+                  </div>
+                </div>
+              </div>
+
+            {%- when 'bar' -%}
+              <div data-popup-bar {{ block_attributes }}>
+                <div class="popup popup--bar popup--bar--{% if image %}has-image{% else %}no-image{% endif %} {{ text_color }}" id="popup--{{ block.id }}" data-popup-bar-holder data-prevent-scroll-lock>
+                  <div class="popup__wrapper">
+                    <div class="popup__body" data-popup-body>
+                      <button class="popup__toggle" type="button" aria-controls="popup--{{ block.id }}" data-popup-bar-toggle>
+                        {%- if title != blank or text != blank -%}
+                          <span class="popup__toggle__text">
+                            {%- if title != blank -%}
+                              <strong>{{ title }}</strong>
+                            {%- endif -%}
+
+                            {%- if text != blank -%}
+                              {{- text -}}
+                            {%- endif -%}
+                          </span>
+                        {%- endif -%}
+
+                        <div class="popup__toggle__icon">
+                          {%- render 'icon-toggle-plus' -%}
+                          {%- render 'icon-toggle-minus' -%}
+                        </div>
+                      </button>
+
+                      <button class="popup__close" type="button" data-popup-close>
+                        <span class="visually-hidden">{{ 'general.accessibility.close' | t }}</span>
+                        {%- render 'icon-close' -%}
+                      </button>
+
+                      <div class="popup__container">
+                        {%- if image != blank -%}
+                          <div class="popup__image">
+                            <div class="popup__image__img">
+                              {%- render 'image-fill', is_background: true, img_object: image -%}
+                            </div>
+                          </div>
+                        {%- endif -%}
+
+                        <div class="popup__form">
+                          {%- render 'newsletter-form'
+                            unique: block.id,
+                            extra_fields: block.settings.extra_fields,
+                            button_text: button_text,
+                            is_popup: true -%}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="popup__underlay" data-popup-underlay></div>
+                  </div>
+                </div>
+              </div>
+
+            {%- when 'cookie' -%}
+              <div data-cookie data-tracking-consent {{ block_attributes }}>
+                {%- assign markup = 'general.cookies.cookies_link' | t -%}
+
+                {%- if shop.privacy_policy -%}
+                  {%- capture markup -%}
+                    <a href="{{ shop.privacy_policy.url }}">{{ 'general.cookies.cookies_link' | t }}</a>
+                  {%- endcapture -%}
+                {%- endif -%}
+
+                <div class="popup popup--cookies" id="popup--{{ block.id }}" data-tracking-consent-inner data-prevent-scroll-lock>
+                  <div class="wrapper--full-padded">
+                    <div class="cookies__container">
+                      <div class="cookies__content">
+                        <p class="cookies__title">{{- 'general.cookies.title' | t -}}</p>
+                        <p>{{- 'general.cookies.text_html' | t: cookies: markup -}}</p>
+                      </div>
+
+                      <div class="cookies__buttons">
+                        <button type="button" class="btn btn--primary btn--solid" data-confirm-cookies>
+                          {{- 'general.cookies.accept' | t -}}
+                        </button>
+
+                        <button type="button" class="cookies__close" data-popup-close>
+                          {{- 'general.cookies.decline' | t -}}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          {%- endcase -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Popups",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "popup-with-image",
+      "name": "Popup with image",
+      "settings": [
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position",
+          "default": "center-center",
+          "options": [
+            {
+              "value": "center-center",
+              "label": "Middle"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom Left"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom Right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Optional"
+        },
+        {
+          "type": "select",
+          "id": "height",
+          "label": "Height",
+          "default": "four-fifty-height",
+          "options": [
+            { "value": "seven-fifty-height", "label": "750px" },
+            { "value": "six-fifty-height", "label": "650px" },
+            { "value": "five-fifty-height", "label": "550px" },
+            { "value": "four-fifty-height", "label": "450px" },
+            { "value": "three-fifty-height", "label": "350px" },
+            { "value": "original-height", "label": "Auto" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Sign up for 10% off"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Description",
+          "default": "<p>Let’s keep in touch. We promise we won’t bug you too much - just promotions and new releases.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Newsletter form"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_newsletter_form",
+          "label": "Show newsletter form",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "extra_fields",
+          "label": "Additional fields",
+          "default": "",
+          "options": [
+            { "value": "", "label": "None" },
+            { "value": "name", "label": "Name" },
+            { "value": "first-last-name", "label": "First and last name" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text"
+        },
+        {
+          "type": "header",
+          "content": "Popup behavior"
+        },
+        {
+          "type": "select",
+          "id": "trigger",
+          "label": "Delay appearance",
+          "default": "delayed_10",
+          "options": [
+            { "value": "always", "label": "Show immediately" },
+            { "value": "delayed_10", "label": "Show 10 seconds after page load" },
+            { "value": "bottom", "label": "Show after user scrolls to page bottom" },
+            { "value": "idle", "label": "Show after user has been idle for 1 minute" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Target page"
+        },
+        {
+          "id": "target_url_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific page"
+        },
+        {
+          "id": "target_url",
+          "type": "url",
+          "label": "Targeted page"
+        },
+        {
+          "type": "header",
+          "content": "Target referrer"
+        },
+        {
+          "id": "target_referrer_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific referrer path"
+        },
+        {
+          "id": "target_referrer",
+          "type": "text",
+          "label": "Targeted referrer"
+        },
+        {
+          "type": "header",
+          "content": "Target device"
+        },
+        {
+          "id": "target_device_enabled",
+          "type": "checkbox",
+          "label": "Limit to desktop or mobile"
+        },
+        {
+          "type": "select",
+          "id": "target_device",
+          "label": "Device ",
+          "default": "mobile",
+          "options": [
+            { "value": "mobile", "label": "Only show on mobile" },
+            { "value": "desktop", "label": "Only show on desktop" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background",
+          "default": "#fff"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text",
+          "default": "text-dark",
+          "options": [
+            { "value": "text-light", "label": "Light" },
+            { "value": "text-dark", "label": "Dark" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bar",
+      "name": "Popup small",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Optional"
+        },
+        {
+          "type": "range",
+          "id": "image_aspect_ratio",
+          "label": "Aspect ratio",
+          "min": 0.5,
+          "max": 1.0,
+          "step": 0.1,
+          "unit": ":1",
+          "default": 0.5
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Sign up for 10% off"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description",
+          "default": "Let’s keep in touch. We promise we won’t bug you too much."
+        },
+        {
+          "type": "header",
+          "content": "Newsletter form"
+        },
+        {
+          "type": "select",
+          "id": "extra_fields",
+          "label": "Additional fields",
+          "default": "",
+          "options": [
+            { "value": "", "label": "None" },
+            { "value": "name", "label": "Name" },
+            { "value": "first-last-name", "label": "First and last name" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text"
+        },
+        {
+          "type": "header",
+          "content": "Popup behavior"
+        },
+        {
+          "type": "select",
+          "id": "trigger",
+          "label": "Delay appearance",
+          "default": "delayed_10",
+          "options": [
+            { "value": "always", "label": "Show immediately" },
+            { "value": "delayed_3", "label": "Show 3 seconds after page load" },
+            { "value": "delayed_10", "label": "Show 10 seconds after page load" },
+            { "value": "bottom", "label": "Show after user scrolls to page bottom" },
+            { "value": "idle", "label": "Show after user has been idle for 1 minute" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Target page"
+        },
+        {
+          "id": "target_url_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific page"
+        },
+        {
+          "id": "target_url",
+          "type": "url",
+          "label": "Targeted page"
+        },
+        {
+          "type": "header",
+          "content": "Target referrer"
+        },
+        {
+          "id": "target_referrer_enabled",
+          "type": "checkbox",
+          "label": "Limit to specific referrer path"
+        },
+        {
+          "id": "target_referrer",
+          "type": "text",
+          "label": "Targeted referrer"
+        },
+        {
+          "type": "header",
+          "content": "Target device"
+        },
+        {
+          "id": "target_device_enabled",
+          "type": "checkbox",
+          "label": "Limit to desktop or mobile"
+        },
+        {
+          "type": "select",
+          "id": "target_device",
+          "label": "Device ",
+          "default": "mobile",
+          "options": [
+            { "value": "mobile", "label": "Only show on mobile" },
+            { "value": "desktop", "label": "Only show on desktop" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background",
+          "default": "#fff"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text",
+          "default": "text-dark",
+          "options": [
+            { "value": "text-light", "label": "Light" },
+            { "value": "text-dark", "label": "Dark" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "cookie",
+      "name": "Cookie consent",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_cookies_popup",
+          "label": "Enable cookie tracking popup",
+          "info": "This feature uses the Shopify [consent tracking API](https://help.shopify.com/en/manual/your-account/privacy/cookies) and will not show in all regions. Customer privacy tracking limits must be enabled in your [online store settings](/admin/online_store/preferences). [Learn More](https://presidiocreative.com/link/palo-alto/docs/cookie-consent)",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "enabled_on": {
+    "groups": ["aside"]
+  }
+}
+{% endschema %}

@@ -1,0 +1,469 @@
+{
+  "sections": {
+    "main": {
+      "type": "product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "subheading": "vendor",
+            "show_rating": true,
+            "show_rating_count": false,
+            "padding_bottom": 20
+          }
+        },
+        "7177a592-7214-4ef9-b7ab-c604b9a02ab1": {
+          "type": "shopify:\/\/apps\/yotpo-product-photo-reviews\/blocks\/star-rating\/eb7dfd7d-db44-4334-bc49-c893b51b36cf",
+          "settings": {
+            "product": "{{product}}"
+          }
+        },
+        "inventory_countdown": {
+          "type": "inventory_countdown",
+          "settings": {
+            "max_inventory": 10,
+            "hide_inventory_count": true,
+            "padding_bottom": 20
+          }
+        },
+        "7ddd2db6-1d92-43ee-a7d9-e786662f9ced": {
+          "type": "icon",
+          "settings": {
+            "icon_name": "truck",
+            "icon_color": "#000000",
+            "icon_width": 20,
+            "icon_text": "Same day dispatch for orders placed before 1pm AEST. Excludes weekends & public holidays.",
+            "text_size": 90,
+            "width": "full",
+            "text_alignment": "left",
+            "bg_color": "",
+            "padding_bottom": 20
+          }
+        },
+        "02ed97fa-8da5-4d8f-9836-17f6f63e451d": {
+          "type": "custom_code",
+          "settings": {
+            "custom_code": "{% if product.metafields.custom.variation_products.value != blank%}\n<div class=\"cc-custom-variation-header\">Select Device<\/div>\n<select class=\"cc-custom-variation\">\n{% for item in product.metafields.custom.variation_products.value %}\n  {% assign ccselected = '' %}\n  {% if item.metafields.custom.variation_value.value != blank%}\n  \t{% if item.title == product.title %}\n      {% assign ccselected = 'selected' %}\n  \t{% endif %}\n    <option {{ ccselected }} data-url=\"{{ item.url }}\">{{ item.metafields.custom.variation_value.value }}<\/option>\n  {% endif %}\n{% endfor %}\n<\/select>\n\n<script>\nconst ccCustomVariations = document.querySelectorAll('.cc-custom-variation');\nccCustomVariations.forEach((ccCustomVariation) => {\n    ccCustomVariation.addEventListener('change', function() {\n        const selectedOption = this.options[this.selectedIndex];\n        location.href = selectedOption.getAttribute('data-url');\n    });\n});\n<\/script>\n<style>\n.cc-custom-variation-header { \n  font-size: calc(.875rem * var(--adjust-body)); \n  margin-bottom: 8px; \n}\n.cc-custom-variation { \n  -webkit-appearance: none;\n  -moz-appearance: none;\n  background: var(--input-bg); \n  background-image: url(data:image\/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Ctitle%3Edown-arrow%3C%2Ftitle%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10.293%2C3.293%2C6%2C7.586%2C1.707%2C3.293A1%2C1%2C0%2C0%2C0%2C.293%2C4.707l5%2C5a1%2C1%2C0%2C0%2C0%2C1.414%2C0l5-5a1%2C1%2C0%2C1%2C0-1.414-1.414Z%22%20fill%3D%22%23727272%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E);\n  background-position: top 50% right 10%;\n  background-repeat: no-repeat;\n  background-size: 0.6rem;\n  border: var(--BORDER-WIDTH) solid var(--text); \n  border-radius: var(--RADIUS); \n  color: var(--text); \n  display: block; \n  font-size: calc(.875rem * var(--adjust-body)); \n  font-family: var(--FONT-STACK-BODY); \n  line-height: 1;\n  padding: 13px 40px 13px 20px;\n}\n@media only screen and (max-width: 767px) {\n  .cc-custom-variation-header { \n    font-size: calc(.75rem * var(--adjust-body)); \n  }\n}\n<\/style>\n{% endif %}",
+            "padding_bottom": 20
+          }
+        },
+        "form": {
+          "type": "form",
+          "settings": {
+            "show_labels": true,
+            "show_quantity": true,
+            "show_payment_button": true,
+            "enable_subscriptions_selectors": true,
+            "padding_bottom": 20
+          }
+        },
+        "a42f4e7d-6a8d-42a4-80af-29ec3b3b52d9": {
+          "type": "feature",
+          "disabled": true,
+          "settings": {
+            "icon_name": "support",
+            "icon_width": 25,
+            "title": "Need help with sizing?",
+            "text": "<p>This content type will accept <strong>rich text<\/strong> to help with adding styles and links to additional pages or content. Use this to add supplementary information to help your buyers.<\/p>",
+            "bg_color": "#f7f9fa",
+            "text_color": "#000000",
+            "padding_bottom": 20
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "padding_bottom": 20
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "7177a592-7214-4ef9-b7ab-c604b9a02ab1",
+        "inventory_countdown",
+        "7ddd2db6-1d92-43ee-a7d9-e786662f9ced",
+        "02ed97fa-8da5-4d8f-9836-17f6f63e451d",
+        "form",
+        "a42f4e7d-6a8d-42a4-80af-29ec3b3b52d9",
+        "description"
+      ],
+      "settings": {
+        "product_sticky_enable": true,
+        "image_layout": "carousel",
+        "image_width": "standard",
+        "product_image_aspect_ratio": true,
+        "enable_zoom": false,
+        "enable_video_looping": false,
+        "bg_color": "",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "limit": 4,
+        "product_recommendations_heading": "You May Also Like",
+        "bg_color": "",
+        "width": "wrapper--full-padded",
+        "padding_top": 0,
+        "padding_bottom": 60
+      }
+    },
+    "icons": {
+      "type": "section-icons-row",
+      "disabled": true,
+      "blocks": {
+        "icon-0": {
+          "type": "text",
+          "settings": {
+            "icon_name": "truck",
+            "title": "Shockproof",
+            "text": "<p>Certified 10ft drop protect.<\/p>"
+          }
+        },
+        "icon-1": {
+          "type": "text",
+          "settings": {
+            "icon_name": "check",
+            "title": "Magsafe",
+            "text": "<p>Magsafe Compatible<\/p>"
+          }
+        },
+        "icon-2": {
+          "type": "text",
+          "settings": {
+            "icon_name": "eco-friendly",
+            "title": "Raised Bezel",
+            "text": "<p>Raised bezel for screen protection.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "icon-0",
+        "icon-1",
+        "icon-2"
+      ],
+      "settings": {
+        "alignment": "center",
+        "columns": 4,
+        "icons_width": 30,
+        "heading": "What's so special about our printed case?",
+        "subheading": "",
+        "bg_color": "",
+        "text_color": "#333333",
+        "box_color": "",
+        "button_text": "",
+        "button_link": "",
+        "button_color": "btn--black",
+        "button_style": "btn--solid",
+        "button_size": "btn--small",
+        "enable_slider_mobile": false,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "835c5322-6612-4424-9bc2-66ff21c435dc": {
+      "type": "section-text",
+      "blocks": {
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-0": {
+          "type": "subheading",
+          "disabled": true,
+          "settings": {
+            "text": "<p>Subheading<\/p>",
+            "size": 100,
+            "margin_bottom": 16
+          }
+        },
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-1": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>What's so special about our printed phone cases?<\/p>",
+            "size": 100,
+            "heading_highlight_type": "italics",
+            "highlight_color": "#d43747"
+          }
+        },
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-2": {
+          "type": "text",
+          "disabled": true,
+          "settings": {
+            "text": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.<\/p>",
+            "size": 100
+          }
+        },
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-3": {
+          "type": "button",
+          "disabled": true,
+          "settings": {
+            "button_text": "Read More",
+            "button_link": "",
+            "button_color": "btn--black",
+            "button_style": "btn--solid",
+            "button_size": "btn--small"
+          }
+        }
+      },
+      "block_order": [
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-0",
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-1",
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-2",
+        "template--19539870974230__835c5322-6612-4424-9bc2-66ff21c435dc-168799362483fdaada-3"
+      ],
+      "settings": {
+        "text_position": "center",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper--narrow",
+        "padding_top": 94,
+        "padding_bottom": 48
+      }
+    },
+    "6866bd91-db7c-4888-a1c3-c3b74d14bb7e": {
+      "type": "dynamic-corecolour-imagebox",
+      "blocks": {
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-1": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_2.svg",
+            "header": "Shockproof",
+            "copy": ""
+          }
+        },
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-2": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_3.3.svg",
+            "header": "16.4ft Drop Protection",
+            "copy": ""
+          }
+        },
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-3": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_4.svg",
+            "header": "Protects the Lens",
+            "copy": ""
+          }
+        },
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-4": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_5.svg",
+            "header": "Protects the Screen",
+            "copy": ""
+          }
+        },
+        "f7419a91-c055-401f-bc6c-e8a57e412687": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_6.svg",
+            "header": "Protective Frame",
+            "copy": ""
+          }
+        },
+        "f316d6b2-c0ab-433f-8126-5d214061a066": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_7.svg",
+            "header": "100% Recyclable",
+            "copy": ""
+          }
+        },
+        "d3701cee-8c66-4142-8656-4c2eec04724d": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_1.svg",
+            "header": "Eco-Friendly Ink",
+            "copy": ""
+          }
+        },
+        "993e73a1-20c9-48c7-bb96-06aadc69f560": {
+          "type": "image-box",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Asset_9.svg",
+            "header": "Embossed Print",
+            "copy": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-1",
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-2",
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-3",
+        "template--20112289267990__6866bd91-db7c-4888-a1c3-c3b74d14bb7e-image-box-4",
+        "f7419a91-c055-401f-bc6c-e8a57e412687",
+        "f316d6b2-c0ab-433f-8126-5d214061a066",
+        "d3701cee-8c66-4142-8656-4c2eec04724d",
+        "993e73a1-20c9-48c7-bb96-06aadc69f560"
+      ],
+      "settings": {
+        "title": "",
+        "desktop-columns": "4",
+        "tablet-columns": "2",
+        "mobile-columns": "2",
+        "top-padding": "1rem",
+        "bottom-padding": "0rem",
+        "image-height": "6rem"
+      }
+    },
+    "513efdf1-28ed-4ba2-a94c-f1108382a969": {
+      "type": "section-image",
+      "settings": {
+        "image": "shopify:\/\/shop_images\/chiccompilation.jpg",
+        "height": "full-height",
+        "enable_mobile_height": true,
+        "mobile_height": "original-height-mobile",
+        "enable_stretch": false,
+        "image_position": "center",
+        "bg_color_secondary": false,
+        "width": "wrapper--full",
+        "padding_top": 40,
+        "padding_bottom": 0
+      }
+    },
+    "eb124a0c-6961-4461-bba9-ee408d9b56a4": {
+      "type": "section-text",
+      "blocks": {
+        "template--19407994257686__eb124a0c-6961-4461-bba9-ee408d9b56a4-16872456510faf7956-0": {
+          "type": "subheading",
+          "settings": {
+            "text": "<h5>When protection meets unique designs.<\/h5>",
+            "size": 120,
+            "margin_bottom": 16
+          }
+        },
+        "ec5ccfdf-696c-4d59-8c72-1351fb308caf": {
+          "type": "heading",
+          "settings": {
+            "text": "<p>Ultimate protection meets style<\/p>",
+            "size": 100,
+            "heading_highlight_type": "italics",
+            "highlight_color": "#d43747"
+          }
+        },
+        "6781984d-dc83-4b7b-adef-7ff9672b44e4": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Tough phone cases doesn't need to compromise on unique and head turning designs. Experience this with CORECOLOUR. <\/p>",
+            "size": 100
+          }
+        }
+      },
+      "block_order": [
+        "template--19407994257686__eb124a0c-6961-4461-bba9-ee408d9b56a4-16872456510faf7956-0",
+        "ec5ccfdf-696c-4d59-8c72-1351fb308caf",
+        "6781984d-dc83-4b7b-adef-7ff9672b44e4"
+      ],
+      "settings": {
+        "text_position": "center",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper--narrow",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "a252f4b9-2039-411d-ae56-0717afceb85a": {
+      "type": "section-image",
+      "settings": {
+        "image": "shopify:\/\/shop_images\/chic1.jpg",
+        "height": "full-height",
+        "enable_mobile_height": true,
+        "mobile_height": "original-height-mobile",
+        "enable_stretch": false,
+        "image_position": "center",
+        "bg_color_secondary": false,
+        "width": "wrapper--full",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "16879135715ffc9b4c": {
+      "type": "apps",
+      "blocks": {
+        "0b05777f-59aa-49e8-b339-22ef0726986b": {
+          "type": "shopify:\/\/apps\/yotpo-product-photo-reviews\/blocks\/reviews\/eb7dfd7d-db44-4334-bc49-c893b51b36cf",
+          "settings": {
+            "product": "{{product}}"
+          }
+        }
+      },
+      "block_order": [
+        "0b05777f-59aa-49e8-b339-22ef0726986b"
+      ],
+      "settings": {
+        "bg_color": "",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    },
+    "tabs": {
+      "type": "section-accordions",
+      "disabled": true,
+      "blocks": {
+        "acordion-0": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "acordion-1": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "acordion-2": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        },
+        "d0defd0d-94c3-403c-bd36-dc2f140a104f": {
+          "type": "text",
+          "settings": {
+            "title": "Heading",
+            "text": "<p>Use this text block to discuss some commonly asked questions like shipping and returns, sizing, warranties, or product and company details.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "acordion-0",
+        "acordion-1",
+        "acordion-2",
+        "d0defd0d-94c3-403c-bd36-dc2f140a104f"
+      ],
+      "settings": {
+        "layout": "two-columns",
+        "show_accordion_divider": false,
+        "title": "Frequently Asked Questions",
+        "subheading": "",
+        "text": "",
+        "tabs_bg_color": "#fafafa",
+        "bg_color_secondary": false,
+        "text_color": "text-dark",
+        "width": "wrapper",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main",
+    "related",
+    "icons",
+    "835c5322-6612-4424-9bc2-66ff21c435dc",
+    "6866bd91-db7c-4888-a1c3-c3b74d14bb7e",
+    "513efdf1-28ed-4ba2-a94c-f1108382a969",
+    "eb124a0c-6961-4461-bba9-ee408d9b56a4",
+    "a252f4b9-2039-411d-ae56-0717afceb85a",
+    "16879135715ffc9b4c",
+    "tabs"
+  ]
+}

@@ -1,0 +1,140 @@
+{%- comment -%} /snippets/nav-drawer.liquid {%- endcomment -%}
+{%- liquid
+  assign highlight_item = section.settings.highlight_item | downcase | strip_html | escape
+  assign highlight_item_color = section.settings.highlight_item_color
+  assign mobile_menu_behaviour = settings.mobile_menu_behaviour
+  assign image = section.settings.logo_not_home
+-%}
+
+{%- capture style -%}
+  {%- if highlight_item_color != 'rgba(0,0,0,0)' and highlight_item_color != '' -%}
+    style="--highlight: {{ highlight_item_color }};"
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture logo -%}
+  {%- if image != blank -%}
+    <a href="{{ routes.root_url }}" class="drawer__logo">
+      {%- assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+      {%- assign image_widths = "[180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048, 2450, 2700, 3000, 3350, 3750, 4100]" -%}
+
+      <img
+        class="drawer__logo-image lazyload"
+        src="{{ image | img_url: 'small' }}"
+        data-src="{{ image_url_pattern }}"
+        data-widths= "{{ image_widths }}"
+        data-aspectratio="{{ image.aspect_ratio }}"
+        data-sizes="auto"
+        height="{{ section.settings.logo_max_width | divided_by: image.aspect_ratio }}px"
+        alt="{{ image.alt | escape }}">
+      <noscript>
+        <img src="{{ image | img_url: '512x' }}" alt="{{ image.alt | escape }}">
+      </noscript>
+    </a>
+  {%- endif -%}
+{%- endcapture -%}
+
+<div id="nav-drawer" class="drawer drawer--right drawer--nav cv-h" role="navigation" {{ style }} data-drawer>
+  <div class="drawer__header">
+    {%- if logo != blank -%}
+      <div class="drawer__title">{{ logo }}</div>
+    {%- endif -%}
+
+    <button type="button" class="drawer__close-button" aria-controls="nav-drawer" data-drawer-toggle>
+      <span class="visually-hidden">{{ 'general.accessibility.close_drawer' | t }}</span>
+      {%- render 'icon-close' -%}
+    </button>
+  </div>
+
+  {%- comment -%} Mobile Navigation {%- endcomment -%}
+  <ul class="mobile-nav mobile-nav--weight-{{ settings.nav_font_weight }}">
+    {%- for link in linklists[section.settings.main-menu].links -%}
+      {%- assign link_title = link.title | strip_html | escape -%}
+      {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
+      {%- if link.links != blank -%}
+        <li class="mobile-menu__item mobile-menu__item--level-1 mobile-menu__item--has-items{% if link.active %} mobile-menu__item--active{% endif %}" aria-haspopup="true">
+          <a href="{{ link.url }}" class="mobile-navlink mobile-navlink--level-1{% if mobile_menu_behaviour == 'trigger' %} mobile-navlink--trigger{% endif %}{% if highlight_item == link_title_lowercase %} mobile-navlink--highlight{% endif %}" data-nav-link-mobile>
+            {{- link_title -}}
+          </a>
+          <button type="button" class="mobile-nav__trigger mobile-nav__trigger--level-1" aria-controls="MobileNav--{{ link.handle }}-{{ forloop.index0 }}" data-collapsible-trigger>
+            {%- render 'icon-toggle-plus' -%}
+            {%- render 'icon-toggle-minus' -%}
+            <span class="fallback-text">{{ 'layout.navigation.see_more' | t }}</span>
+          </button>
+          <div class="mobile-dropdown" id="MobileNav--{{ link.handle }}-{{ forloop.index0 }}" data-collapsible-container>
+            <ul class="mobile-nav__sublist{% if sub_link.levels == 1 %} mobile-nav__sublist--has-items{% endif %}" data-collapsible-content>
+              {%- for sub_link in link.links -%}
+                {%- assign link_title = sub_link.title | strip_html | escape -%}
+                {%- assign link_title_lowercase = sub_link.title | downcase | strip_html | escape -%}
+
+                {%- capture link_image_markup -%}
+                  {%- render 'header-link-image' with enable: section.settings.show_images, link: sub_link, aspect_ratio: section.settings.image_aspect_ratio -%}
+                {%- endcapture -%}
+
+                <li class="mobile-menu__item mobile-menu__item--level-2{% if sub_link.levels == 1 %} mobile-menu__item--has-items{% endif %}{% if sub_link.active %} mobile-menu__item--active{% endif %}" {% if sub_link.levels == 1 %}aria-haspopup="true"{% endif %}>
+                  <a href="{{ sub_link.url }}" class="mobile-navlink mobile-navlink--level-2{% if link_image_markup != blank %} mobile-navlink--image{% endif %}{% if sub_link.levels == 1 and mobile_menu_behaviour == 'trigger' %} mobile-navlink--trigger{% endif %}{% if highlight_item == link_title_lowercase %} mobile-navlink--highlight{% endif %}" data-nav-link-mobile>
+                    {%- if link_image_markup != blank -%}
+                      <div class="mobile-navlink__image">
+                        {{- link_image_markup -}}
+                      </div>
+                    {%- endif -%}
+
+                    <span>{{- link_title -}}</span>
+                  </a>
+
+                  {%- if sub_link.levels == 1 -%}
+                    <button type="button" class="mobile-nav__trigger mobile-nav__trigger--level-2" aria-controls="MobileNav--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" data-collapsible-trigger>
+                      {%- render 'icon-toggle-plus' -%}
+                      {%- render 'icon-toggle-minus' -%}
+                      <span class="fallback-text">{{ 'layout.navigation.see_more' | t }}</span>
+                    </button>
+                  {%- endif -%}
+
+                  {%- if sub_link.levels == 1 -%}
+                    <div class="mobile-dropdown" id="MobileNav--{{ link.handle }}-{{ sub_link.handle }}-{{ forloop.index0 }}" data-collapsible-container>
+                      <ul class="mobile-nav__sub-sublist" data-collapsible-content>
+                        {%- for sub_sub_link in sub_link.links -%}
+                          {%- assign link_title = sub_sub_link.title | strip_html | escape -%}
+                          {%- assign link_title_lowercase = sub_sub_link.title | downcase | strip_html | escape -%}
+                          <li class="mobile-menu__item mobile-menu__item--level-3{% if sub_sub_link.active %} mobile-menu__item--active{% endif %}">
+                            <a href="{{ sub_sub_link.url }}" class="mobile-navlink mobile-navlink--level-3{% if highlight_item == link_title_lowercase %} mobile-navlink--highlight{% endif %}">
+                              {{- link_title -}}
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </li>
+      {%- else -%}
+        <li class="mobile-menu__item mobile-menu__item--level-1{% if link.active %} mobile-menu__item--active{% endif %}">
+          <a href="{{ link.url }}" class="mobile-navlink mobile-navlink--level-1{% if highlight_item == link_title_lowercase %} mobile-navlink--highlight{% endif %}">
+            {{ link_title }}
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  {%- if shop.customer_accounts_enabled or settings.show_header_search -%}
+    <ul class="mobile-nav mobile-nav--bottom mobile-nav--weight-{{ settings.nav_font_weight }}">
+      {%- if shop.customer_accounts_enabled -%}
+        {%- if customer -%}
+          <li class="mobile-menu__item{% if request.path contains routes.account_url %} mobile-menu__item--active{% endif %}"><a href="{{ routes.account_url }}" class="mobile-navlink mobile-navlink--small">{{ 'customer.account.title' | t }}</a></li>
+          <li class="mobile-menu__item{% if request.path contains routes.account_logout_url %} mobile-menu__item--active{% endif %}"><a href="{{ routes.account_logout_url }}" class="mobile-navlink mobile-navlink--small">{{ 'layout.customer.log_out' | t }}</a></li>
+        {%- else -%}
+          <li class="mobile-menu__item{% if request.path contains routes.account_login_url %} mobile-menu__item--active{% endif %}"><a href="{{ routes.account_login_url }}" class="mobile-navlink mobile-navlink--small" id="customer_login_link">{{ 'layout.customer.log_in' | t }}</a></li>
+          <li class="mobile-menu__item{% if request.path contains routes.account_register_url %} mobile-menu__item--active{% endif %}"><a href="{{ routes.account_register_url }}" class="mobile-navlink mobile-navlink--small" id="customer_register_link">{{ 'layout.customer.create_account' | t }}</a></li>
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if settings.show_header_search -%}
+        <li class="mobile-menu__item{% if request.path contains routes.search_url %} mobile-menu__item--active{% endif %}"><a href="{{ routes.search_url }}" class="mobile-navlink mobile-navlink--small" data-nav-search-open>{{ 'layout.navigation.search' | t }}</a></li>
+      {%- endif -%}
+    </ul>
+  {%- endif -%}
+</div>

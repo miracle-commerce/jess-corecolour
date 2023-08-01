@@ -1,0 +1,122 @@
+{%- style -%}
+  #BrickBlock--{{ block_id }} .rich-text__heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }}) }
+  #BrickBlock--{{ block_id }} .rich-text__text { --adjust-body: calc(var(--FONT-ADJUST-BODY) * {{ text_size }}) }
+{%- endstyle -%}
+
+{%- liquid
+  assign animations_enabled = settings.animations_enabled
+  assign animation_delay = 150
+-%}
+
+{%- capture content -%}
+  {%- if top_image != blank -%}
+    <div class="rich-text__top-image"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+      {% endif %}>
+      {%- liquid
+        assign image_url_pattern = top_image | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+        assign image_widths = "[180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048, 2450, 2700, 3000, 3350, 3750, 4100]"
+        assign animation_delay = animation_delay | plus: 150
+        assign image_alt = top_image.alt | escape
+
+        capture styles
+          echo 'width: ' | append: top_image_width | append: 'px;'
+        endcapture
+      -%}
+
+      <img class="rich-text__top-image-img lazyload"
+        src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+        data-src="{{ image_url_pattern }}"
+        data-widths= "{{ image_widths }}"
+        data-aspectratio="{{ top_image.aspect_ratio }}"
+        data-sizes="auto"
+        style="{{ styles }}"
+        alt="{{ image_alt }}">
+      <noscript>
+        {{- top_image
+          | image_url: width: top_image.width
+          | image_tag: class: 'rich-text__top-image-img img-object-contain', style: styles, alt: image_alt
+        -}}
+      </noscript>
+    </div>
+  {%- endif -%}
+
+  {%- if subheading != blank -%}
+    <div class="subheading-text main-subheading"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>{{ subheading }}</div>
+  {%- endif -%}
+
+  {%- if heading != blank -%}
+    <h3 class="rich-text__heading h2"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>{{ heading }}</h3>
+
+    {%- if settings.show_spacer_lines -%}
+      <hr
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-delay="{{ animation_delay }}"
+          data-aos-anchor="{{ animation_anchor }}"
+        {% endif %}>
+      {%- assign animation_delay = animation_delay | plus: 150 -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if text != blank -%}
+    <div class="rich-text__text"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>{{ text }}</div>
+  {%- endif -%}
+
+  {%- if button_text != blank or button_2_text != blank -%}
+    <div class="rich-text__buttons main-buttons">
+      {%- if button_text != blank -%}
+        <div class="main-buttons__item"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          <a class="btn {{ button_style }} {{ button_size }} {{ button_color }}" href="{{ button_link }}">{{ button_text }}</a>
+        </div>
+      {%- endif -%}
+
+      {%- if button_2_text != blank -%}
+        <div class="main-buttons__item"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>
+          <a class="btn {{ button_2_style }} {{ button_2_size }} {{ button_2_color }}" href="{{ button_2_link }}">{{ button_2_text }}</a>
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
+<div class="rich-text text-{{ text_position }}{%- render 'button-fallback-classes', primary_color: button_color, secondary_color: button_2_color, section_bg_color: block_bg_color -%}">
+  <div class="{{ section_width }}">
+    <div class="rich-text__container">
+      {{- content -}}
+    </div>
+  </div>
+</div>

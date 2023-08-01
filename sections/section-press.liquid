@@ -1,0 +1,360 @@
+{% comment %} Press/Logo {% endcomment %}
+
+{%- liquid
+  assign section_width = section.settings.width
+  assign heading = section.settings.title
+  assign show_quotations = section.settings.show_quotations
+  assign show_rounded_corners = section.settings.show_rounded_corners
+  assign autoplay = section.settings.autoplay
+  assign duration = section.settings.duration | times: 1000
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign blocks_count = section.blocks.size
+
+  assign block_link = section.blocks | map: 'settings' | where: 'link', null
+  assign block_text = section.blocks | map: 'settings' | where: 'text', ''
+  assign no_text = false
+  if block_text.size == blocks_count and heading == blank
+    assign no_text = true
+  endif
+  assign no_blockquotes = false
+  if block_text.size == blocks_count
+    assign no_blockquotes = true
+  endif
+  assign no_links = false
+  if block_link.size == 0
+    assign no_links = true
+  endif
+
+  assign id = 'Press--' | append: section.id
+  assign selector_id = '#' | append: id
+  assign animation_anchor = selector_id
+  assign animations_enabled = settings.animations_enabled
+  assign animation_delay = 150
+
+  capture section_classes
+    echo 'section-padding press'
+    if no_blockquotes
+      echo ' press--no-blockquotes'
+    endif
+    if no_links
+      echo ' press--no-links'
+    endif
+    if bg_color_secondary
+      echo ' bg-secondary'
+    endif
+  endcapture
+-%}
+
+{%- style -%}
+  {{ selector_id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section id="{{ id }}"
+  class="{{ section_classes }}"
+  data-section-id="{{ section.id }}"
+  data-section-type="press"
+  data-autoplay="{{ autoplay }}"
+  data-duration="{{ duration }}">
+  <div class="{{ section_width }}">
+    {%- unless heading == blank -%}
+      <h4 class="press__heading subheading-text"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {{- heading -}}
+      </h4>
+    {%- endunless -%}
+  </div>
+
+  {%- if blocks_count > 0 -%}
+    <div class="press__items"
+      data-press-items
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 250 -%}
+      {% endif %}>
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign text = block.settings.text
+          assign image = block.settings.press_logo
+          assign link = block.settings.link
+          assign has_nested_links = false
+
+          if link != blank and text contains '</a>'
+            assign has_nested_links = true
+          endif
+        -%}
+
+        <div class="press__item{% if show_quotations %} press__item--quotes{% endif %}" {{ block.shopify_attributes }}>
+          {%- unless text == blank -%}
+            <div class="press__item__inner">
+              <div class="{{ section_width }}">
+                <div class="press__item__content">
+                  {%- if show_quotations -%}
+                    <span class="press__quote"></span>
+                  {%- endif -%}
+                  {%- if link != blank and has_nested_links == false -%}
+                    <a href="{{ link }}" aria-label="{{ 'homepage.onboarding.press.read_more' | t }}"{% if forloop.index > 1 %} tabindex="-1"{% endif %}>{{ text }}</a>
+                  {%- elsif link != blank and has_nested_links -%}
+                    {{- text -}}
+                    <a href="{{ link }}" aria-label="{{ 'homepage.onboarding.press.read_more' | t }}" class="press__item__read-more"{% if forloop.index > 1 %} tabindex="-1"{% endif %}>
+                      {{- 'homepage.onboarding.press.read_more' | t -}}
+                      {%- render 'icon-arrow-right' -%}
+                    </a>
+                  {%- else -%}
+                    {{- text -}}
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          {%- endunless -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <div class="press__logos press__logos--{{ blocks_count }}{% if no_text %} press__logos--no-text{% endif %}{% if show_rounded_corners %} press__logos--rounded-corners{% endif %}"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+      {% endif %}>
+      <div class="press__logos-slider" data-logo-slider>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign text = block.settings.text
+            assign image = block.settings.press_logo
+            assign image_width = block.settings.logo_width
+            assign retina_size = image_width | times: 2
+            assign image_height = image_width
+
+            unless image == blank
+              assign image_height = image_width | divided_by: image.aspect_ratio
+              assign widths = image_width | append: ', ' | append: retina_size
+              assign sizes = image_width | append: 'px'
+            endunless
+          -%}
+
+          <div class="press__logos-slide{% if text != blank %} has-text{% endif %}" data-logo-slide data-logo-index="{{ forloop.index0 }}" tabindex="0">
+            <div class="press__logo" style="--image-width: {{ image_width }}px; --image-height: {{ image_height }}px;">
+              {%- unless image == blank -%}
+                {%- render 'image',
+                  image: image,
+                  width: retina_size,
+                  widths: widths,
+                  sizes: sizes,
+                  classes: 'press__logo-image' -%}
+              {%- else -%}
+                <div class="press__logo-image press__logo-image--placeholder" style="width: {{ image_width | append: 'px' }}" data-thumbnail-id="{{ section.id }}-{{ media.id }}">
+                  {{- 'logo' | placeholder_svg_tag: 'placeholder-svg' -}}
+                </div>
+              {%- endunless -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- else -%}
+    {%- comment -%} Onboarding items {%- endcomment -%}
+    <div class="press__items press__items--onboarding"
+      data-press-items
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 250 -%}
+      {% endif %}>
+      {%- for i in (1..4) -%}
+        <div class="press__item{% if show_quotations %} press__item--quotes{% endif %}" {{ block.shopify_attributes }}>
+          <div class="press__item__inner">
+            <div class="{{ section_width }}">
+              <div class="press__item__content">
+                {%- if show_quotations -%}
+                  <span class="press__quote"></span>
+                {%- endif -%}
+
+                {{- 'homepage.onboarding.press.text' | t -}}
+
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <div class="press__logos press__logos--{{ blocks_count }}"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      <div class="press__logos-slider" data-logo-slider>
+        {%- for i in (1..4) -%}
+          <div class="press__logos-slide" data-logo-slide>
+            <div class="press__logo">
+              <div class="press__logo-image press__logo-image--placeholder">
+                {{- 'logo' | placeholder_svg_tag: 'placeholder-svg' -}}
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Press/Logo",
+  "class": "press-section",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Press"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quotations",
+      "label": "Show quotations",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rounded_corners",
+      "label": "Show rounded corners",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay slideshow",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "unit": "sec",
+      "label": "Change slides every",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--narrow",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" },
+        { "value": "wrapper--narrow", "label": "Page width narrow" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Press",
+      "type": "press",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Provide some information about what the company below thinks about your brand.</p>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "press_logo",
+          "label": "Press logo"
+        },
+        {
+          "type": "range",
+          "id": "logo_width",
+          "label": "Custom logo width (in pixels)",
+          "min": 40,
+          "max": 180,
+          "default": 100,
+          "step": 10,
+          "unit":"px"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Press/Logo",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "press"
+        },
+        {
+          "type": "press"
+        },
+        {
+          "type": "press"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside"]
+  }
+}
+{% endschema %}

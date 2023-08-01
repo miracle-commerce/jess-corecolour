@@ -1,0 +1,370 @@
+{%- liquid
+  assign section_width = section.settings.width
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign text_color = section.settings.text_color
+  assign blog = blogs[section.settings.blog]
+  assign blog_style = section.settings.blog_style
+  assign blog_link = blog.url | default: '#'
+  assign heading = section.settings.heading
+  assign image_aspect_ratio = section.settings.image_aspect_ratio
+  assign button_text = section.settings.button_text
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign rows = section.settings.rows | plus: 0
+  assign columns = section.settings.columns | plus: 0
+  assign articles_count = columns | times: rows
+  assign show_spacer_lines = settings.show_spacer_lines
+  assign default_image = section.settings.default_image
+  assign default_color = section.settings.default_color
+  assign show_author = section.settings.show_author
+  assign show_date = section.settings.show_date
+  assign show_tags = section.settings.show_tags
+  assign show_comments_count = section.settings.show_comments_count
+
+  unless show_comments_count or blog.comments_enabled?
+    assign show_comments_count = false
+  endunless
+
+  if blog != blank and articles_count > blog.articles.size
+    assign articles_count = blog.articles.size
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#FeaturedBlog--' | append: section.id
+  assign animation_delay = 150
+
+  if blog_style == 'photo'
+    assign blog_style = 'blog--photo'
+  else
+    assign blog_style = 'blog--standard'
+  endif
+
+  case default_color
+    when 'accent'
+      assign default_color = 'blog__post-image--accent'
+    when 'default'
+      assign default_color = 'blog__post-image--default'
+  endcase
+-%}
+
+{%- style -%}
+  #FeaturedBlog--{{ section.id }} {
+    --image-height: {{ image_aspect_ratio | times: 100 }}%;
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+
+    {%- if articles_count >= columns -%}
+      --grid: repeat({{ columns }}, minmax(0, 1fr));
+    {%- else -%}
+      --grid: repeat({{ articles_count }}, calc(100% / {{ columns }}));
+    {%- endif -%}
+  }
+
+  {%- if bg_color_secondary -%}
+    #FeaturedBlog--{{ section.id }} {
+      --bg: var(--bg-secondary);
+    }
+  {%- endif -%}
+{%- endstyle -%}
+
+<div id="FeaturedBlog--{{ section.id }}"
+  class="featured-blog {{ blog_style }} {{ text_color }} section-padding{%- render 'button-fallback-classes', primary_color: button_color, bg_color_secondary: bg_color_secondary -%}"
+  data-section-id="{{ section.id }}"
+  data-section-type="featured-blog">
+  <div class="{{ section_width }}">
+    {%- if heading != '' -%}
+      <div class="section__header">
+        <h2 class="section__heading h3"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {% endif %}>{{ heading }}</h2>
+
+        {%- if show_spacer_lines -%}
+          <hr class="section__heading-line"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="featured-blog__container">
+      <div class="grid carousel--mobile">
+        {%- if section.settings.blog != blank -%}
+          {%- for article in blog.articles limit: articles_count -%}
+            {%- assign animation_delay = 150 | times: forloop.index -%}
+            {%- render 'blog-post-grid-item',
+              article: article,
+              animation_anchor: animation_anchor,
+              animation_delay: animation_delay,
+              default_color: default_color,
+              default_image: default_image,
+              show_author: show_author,
+              show_date: show_date,
+              show_tags: show_tags,
+              show_comments_count: show_comments_count,
+              onboarding: false -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- for i in (1..articles_count) -%}
+            {%- assign animation_delay = 150 | times: forloop.index -%}
+            {%- render 'blog-post-grid-item',
+              article: article,
+              animation_anchor: animation_anchor,
+              animation_delay: animation_delay,
+              default_color: default_color,
+              default_image: default_image,
+              show_author: show_author,
+              show_date: show_date,
+              show_tags: show_tags,
+              show_comments_count: show_comments_count,
+              onboarding: true -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if button_text != '' -%}
+      <div class="featured-blog__button"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay | plus: 150 }}"
+        {% endif %}>
+        <a href="{{ blog_link }}" class="btn {{ button_style }} {{ button_size }} {{ button_color }}">
+          {{- button_text -}}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Blog posts",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "blog",
+        "id": "blog",
+        "label": "Blog"
+      },
+      {
+        "type": "select",
+        "id": "blog_style",
+        "label": "Blog style",
+        "default": "photo",
+        "options": [
+          { "value": "standard", "label": "Standard" },
+          { "value": "photo", "label": "Photo background" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "image_aspect_ratio",
+        "label": "Image aspect ratio",
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1,
+        "unit": ":1",
+        "default": 1.1,
+        "info": "Wide to tall"
+      },
+      {
+        "type": "range",
+        "id": "rows",
+        "label": "Number of rows",
+        "default": 1,
+        "min": 1,
+        "max": 4,
+        "step": 1
+      },
+      {
+        "type": "range",
+        "id": "columns",
+        "label": "Articles per row",
+        "default": 3,
+        "min": 2,
+        "max": 4,
+        "step": 1
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tags",
+        "label": "Show tags",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_comments_count",
+        "label": "Show comment count",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Image"
+      },
+      {
+        "type": "image_picker",
+        "id": "default_image",
+        "label": "Default blog image",
+        "info": "Applies if the blog has no featured image"
+      },
+      {
+        "type": "select",
+        "id": "default_color",
+        "label": "Image replacement color",
+        "info": "Applies if the blog has no image set",
+        "default": "none",
+        "options": [
+          { "value": "accent", "label": "Accent color" },
+          { "value": "default", "label": "Default color" },
+          { "value": "none", "label": "None" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Text"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading"
+      },
+      {
+        "type": "header",
+        "content": "Button"
+      },
+      {
+        "type": "text",
+        "id": "button_text",
+        "label": "Text",
+        "default": "View all posts",
+        "info": "Links to blog"
+      },
+      {
+        "type": "select",
+        "id": "button_color",
+        "label": "Button color",
+        "default": "btn--black",
+        "options": [
+          { "label": "Primary", "value": "btn--primary" },
+          { "label": "Secondary", "value": "btn--secondary" },
+          { "label": "White", "value": "btn--white" },
+          { "label": "Black", "value": "btn--black" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "button_style",
+        "label": "Button style",
+        "default": "btn--solid",
+        "options": [
+          { "label": "Solid", "value": "btn--solid" },
+          { "label": "Outline", "value": "btn--outline" },
+          { "label": "Solid with border", "value": "btn--solid-border" },
+          { "label": "Text", "value": "btn--text" }
+        ]
+      },
+      {
+        "type": "select",
+        "id": "button_size",
+        "label": "Size",
+        "default": "btn--small",
+        "options": [
+          { "label": "Large", "value": "btn--large" },
+          { "label": "Medium", "value": "btn--medium" },
+          { "label": "Small", "value": "btn--small" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "label": "Text color",
+        "default": "text-dark",
+        "info": "Only applies to text not overlaid on images",
+        "options": [
+          { "value": "text-light", "label": "Light"},
+          { "value": "text-dark", "label": "Dark"}
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "default": false,
+        "info": "Use secondary background color"
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper",
+        "options": [
+          { "value": "wrapper--narrow", "label": "Page width narrow" },
+          { "value": "wrapper", "label": "Page width" },
+          { "value": "wrapper--full-padded", "label": "Full width padded" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "presets": [
+      {
+        "name": "Blog posts",
+        "category": "Text"
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside","footer"]
+    }
+  }
+{% endschema %}

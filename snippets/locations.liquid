@@ -1,0 +1,123 @@
+{%- liquid
+  assign subheading = section.settings.subheading
+  assign heading = section.settings.title
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Locations--' | append: section.id
+  assign animation_delay = 150
+-%}
+
+{%- style -%}
+  #Locations--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<div id="Locations--{{ section.id }}" class="section-padding locations{% if bg_color_secondary %} bg-secondary{% endif %}">
+  <div class="wrapper locations__wrapper">
+
+    <div class="locations__info">
+      {%- if subheading != blank or heading != blank -%}
+        <div class="section__header text-left">
+          {%- if subheading != blank -%}
+            <p class="locations__info-subheading subheading-text"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ subheading }}</p>
+          {% endif %}
+
+          {%- if heading != blank -%}
+            <h2 class="locations__info-heading"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>{{ heading }}</h2>
+              {%- if settings.show_spacer_lines -%}
+                <hr class="section__heading-line"{% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                  {%- assign animation_delay = animation_delay | plus: 150 -%}
+                {% endif %}>
+              {%- endif -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="locations__stores"
+        data-slider-info
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay =  150 -%}
+        {% endif %}>
+        {%- if section.blocks.size > 0 -%}
+          {%- for block in section.blocks -%}
+            <div class="location__store" {{ block.shopify_attributes }} data-slide-item>
+
+              {%- if block.settings.title != blank -%}
+                <h3 class="location__address h4">{{ block.settings.title }}</h3>
+              {%- endif -%}
+
+              {%- if block.settings.working_time != blank -%}
+                {{- block.settings.working_time -}}
+              {%- endif -%}
+
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          {%- for i in (1..3) -%}
+            <div class="location__store">
+              <h3 class="location__address h4">{{ 'homepage.onboarding.locations.address' | t }}</h3>
+
+              {{ 'homepage.onboarding.locations.working_hours_html' | t }}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="locations__gallery"
+        data-slider-gallery
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+        {% endif %}>
+        {%- for block in section.blocks -%}
+          <div class="location__image">
+            {%- render 'image-fill',
+              is_background: true,
+              img_object: block.settings.image,
+              classes: 'location__image-bg' -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div class="locations__gallery"
+        data-slider-gallery
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+        {% endif %}>
+        {%- for i in (1..3) -%}
+          <div class="location__image">
+            {%- render 'image-fill',
+              is_background: true,
+              img_object: '',
+              classes: 'location__image-bg' -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>

@@ -1,0 +1,322 @@
+{%- comment -%} /sections/blog.liquid {%- endcomment -%}
+{%- liquid
+  assign enable_infinity_scroll = settings.enable_infinity_scroll
+  assign columns = section.settings.post_columns | plus: 0
+  assign tag_alignment = section.settings.tag_alignment
+  assign blog_style = section.settings.blog_style
+  assign default_image = section.settings.default_image
+  assign default_color = section.settings.default_color
+  assign show_author = section.settings.show_author
+  assign show_date = section.settings.show_date
+  assign show_tags = section.settings.show_tags
+  assign show_comments_count = section.settings.show_comments_count
+  assign bg_color_secondary = section.settings.bg_color_secondary
+
+  unless show_comments_count or blog.comments_enabled?
+    assign show_comments_count = false
+  endunless
+
+  case columns
+    when 1
+      assign paginator = 5
+    when 2
+      assign article_width = 'blog__post--two-col'
+      assign paginator = 10
+    when 3
+      assign article_width = 'blog__post--three-col'
+      assign paginator = 9
+    else
+      assign article_width = 'blog__post--four-col'
+      assign paginator = 12
+  endcase
+
+  if columns > 1
+    assign wrapper = 'wrapper'
+  else
+    assign wrapper = 'wrapper--narrow'
+  endif
+
+  case default_color
+    when 'accent'
+      assign default_color = 'blog__post-image--accent'
+    when 'default'
+      assign default_color = 'blog__post-image--default'
+  endcase
+
+  if tag_alignment == 'left'
+    assign tags_alignment = 'blog__tags--left'
+  else
+    assign tags_alignment = 'blog__tags--center'
+  endif
+
+  if blog_style == 'photo'
+    assign blog_style = 'blog--photo'
+  else
+    assign blog_style = 'blog--standard'
+  endif
+
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#BlogPosts--' | append: section.id
+  assign animation_delay = 150
+-%}
+
+{%- style -%}
+  .blog {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+  }
+
+  .blog .blog__post-image {
+    --image-height: {{ section.settings.image_aspect_ratio | times: 100 }}%;
+  }
+{%- endstyle -%}
+
+<section id="BlogPosts--{{ section.id }}"
+  class="blog {{ blog_style }} section-padding{% if bg_color_secondary %} bg-secondary{% endif %}"
+  data-section-type="blog-posts"
+  data-section-id="{{ section.id }}">
+  <div class="{{ wrapper }}">
+    <h1 class="text-center"
+      {% if animations_enabled %}
+        data-aos="fade-up"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {% endif %}>
+      {{- blog.title | link_to: blog.url -}}
+      {%- if section.settings.show_rss_icon -%}
+        <a href="{{ shop.url }}{{ blog.url }}.atom" class="rss" target="_blank">
+          {%- render 'icon-rss' -%}
+        </a>
+      {%- endif -%}
+    </h1>
+
+    {%- comment -%}
+      Blog tags
+    {%- endcomment -%}
+    {%- if blog.all_tags.size > 0 -%}
+      <div class="blog__tags {{ tags_alignment }}"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        <div class="blog__tags-title subheading-text">
+          {{ 'blogs.article.filter_by_tags' | t }}
+        </div>
+
+        <ul class="blog__tags-list">
+          {%- if current_tags.size > 1 -%}
+            <li class="blog__tag blog__tag--reset">
+              <a href="{{ blog.url }}" class="blog__tag-reset-button btn">
+                <span class="blog__tag-clear">{{ 'blogs.article.clear_tags' | t }}</span>
+                <span class="blog__x">✕</span>
+              </a>
+            </li>
+          {%- endif -%}
+
+          {%- for tag in blog.all_tags limit: 15 -%}
+            {%- unless tag contains 'time_' -%}
+              <li class="blog__tag">
+                {%- if current_tags contains tag -%}
+                  <span class="blog__tag-current">
+                    {{- tag | link_to_remove_tag: tag | replace: '<a ', '<a class="btn" ' | replace: '</a>', '<span class="blog__x">✕</span></a>' -}}
+                  </span>
+                {%- else -%}
+                  <span class="blog__tag-item">
+                    {{- tag | link_to_add_tag: tag | replace: '<a ', '<a class="btn" ' -}}
+                  </span>
+                {%- endif -%}
+              </li>
+            {%- endunless -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- paginate blog.articles by paginator -%}
+    <div class="{{ wrapper }}">
+      <div class="blog__post {{ article_width }}"{% if enable_infinity_scroll %} id="AjaxinateLoop" data-ajaxinate-id="{{ section.id }}"{% endif %}>
+        {%- comment -%}
+          Loop through each article.
+        {%- endcomment -%}
+        {%- for article in blog.articles -%}
+          {%- render 'blog-post-grid-item',
+            article: article,
+            animation_delay: animation_delay,
+            animation_anchor: animation_anchor,
+            default_color: default_color,
+            default_image: default_image,
+            show_author: show_author,
+            show_date: show_date,
+            show_tags: show_tags,
+            show_comments_count: show_comments_count -%}
+
+          {% if animations_enabled %}
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="blog__pagination"
+        {% if animations_enabled %}
+          data-aos="fade-up"
+          data-aos-anchor="{{ animation_anchor }}"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+        {% endif %}>
+        {%- if enable_infinity_scroll -%}
+          <div class="pagination pagination--infinite" id="AjaxinatePagination" data-ajaxinate-id="{{ section.id }}">
+            {%- if paginate.next -%}
+              <div class="pagination__loading">
+                <a href="{{ paginate.next.url }}"></a>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- if paginate.pages > 1 -%}
+            <noscript>
+              {%- render 'pagination', paginate: paginate -%}
+            </noscript>
+          {%- endif -%}
+        {%- else -%}
+          {%- if paginate.pages > 1 -%}
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endif -%}
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endpaginate -%}
+</section>
+
+{% schema %}
+  {
+    "name": "Blog",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "default_image",
+        "label": "Default blog image",
+        "info": "Applies if the blog has no featured image"
+      },
+      {
+        "type": "select",
+        "id": "default_color",
+        "label": "Image replacement color",
+        "info": "Applies if the blog has no image set",
+        "options": [
+          { "value": "accent", "label": "Accent color" },
+          { "value": "default", "label": "Default color" },
+          { "value": "none", "label": "None" }
+        ],
+        "default": "accent"
+      },
+      {
+        "type": "select",
+        "id": "blog_style",
+        "label": "Blog style",
+        "options": [
+          { "value": "standard", "label": "Standard" },
+          { "value": "photo", "label": "Photo background" }
+        ],
+        "default": "photo"
+      },
+      {
+        "type": "range",
+        "id": "post_columns",
+        "label": "Posts per row",
+        "info": "Desktop only",
+        "min": 1,
+        "max": 4,
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "image_aspect_ratio",
+        "label": "Image aspect ratio",
+        "min": 0.5,
+        "max": 1.5,
+        "step": 0.1,
+        "unit": ":1",
+        "default": 1.3
+      },
+      {
+        "type": "checkbox",
+        "id": "show_rss_icon",
+        "label": "Show RSS icon",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_date",
+        "label": "Show date",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_author",
+        "label": "Show author",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_tags",
+        "label": "Show tags",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_comments_count",
+        "label": "Show comment count",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "tag_alignment",
+        "label": "Tag alignment",
+        "options": [
+          { "value": "center", "label": "Center" },
+          { "value": "left", "label": "Left" }
+        ],
+        "default": "left"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ]
+  }
+{% endschema %}

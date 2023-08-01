@@ -1,0 +1,107 @@
+{%- comment -%} /sections/locations.liquid {%- endcomment -%}
+
+<div data-section-id="{{ section.id }}" data-section-type="locations">
+  {%- render 'locations' -%}
+</div>
+
+{% comment %} Schema {% endcomment %}
+{% schema %}
+  {
+    "name": "Locations",
+    "class": "locations-section",
+    "settings": [
+      {
+        "type": "text",
+        "id": "subheading",
+        "label": "Subheading",
+        "default": "Our stores"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Locations & hours"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "checkbox",
+        "id": "bg_color_secondary",
+        "label": "Background",
+        "info": "Use secondary background color",
+        "default": false
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "blocks": [
+      {
+        "name": "Locations",
+        "type": "locations",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Address",
+            "default": "566 Emerson Street Palo Alto, California"
+          },
+          {
+            "type": "richtext",
+            "id": "working_time",
+            "label": "Hours",
+            "default": "<p>Mon - Fri: 8am - 5pm<\/p><p>Sat: Closed<\/p><p>Sun: Closed<\/p>"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Store image"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Locations",
+        "category": "Text",
+        "blocks": [
+          {
+            "type": "locations"
+          },
+          {
+            "type": "locations"
+          },
+          {
+            "type": "locations"
+          }
+        ]
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside","footer"]
+    }
+  }
+{% endschema %}

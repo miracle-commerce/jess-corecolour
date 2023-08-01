@@ -1,0 +1,118 @@
+{%- liquid
+  assign upsell_variant = upsell_product.selected_or_first_available_variant
+  assign upsell_link = upsell_product.url | default: '#!'
+  assign upsell_image = upsell_product.featured_media.preview_image
+  assign upsell_error = false
+
+  if upsell_product == blank
+    assign show_upsell = false
+    assign upsell_error = true
+  endif
+
+  if request.design_mode or upsell_product != blank
+    assign show_upsell = true
+  endif
+
+  assign upsell_form_id = "UpsellForm--" | append: unique
+  assign upsell_button_id = "UpsellButton--" | append: unique
+
+  assign single_variant = false
+  if upsell_product.variants.size == 1 and upsell_product.selling_plan_groups.size == 0
+    assign single_variant = true
+  endif
+
+  assign subtitle = 'general.upsell.pair_products' | t
+  if is_complementary
+    assign subtitle = 'general.complementary.pair_products' | t
+  endif
+-%}
+
+{%- if show_upsell -%}
+  <div class="product-upsell__holder{% if upsell_error %} product-upsell__holder--onboarding{% endif %}" data-upsell-holder>
+    <div class="product-upsell">
+      <div class="product-upsell__content">
+        <p class="product-upsell__subtitle">{{ subtitle }}</p>
+        {%- if upsell_error -%}
+          <p class="product-upsell__title h3">{{ 'general.upsell.error_no_product' | t }}</p>
+          <p class="product-upsell__variant-title">{{ 'general.upsell.error_info' | t }}</p>
+        {%- else -%}
+          <p class="product-upsell__title h3">
+            <a href="{{ upsell_link }}">{{ upsell_product.title | strip_html }}</a>
+          </p>
+
+          {%- if single_variant -%}
+            {%- form 'product', upsell_product, data-product-form: '', id: upsell_form_id -%}
+              <input type="hidden" name="id" value="{{ upsell_variant.id }}">
+
+              <button type="submit" name="add"
+                class="product-upsell__btn btn btn--secondary btn--solid-border{% unless upsell_variant.available %} is-hidden{% endunless %}"
+                id="{{ upsell_button_id }}"
+                {% unless upsell_variant.available %} is-hidden{% endunless %}
+                data-add-to-cart
+                data-upsell-btn>
+                <span class="product-upsell__btn-hidden" data-upsell-btn-text>{{ 'general.upsell.add_to_cart' | t }}</span>
+                <span class="product-upsell__btn-text">{{ 'general.upsell.add_to_cart' | t }}</span>
+                <span class="product-upsell__btn-price">&nbsp;-&nbsp;
+                  {%- liquid
+                    if upsell_variant.price == 0
+                      echo 'products.product.free' | t
+                    else
+                      echo upsell_variant.price | money
+                    endif
+                  -%}
+                </span>
+
+                <span class="product-upsell__btn-progress">
+                  <svg height="18" width="18" class="svg-loader">
+                    <circle r="7" cx="9" cy="9" />
+                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                  </svg>
+                </span>
+
+                <span class="product-upsell__btn-check">&nbsp;</span>
+              </button>
+
+              <p class="product-upsell__out-of-stock">{{ 'general.upsell.out_of_stock' | t }}</p>
+            {%- endform -%}
+          {%- else -%}
+            {%- unless upsell_variant.available -%}
+              <p class="product-upsell__unavailable">{{ 'products.product.sold_out' | t }}</p>
+            {%- endunless -%}
+
+            <a class="product-upsell__btn btn btn--secondary btn--solid-border"
+              href="{{ upsell_link }}"
+              data-handle="{{ upsell_product.handle }}"
+              data-button-quick-view
+              >
+                <span class="product-upsell__btn-text">{{ 'general.upsell.quick_view' | t }}</span>
+                <span class="product-upsell__btn-progress">
+                  <svg height="18" width="18" class="svg-loader">
+                    <circle r="7" cx="9" cy="9" />
+                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                  </svg>
+                </span>
+
+                <span class="product-upsell__btn-check">&nbsp;</span>
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+
+        <div data-cart-errors-container role="alert" class="product-upsell__errors"></div>
+      </div>
+
+      <div class="product-upsell__image">
+        <a class="product-upsell__image__link" href="{{ upsell_link }}" aria-label="{{ upsell_product.title | escape | strip_html }}"{% if index > 1 %} tabindex="-1"{% endif %}>
+          {%- liquid
+            assign image = upsell_image
+            assign placeholder_svg = 'product-' | append: index
+          -%}
+          {% render 'image-fill',
+            img_object: image,
+            aspect_ratio: image.aspect_ratio,
+            placeholder_svg: placeholder_svg,
+            classes: 'product-upsell__image__thumb' %}
+        </a>
+      </div>
+    </div>
+  </div>
+{%- endif -%}

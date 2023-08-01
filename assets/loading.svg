@@ -1,0 +1,6 @@
+<svg width="320" height="4px" viewBox="0 0 320 4" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="0" height="4" fill="#000">
+    <animate attributeName="x" from="0" to="320" dur="2.1s" repeatCount="indefinite"/>
+    <animate attributeName="width" from="0" to="320" dur="2.1s" repeatCount="indefinite"/>
+  </rect>
+</svg>

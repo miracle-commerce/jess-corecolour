@@ -1,0 +1,212 @@
+{% style %}
+  :root {
+    --cc-imagebox-desktop-columns: {{ section.settings.desktop-columns }};
+    --cc-imagebox-tablet-columns: {{ section.settings.tablet-columns }};
+    --cc-imagebox-mobile-columns: {{ section.settings.mobile-columns }};
+    --cc-imagebox-top-padding: {{ section.settings.top-padding }};
+    --cc-imagebox-bottom-padding: {{ section.settings.bottom-padding }};
+    --cc-imagebox-image-height: {{ section.settings.image-height }};
+  }
+{% endstyle %}
+
+<section class="cc-imagebox--container">
+  {% if section.settings.title != blank %}
+    <h2 class="cc-imagebox--title">
+      {{ section.settings.title | escape }}
+    </h2>
+  {% endif %}
+  <div class="cc-imagebox--content">
+    <div class="cc-imagebox--wrapper">
+      {% for block in section.blocks %}
+        <div class="cc-imagebox--item">
+          {% if block.settings.image %}
+            <img class="cc-imagebox--image" src="{{ block.settings.image | img_url: "original" }}" loading="lazy">
+          {% endif %}
+  
+          {% if block.settings.header != blank %}
+            <h2 class="cc-imagebox--header">
+              {{ block.settings.header | escape }}
+            </h2>
+          {% endif %}
+
+          {% if block.settings.copy != blank %}
+            <p class="cc-imagebox--copy">
+              {{ block.settings.copy | escape }}
+            </p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "CC Image Box",
+    "class": "cc-image-box--section",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Header Title"
+      },
+      {
+        "type": "text",
+        "id": "desktop-columns",
+        "label": "Columns in Desktop",
+        "default": "4"
+      },
+      {
+        "type": "text",
+        "id": "tablet-columns",
+        "label": "Columns in Tablet",
+        "default": "2"
+      },
+      {
+        "type": "text",
+        "id": "mobile-columns",
+        "label": "Columns in Mobile",
+        "default": "2"
+      },
+      {
+        "type": "text",
+        "id": "top-padding",
+        "label": "Container Top Padding",
+        "default": "4rem",
+        "info": "1rem is equivalent 16px"
+      },
+      {
+        "type": "text",
+        "id": "bottom-padding",
+        "label": "Container Bottom Padding",
+        "default": "4rem",
+        "info": "1rem is equivalent 16px"
+      },
+      {
+        "type": "text",
+        "id": "image-height",
+        "label": "Image Height",
+        "default": "6rem",
+        "info": "1rem is equivalent 16px"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "image-box",
+        "name": "Image Box",
+        "settings": [
+          {
+            "id": "image",
+            "type": "image_picker",
+            "label": "Image"
+          },
+          {
+            "id": "header",
+            "type": "text",
+            "label": "Header"
+          },
+          {
+            "id": "copy",
+            "type": "text",
+            "label": "Copy"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "category": "Image",
+        "name": "CC Image Box",
+        "blocks": [
+          {
+            "type": "image-box"
+          },
+          {
+            "type": "image-box"
+          },
+          {
+            "type": "image-box"
+          },
+          {
+            "type": "image-box"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
+
+{% stylesheet %}
+  .cc-imagebox--container {
+    padding: var(--cc-imagebox-top-padding) 0 var(--cc-imagebox-bottom-padding) 0;
+  }
+  .cc-imagebox--image {
+    height: var(--cc-imagebox-image-height);  
+    margin-bottom: 1.8rem;
+  }
+  .cc-imagebox--title {
+    font-size: 2.5rem;
+    margin: 0;
+    padding-bottom: 2rem;
+    text-align: center;
+  }
+  .cc-imagebox--content {
+    margin: 0 auto;
+    max-width: 1500px;
+    padding: 1rem;
+  }
+  .cc-imagebox--wrapper {
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: repeat(var(--cc-imagebox-desktop-columns), 1fr);
+  }
+  .cc-imagebox--item {
+    text-align: center;
+    text-decoration: none;
+  }
+  .cc-imagebox--header {
+    color: var(--heading);
+    font-family: var(--FONT-STACK-HEADING);
+    font-size: calc(0.9rem * var(--adjust-heading));
+    font-style: var(--FONT-STYLE-HEADING);
+    font-weight: var(--FONT-WEIGHT-HEADING);
+    text-align: center;
+  }
+  .cc-imagebox--copy {
+    color: var(--text);;
+    font-size: calc(0.8rem * var(--adjust-body));
+    font-family: var(--FONT-STACK-BODY);
+    font-style: var(--FONT-STYLE-BODY);
+    font-weight: var(--FONT-WEIGHT-BODY);
+    padding: 0 16%;
+    text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .cc-imagebox--wrapper {
+      grid-template-columns: repeat(var(--cc-imagebox-tablet-columns), 1fr);
+    }
+    .cc-imagebox--header {
+      font-size: 1.2rem;
+    }
+    .cc-imagebox--copy {
+      padding: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cc-imagebox--wrapper {
+      grid-template-columns: repeat(var(--cc-imagebox-mobile-columns), 1fr);
+    }
+    .cc-imagebox--image {
+      height: calc(0.8 * var(--cc-imagebox-image-height));
+    }
+    .cc-imagebox--header {
+      font-size: 1rem;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

@@ -1,0 +1,45 @@
+{%- liquid
+  assign show_continue_shopping = settings.show_continue_shopping
+  assign continue_shopping_link = routes.all_products_collection_url
+  assign show_empty_cart_buttons = settings.show_empty_cart_buttons
+  assign empty_cart_buttons = settings.empty_cart_buttons | default: 'main-menu'
+
+  if settings.continue_shopping_link != blank
+    assign continue_shopping_link = settings.continue_shopping_link
+  endif
+-%}
+
+<div class="cart-empty-buttons{%- render 'button-fallback-classes', primary_color: 'btn--primary', bg_color_secondary: bg_color_secondary -%}"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-delay="{{ animation_delay }}"
+    {%- assign animation_delay = animation_delay | plus: 100 -%}
+  {% endif %}>
+  {%- if show_continue_shopping and show_empty_cart_buttons == false -%}
+    <div
+      {% if animations_enabled %}
+        data-aos="fade"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 100 -%}
+      {% endif %}>
+      <a href="{{ continue_shopping_link }}" class="btn btn--primary btn--solid">
+        {{ 'cart.general.continue_shopping' | t }}
+      </a>
+    </div>
+  {%- endif -%}
+
+  {%- if show_empty_cart_buttons and linklists[empty_cart_buttons].links.size > 0 -%}
+    {%- for link in linklists[empty_cart_buttons].links limit: 3 -%}
+      <div
+        {% if animations_enabled %}
+          data-aos="fade"
+          data-aos-delay="{{ animation_delay }}"
+          {%- assign animation_delay = animation_delay | plus: 100 -%}
+        {% endif %}>
+        <a href="{{ link.url }}" class="btn btn--primary btn--solid btn--small">
+          {{ link.title | strip_html | escape }}
+        </a>
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+</div>

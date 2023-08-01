@@ -1,0 +1,368 @@
+{%- liquid
+  assign unique = section.id
+  assign section_height = section.settings.section_height
+  if section.settings.enable_mobile_height
+    assign mobile_section_height = ' ' | append: section.settings.mobile_section_height
+  endif
+  assign section_width = section.settings.width
+  assign text_color = section.settings.text_color
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#BannerWithTextColumns--' | append: unique
+  assign animation_delay = 150
+  assign padding_top = section.settings.padding_top | append: 'px'
+  assign padding_bottom = section.settings.padding_bottom | append: 'px'
+-%}
+
+{%- style -%}
+  #BannerWithTextColumns--{{ unique }} {
+    --PT: {{ padding_top }};
+    --PB: {{ padding_bottom }};
+    --item-count: {{ section.blocks.size }};
+  }
+{%- endstyle -%}
+
+<section id="BannerWithTextColumns--{{ unique }}"
+  class="section-banner-with-text-columns section-padding {{ text_color }}"
+  data-section-id="{{ unique }}"
+  data-section-type="banner-with-text-columns">
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="{{ section_width }}">
+      <div class="banners {{ section_height }}{{ mobile_section_height }}">
+        <div class="banners__media" data-banners-media
+          {% if animations_enabled %}
+            data-aos="fade-in"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+          {% endif %}>
+
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign image = block.settings.image
+              assign image_alt = image.alt | strip_html | escape
+              assign image_width = image.width
+              assign image_widths = '180, 360, 540, 720, 900, 1080, 1296, 1512, 1728, 2048, 2450, 2700, 3000, 3350, 3750, 4100'
+              assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+            -%}
+
+            <div class="banners__image">
+              <div class="overlay" style="--overlay-opacity: {{ overlay_opacity }}"></div>
+
+              <div class="banners__image-inner lazy-image"
+                data-banner-image
+                style="background-image: url('{{ image | img_url: '1x1' }}');">
+                {%- if image != blank -%}
+                  {%- render 'image',
+                    image: image,
+                    width: image_width,
+                    widths: image_widths,
+                    alt: image_alt,
+                    sizes: 'auto' -%}
+                {%- else -%}
+                  <div class="svg-placeholder placeholder-svg--overlayed">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg-filled' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if section.settings.show_single_image -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        <div class="banners__content banners__slider"
+          data-slider
+          data-slider-id="slider--{{ section.id }}"
+          {% if section.settings.show_single_image %} data-slider-single-image{% endif %}>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign subheading = block.settings.subheading
+              assign heading = block.settings.heading
+              assign text = block.settings.text
+              assign button_text = block.settings.button_text
+              assign button_link = block.settings.button_link | default: '#'
+            -%}
+
+            <div class="banner"
+              data-banner
+              data-index={{ forloop.index0 }}
+              {{ block.shopify_attributes }}>
+              <div class="banner__content"
+                {% if animations_enabled %}
+                  data-aos="fade-up"
+                  data-aos-anchor="{{ animation_anchor }}"
+                  data-aos-delay="{{ animation_delay }}"
+                {% endif %}
+                data-banner-content>
+                {%- if subheading != blank -%}
+                  <p class="banner__subheading subheading-text">{{ subheading }}</p>
+                {%- endif -%}
+
+                {%- if heading != blank -%}
+                  <h3 class="banner__heading">{{ heading }}</h3>
+                {%- endif -%}
+
+                {%- if text != blank -%}
+                  <div class="banner__entry">
+                    {{ text }}
+                  </div>
+                {%- endif -%}
+
+                {%- if button_text != blank -%}
+                  <a class="banner__btn btn {{ button_style }} {{ button_size }} {{ button_color }}" href="{{ button_link }}">{{ button_text | escape }}</a>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  {%- else -%}
+    {%- render 'no-blocks' -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Banner with text columns",
+  "class": "supports-transparent-header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_height",
+      "label": "Height",
+      "default": "six-fifty-height",
+      "options": [
+        { "value": "full-height", "label": "Full screen" },
+        { "value": "three-quarters-height", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height", "label": "Two thirds of screen" },
+        { "value": "one-half-height", "label": "One half of screen" },
+        { "value": "one-third-height", "label": "One third of screen" },
+        { "value": "one-fifth-height", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height", "label": "750px" },
+        { "value": "six-fifty-height", "label": "650px" },
+        { "value": "five-fifty-height ", "label": "550px" },
+        { "value": "four-fifty-height", "label": "450px" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_height",
+      "label": "Enable mobile height",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "mobile_section_height",
+      "label": "Mobile height",
+      "default": "five-fifty-height-mobile",
+      "options": [
+        { "value": "full-height-mobile", "label": "Full screen" },
+        { "value": "three-quarters-height-mobile", "label": "Three quarters of screen" },
+        { "value": "two-thirds-height-mobile", "label": "Two thirds of screen" },
+        { "value": "one-half-height-mobile", "label": "One half of screen" },
+        { "value": "one-third-height-mobile", "label": "One third of screen" },
+        { "value": "one-fifth-height-mobile", "label": "One fifth of screen" },
+        { "value": "seven-fifty-height-mobile", "label": "750px" },
+        { "value": "six-fifty-height-mobile", "label": "650px" },
+        { "value": "five-fifty-height-mobile", "label": "550px" },
+        { "value": "four-fifty-height-mobile", "label": "450px" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Color",
+      "default": "text-light",
+      "options": [
+        { "value": "text-light", "label": "Light" },
+        { "value": "text-dark", "label": "Dark" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "btn--white",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--text",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--small",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Image control"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_single_image",
+      "label": "Show single image",
+      "info": "Will display only the image added to the first column item",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 0
+    }
+  ],
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Text contrast",
+          "info": "Improves readability of text",
+          "min": 0,
+          "max": 95,
+          "step": 5,
+          "unit": "%",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Text"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Add a subheading"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Add a heading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to describe products, share details on availability and style, or as a space to display recent reviews or FAQs.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default": "Learn More"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner with text columns",
+      "category": "Text",
+      "blocks": [
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

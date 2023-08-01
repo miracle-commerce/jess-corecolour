@@ -1,0 +1,97 @@
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "announcement-0": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Exclusive 10% OFF for all new customers - promo code WELCOME10<\/p>",
+            "icon_name": "smile",
+            "icon_color": "#9585ff",
+            "icon_width": 21,
+            "target_url_enabled": false,
+            "target_url": "",
+            "target_referrer_enabled": false,
+            "target_referrer": "",
+            "target_device_enabled": false,
+            "target_device": "mobile"
+          }
+        },
+        "4eb950fc-cacc-473e-8ee0-8e352e763ecc": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Free shipping on selected items.<\/p>",
+            "icon_name": "truck",
+            "icon_color": "#9585ff",
+            "icon_width": 21,
+            "target_url_enabled": false,
+            "target_url": "shopify:\/\/collections\/limited-free-shipping-range",
+            "target_referrer_enabled": false,
+            "target_referrer": "",
+            "target_device_enabled": false,
+            "target_device": "mobile"
+          }
+        },
+        "11e76d71-6242-4d22-93df-d2e85c1f3b1a": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Afterpay available. <\/p>",
+            "icon_name": "credit-card",
+            "icon_color": "#9585ff",
+            "icon_width": 21,
+            "target_url_enabled": false,
+            "target_url": "",
+            "target_referrer_enabled": false,
+            "target_referrer": "",
+            "target_device_enabled": false,
+            "target_device": "mobile"
+          }
+        }
+      },
+      "block_order": [
+        "announcement-0",
+        "4eb950fc-cacc-473e-8ee0-8e352e763ecc",
+        "11e76d71-6242-4d22-93df-d2e85c1f3b1a"
+      ],
+      "settings": {
+        "bg_color": "#1b1b1b",
+        "color": "#ffffff",
+        "layout": "marquee",
+        "padding": 10,
+        "slider_speed": 5,
+        "marquee_speed": 50,
+        "text_size": 100,
+        "message_spacing": 30
+      }
+    },
+    "header": {
+      "type": "header",
+      "custom_css": [
+
+      ],
+      "settings": {
+        "sticky_header": true,
+        "header_border": false,
+        "logo_not_home": "shopify:\/\/shop_images\/finallogo-wordmarkblackpurple-400.svg",
+        "logo_max_width": 170,
+        "main-menu": "main-menu",
+        "show_images": false,
+        "image_aspect_ratio": 1,
+        "menu_alignment": "center",
+        "highlight_item": "Sale",
+        "highlight_item_color": "#d02e2e",
+        "header_transparent": true,
+        "logo": "shopify:\/\/shop_images\/finallogo-wordmarkwhite-400.svg",
+        "header_text_color": "white",
+        "header_gradient": true
+      }
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
+}

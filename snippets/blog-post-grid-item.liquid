@@ -1,0 +1,180 @@
+{%- comment -%}
+  Renders blog post item in a grid
+
+  Accepts:
+  - article: {Object} article (required)
+  - id: {String} Unique ID
+  - classes: {String} Additional classes
+  - animation_delay: {Number} Factor based on grid items per row
+  - animation_anchor: {String} Hook for the AOS animation
+  - default_color: {Color} Applies if the blog has no image set
+  - default_image: {Object} Applies if the blog has no featured image
+  - show_author: {Boolean} Show the author
+  - show_date: {Boolean} Shows the date
+  - show_tags: {Boolean} Shows the tags
+  - show_comments_count: {Boolean} Shows the comments count
+  - onboarding: {Boolean} Applies if no blog is selected
+
+  Usage:
+  {%- render 'blog-post-grid-item',
+    article: article,
+    id: id,
+    classes: classes,
+    animation_delay: animation_delay,
+    animation_anchor: animation_anchor,
+    default_color: default_color,
+    default_image: default_image,
+    show_author: show_author,
+    show_date: show_date,
+    show_tags: show_tags,
+    show_comments_count: show_comments_count
+    onboarding: false -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign article_image = article.image | default: default_image
+  assign article_url = article.url | default: '#!'
+  assign classes = classes | prepend: ' ' | default: ''
+  assign id = id | default: ''
+  assign article_style = article_style | default: 'photo'
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = animation_anchor | default: section.id
+  assign animation_delay = animation_delay | default: 150
+
+  if blog
+    assign blog_url = blog.url
+  else
+    assign blog_url = article.url | split: '/blogs/' | last | split: '/' | first | prepend: '/blogs/'
+  endif
+
+  unless onboarding
+    assign article_title = article.title | strip_html
+    assign author = 'blogs.article.by_author' | t: author: article.author
+    assign published_at = article.published_at | date: format: 'month_day_year'
+    assign datetime = article.published_at | date: '%Y-%m-%d'
+    assign comments_count = 'blogs.comments.comments_with_count' | t: count: article.comments_count
+    capture article_excerpt
+      echo article.excerpt_or_content | strip_html | strip | truncatewords: 35
+    endcapture
+  else
+    assign article_title = 'blogs.article.onboarding.title' | t
+    assign author_name = 'blogs.article.onboarding.author' | t
+    assign author = 'blogs.article.by_author' | t: author: author_name
+    assign published_at = 'now' | date: format: 'month_day_year'
+    assign datetime = 'now' | date: '%Y-%m-%d'
+    assign comments_count = 'blogs.comments.comments_with_count' | t: count: 0
+    assign article_excerpt = 'blogs.article.onboarding.excerpt' | t
+  endunless
+
+  capture anchor_and_delay
+    echo ' data-aos-anchor="' | append: animation_anchor | append: '"'
+    echo ' data-aos-delay="' | append: animation_delay | append: '" '
+  endcapture
+  capture animation_zoom
+    echo ' data-aos="zoom-out"'
+    echo ' data-aos-easing="ease"'
+    echo ' data-aos-duration="1000"'
+    echo anchor_and_delay
+  endcapture
+  capture animation_fadeup
+    echo ' data-aos="fade-up"'
+    echo anchor_and_delay
+  endcapture
+  capture animation_fade
+    echo ' data-aos="fade"'
+    echo anchor_and_delay
+  endcapture
+
+  assign container_animation = animation_fade
+  assign image_animation = ''
+  assign text_animation = ''
+
+  if type == 'all-types' and article_style == 'photo'
+    assign image_animation = animation_zoom
+  elsif type == 'all-types' and article_style == 'standard'
+    assign image_animation = animation_zoom
+    assign text_animation = animation_fade
+  else
+    assign container_animation = animation_fadeup
+  endif
+-%}
+
+{%- capture article_image -%}
+  <a href="{{ article_url }}" class="blog__post-image-link">
+    {%- if article_image or default_color == 'none' -%}
+      <div class="blog__post-image" {{ image_animation }}>
+        {%- render 'image-fill', is_background: true, img_object: article_image -%}
+      </div>
+    {%- else -%}
+      <div class="blog__post-image {{ default_color }}"></div>
+    {%- endif -%}
+
+    <div class="blog__post-overlay"></div>
+  </a>
+{%- endcapture -%}
+
+{%- capture article_tags -%}
+  <div class="blog__post-tags">
+    {%- case onboarding -%}
+      {%- when true -%}
+        {% for tag in (1..2) %}
+          <a href="#!" class="blog__post-tags-link"><small>{{ 'blogs.article.onboarding.tag' | t }}</small></a>
+        {% endfor %}
+
+      {%- else -%}
+        {%- if article.tags.size > 0 -%}
+          {%- for tag in article.tags -%}
+            {% unless tag contains 'time_' %}
+              <a class="blog__post-tags-link" href="{{ blog_url }}/tagged/{{ tag | handle }}"><small>{{ tag | capitalize }}</small></a>
+            {% endunless %}
+          {%- endfor -%}
+        {%- endif -%}
+    {%- endcase -%}
+  </div>
+{%- endcapture -%}
+
+<div class="blog__post-item grid__item{% if onboarding %} blog__post-item--onboarding{% endif %}{{ classes }}"
+  {% if id != '' %}id="{{ id }}"{% endif %}
+  {{ container_animation }}>
+  {{- article_image -}}
+
+  <div class="blog__post-content" {{ text_animation }}>
+    {%- if show_tags -%}
+      {{ article_tags }}
+    {%- endif -%}
+
+    <h3 class="blog__post-title">
+      <a class="blog__post-title-link" href="{{ article_url }}">{{ article_title }}</a>
+    </h3>
+
+    {%- if show_author or show_date -%}
+      <p class="blog__post-meta">
+        {%- capture date -%}<time datetime="{{ datetime }}">{{ published_at }}</time>{%- endcapture -%}
+
+        {%- if show_author -%}
+          <small>{{ author }}</small>
+        {%- endif -%}
+
+        {%- if show_date -%}
+          <small>{{ date }}</small>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+
+    {%- if article_excerpt != empty -%}
+      <a class="blog__post-excerpt-link" href="{{ article_url }}">
+        <div class="rte">
+          {{- article_excerpt -}}
+        </div>
+      </a>
+    {%- endif -%}
+
+    {%- if show_comments_count and article.comments_count > 0 or show_comments_count and onboarding -%}
+      <div class="blog__post-comments">
+        <a href="{{ article_url }}#Comments" class="blog__comments-link">
+          <small>{{ comments_count }}</small>
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

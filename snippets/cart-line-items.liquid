@@ -1,0 +1,265 @@
+{%- comment -%}
+    Renders list of cart items or upsell products
+
+    Accepts:
+    - part: {String} Accepts 'line-items' or 'upsell-items' (required)
+    - animation_delay: {Number} Animation delay that items are supposed to start from
+
+    Usage:
+    {%- render 'cart-line-items', part: 'line-items' -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '.cart__items'
+  assign cart_products = ''
+  assign upsell_products = ''
+  assign line_items_html = ''
+  assign item_animation_delay = animation_delay | default: 150
+-%}
+
+{%- for line_item in cart.items -%}
+  {%- assign cart_products = cart_products | append: line_item.product.id | append: ',' -%}
+
+  {%- capture cart_line_item -%}
+    <div class="cart__item{% if forloop.last %} cart__item--no-border{% endif %}"
+      data-item="{{ line_item.key }}"
+      data-item-index="{{ forloop.index }}"
+      data-item-title="{{ line_item.title | strip_html }}"
+      {% if animations_enabled %}
+        data-aos="fade-left"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ item_animation_delay }}"
+        {%- assign item_animation_delay = item_animation_delay | plus: 150 -%}
+      {% endif %}
+      data-cart-item>
+      <div class="cart__item__image">
+        <a href="{{ line_item.url }}">
+          {%- liquid
+            assign image = line_item.image
+            assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+            assign image_widths = "[90,160,180,270,320]"
+          -%}
+          <img
+            class="lazyload"
+            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            data-src="{{ image_url_pattern }}"
+            data-aspectratio="{{ image.aspect_ratio | default: 1 }}"
+            data-widths= "{{ image_widths }}"
+            data-sizes="auto"
+            alt="{{ line_item.title | strip_html | escape }}">
+          <noscript>
+            <img src="{{ image | img_url: '160x' }}" alt="{{ line_item.title | strip_html | escape }}">
+          </noscript>
+        </a>
+      </div>
+
+      <div class="cart__item__content">
+        <div class="cart__item__content-inner">
+          <div class="cart__item__info">
+            <p class="cart__item__title">
+              <a href="{{- line_item.url -}}">
+                {{- line_item.product.title | strip_html -}}
+              </a>
+            </p>
+
+            <div class="cart__item__meta">
+              {%- unless line_item.product.has_only_default_variant -%}
+                {%- for option in line_item.options_with_values -%}
+                  <p class="cart__item__selected-options">
+                    <span>{{- option.name -}}:</span>
+                    <span>{{- option.value -}}</span>
+                  </p>
+                {%- endfor -%}
+              {%- endunless -%}
+
+              {%- if line_item.selling_plan_allocation -%}
+                <p class="cart__item__selling-plan">
+                  <span>{{ line_item.selling_plan_allocation.selling_plan.name }}</span>
+                </p>
+              {%- endif -%}
+
+              {%- assign property_size = line_item.properties | size -%}
+              {%- if property_size > 0 -%}
+                {%- for p in line_item.properties -%}
+                  {%- assign property_first_char = p.first | slice: 0 -%}
+                  {%- if p.last != blank and property_first_char != '_' -%}
+                    <p class="cart__item__property">
+                      <span>{{ p.first }}: </span>
+                      <span>
+                        {%- if p.last contains '/uploads/' -%}
+                          <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                        {%- else -%}
+                          {{ p.last }}
+                        {%- endif -%}
+                      </span>
+                    </p>
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+            </div>
+          </div>
+
+          <p class="cart__item__price">
+            {%- assign discounted = false -%}
+            {%- assign sale = false -%}
+
+            {%- if line_item.original_price > line_item.final_price -%}
+              {%- assign discounted = true -%}
+            {%- endif -%}
+
+            {%- if line_item.variant.compare_at_price > line_item.price -%}
+              {%- assign sale = true -%}
+            {%- endif -%}
+
+            {%- if sale or discounted -%}
+              <ins>
+                {%- if line_item.final_price == 0 -%}
+                  {{- 'products.product.free' | t -}}
+                {%- else -%}
+                  {{- line_item.final_price | money -}}
+                {%- endif -%}
+              </ins>
+            {%- else -%}
+              {%- if line_item.final_price == 0 -%}
+                {{- 'products.product.free' | t -}}
+              {%- else -%}
+                {{- line_item.final_price | money -}}
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if sale and discounted == false -%}
+              <del>
+                {{- line_item.variant.compare_at_price | money -}}
+              </del>
+            {%- endif -%}
+
+            {%- if discounted -%}
+              <del>
+                {{- line_item.original_price | money -}}
+              </del>
+            {%- endif -%}
+
+            {%- if line_item.unit_price and line_item.unit_price != 0 -%}
+              {%- capture unit_price_separator -%}
+                <span aria-hidden="true">/</span><span class="visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+              {%- endcapture -%}
+
+              {%- capture unit_price_base_unit -%}
+                {%- if line_item.unit_price_measurement.reference_value != 1 -%}
+                  {{- line_item.unit_price_measurement.reference_value -}}
+                {%- endif -%}
+                {{- line_item.unit_price_measurement.reference_unit -}}
+              {%- endcapture -%}
+
+              <span class="line__price">
+                <small class="visually-hidden">{{ 'products.product.unit_price_label' | t }}</small>
+                <small>{{ line_item.unit_price | money }} {{ unit_price_separator }} {{ unit_price_base_unit }}</small>
+              </span>
+            {%- endif -%}
+          </p>
+        </div>
+
+        <div class="cart__item__bottom">
+          <div class="cart__item__quantity" data-quantity-holder>
+            <button type="button" class="cart__item__quantity-minus" data-quantity-minus data-quantity-button title="
+              {{- 'general.accessibility.decrease' | t }} - {{ line_item.product.title | strip_html -}}">
+              <span class="visually-hidden">{{ 'general.accessibility.decrease' | t }}</span>
+              {%- render 'icon-toggle-minus' -%}
+            </button>
+
+            {%- assign quantity = line_item.quantity -%}
+
+            {%- if line_item.variant.inventory_policy == 'deny' and line_item.variant.inventory_management != nil and line_item.variant.inventory_quantity < quantity -%}
+              {%- assign quantity = line_item.variant.inventory_quantity -%}
+            {%- endif -%}
+
+            <input type="number" name="updates[]" id="updates_{{ line_item.key }}" class="cart__item__quantity-field" data-quantity-field
+            data-id="{{- line_item.key -}}" value="{{- quantity -}}"
+            title="{{- 'cart.label.quantity' | t }} - {{ line_item.product.title | strip_html -}}" pattern="[0-9]*">
+
+            <button type="button" class="cart__item__quantity-plus" data-quantity-plus data-quantity-button title="
+              {{- 'general.accessibility.increase' | t }} - {{ line_item.product.title | strip_html -}}">
+              <span class="visually-hidden">{{ 'general.accessibility.increase' | t }}</span>
+              {%- render 'icon-toggle-plus' -%}
+            </button>
+          </div>
+
+          <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&amp;quantity=0" class="cart__item__remove" data-item-remove data-id="{{ line_item.key }}" title="{{ 'cart.general.remove' | t }}">
+            <span>{{ 'cart.general.remove' | t }}</span>
+          </a>
+        </div>
+      </div>
+
+      {%- if line_item.original_price > line_item.final_price -%}
+        {%- for discount in line_item.line_level_discount_allocations -%}
+          <p class="cart__discount">
+            {%- render 'icon-tags' -%}
+            {%- liquid
+              if settings.currency_code_enable
+                assign discount_price = discount.amount | money_with_currency
+              else
+                assign discount_price = discount.amount | money
+              endif
+            -%}
+
+            <span>{{ 'cart.general.discount_label' | t: amount: discount_price, title: discount.discount_application.title }}</span>
+          </p>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  {%- endcapture -%}
+
+  {%- assign line_items_html = line_items_html | append: cart_line_item -%}
+{%- endfor -%}
+
+{%- liquid
+  for line_item in cart.items
+    assign upsell_product_list = line_item.product.metafields.theme.upsell_list
+    assign upsell_product = line_item.product.metafields.theme.upsell
+
+    if upsell_product_list.value != nil and upsell_product_list.type == 'list.product_reference'
+      comment
+        Product meta field type "List of products"
+      endcomment
+
+      for upsell_product in upsell_product_list.value
+        if cart_products contains upsell_product.id or upsell_product.available == false
+          continue
+        endif
+
+        unless upsell_products contains upsell_product.handle
+          assign upsell_products = upsell_products | append: upsell_product.handle | append: ','
+        endunless
+      endfor
+    endif
+
+    comment
+      Product meta field type "One product"
+    endcomment
+
+    if upsell_product.value != nil and upsell_product.type == 'product_reference'
+      assign upsell_product = upsell_product.value
+
+      if cart_products contains upsell_product.id or upsell_product.available == false
+        continue
+      endif
+
+      unless upsell_products contains upsell_product.handle
+        assign upsell_products = upsell_products | append: upsell_product.handle | append: ','
+      endunless
+    endif
+  endfor
+-%}
+
+{%- case part -%}
+  {%- when 'line-items' -%}
+    {{- line_items_html -}}
+
+  {%- when 'upsell-items' -%}
+    {%- if upsell_products != '' -%}
+      <div data-pair-products>
+        {% render 'upsell-products' with upsell_products as upsell_products %}
+      </div>
+    {%- endif -%}
+{%- endcase -%}

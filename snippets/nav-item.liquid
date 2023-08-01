@@ -1,0 +1,153 @@
+{%- liquid
+  assign highlight_item = section.settings.highlight_item | downcase | strip_html | escape
+  assign link_title = link.title | strip_html | escape
+  assign link_title_lowercase = link.title | downcase | strip_html | escape
+  assign parent = false
+  assign grandparent = false
+  if link.levels == 1
+    assign parent = true
+  endif
+  if link.levels == 2
+    assign grandparent = true
+  endif
+
+  assign child_count = 0
+  assign image_count = 0
+  if grandparent
+    assign child_count = link.links.size
+    if child_count > 10
+      assign child_count = 10
+    endif
+  endif
+
+  assign index = index | append: ""
+  for block in section.blocks
+    if block.settings.position == index
+      assign grandparent = true
+      assign image_count = image_count | plus: 1
+    endif
+  endfor
+
+  if parent or grandparent
+    assign expands = true
+    assign key = link.url | append: link.title | append: link.levels | md5
+  endif
+
+  if parent and link.levels == 1
+    assign child_count = child_count | plus: 1
+  endif
+
+  if image_count and child_count == 0
+    assign images_only = " grandparent--all-images"
+  endif
+
+  capture classes
+    echo 'menu__item'
+
+    if grandparent
+      echo ' grandparent kids-' | append: child_count
+
+      if image_count > 0
+        echo ' images-' | append: image_count
+      else
+        echo ' no-images'
+      endif
+
+      echo images_only
+    elsif parent
+      echo ' parent'
+    else
+      echo ' child'
+    endif
+
+    if link.active
+      echo ' menu-item--active'
+    endif
+  endcapture
+-%}
+
+<div class="{{ classes }}"
+  data-nav-item
+  {% if grandparent %}
+    role="navigation"
+  {% endif %}
+  {% if expands %}
+    role="button"
+    aria-haspopup="true"
+    aria-expanded="false"
+    data-hover-disclosure-toggle="dropdown-{{ key }}"
+    aria-controls="dropdown-{{ key }}"
+  {% else %}
+    data-hover-disclosure-toggle
+  {% endif %}>
+  <a href="{{ link.url }}" data-top-link class="navlink navlink--toplevel{% if highlight_item == link_title_lowercase %} navlink--highlight{% endif %}">
+    <span class="navtext">{{ link_title }}</span>
+  </a>
+  {%- if expands -%}
+    <div class="header__dropdown"
+      data-hover-disclosure
+      role="combobox"
+      id="dropdown-{{ key }}">
+      <div class="header__dropdown__wrapper">
+        <div class="header__dropdown__inner">
+          {%- if grandparent -%}
+            {%- unless images_only -%}
+              <div class="header__grandparent__links">
+                {%- if link.levels == 2 -%}
+                  {%- for link in link.links -%}
+                    {%- capture link_image_markup -%}
+                      {%- render 'header-link-image' with enable: section.settings.show_images, link: link, aspect_ratio: section.settings.image_aspect_ratio -%}
+                    {%- endcapture -%}
+
+                    <div class="dropdown__family">
+                      {%- assign link_title = link.title | strip_html | escape -%}
+                      {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
+                      <a href="{{ link.url }}" class="navlink navlink--child{% if link_image_markup != blank %} navlink--image{% endif %}{% if link.active %} navlink--active{% endif %}{% if highlight_item == link_title_lowercase %} navlink--highlight{% endif %}">
+                        {{- link_image_markup -}}
+                        <span class="navtext">{{ link_title }}</span>
+                      </a>
+                      {%- for link in link.links -%}
+                        {%- assign link_title = link.title | strip_html | escape -%}
+                        {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
+                        <a href="{{ link.url }}" class="navlink navlink--grandchild{% if link.active %} navlink--active{% endif %}{% if highlight_item == link_title_lowercase %} navlink--highlight{% endif %}">
+                          <span class="navtext">{{ link_title }}</span>
+                        </a>
+                      {%- endfor -%}
+                    </div>
+                  {%- endfor -%}
+                {%- elsif link.levels == 1 -%}
+                  <div class="dropdown__family">
+                    {%- for link in link.links -%}
+                      {%- assign link_title = link.title | strip_html | escape -%}
+                      {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
+                      <a href="{{ link.url }}" data-stagger class="navlink navlink--grandchild{% if link.active %} navlink--active{% endif %}{% if highlight_item == link_title_lowercase %} navlink--highlight{% endif %}">
+                        <span class="navtext">{{ link_title }}</span>
+                      </a>
+                    {%- endfor %}
+                  </div>
+                {%- endif %}
+              </div>
+            {%- endunless -%}
+
+            {%- for block in section.blocks -%}
+              {% comment %} Render block content {% endcomment %}
+              {%- if block.settings.position == index -%}
+                {%- render 'header-block', block: block -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+          {%- else -%}
+            {% comment %} Simple dropdown {% endcomment %}
+            {%- for link in link.links -%}
+              {%- assign link_title = link.title | strip_html | escape -%}
+              {%- assign link_title_lowercase = link.title | downcase | strip_html | escape -%}
+              <a href="{{ link.url }}" data-stagger class="navlink navlink--child{% if link.active %} navlink--active{% endif %}{% if highlight_item == link_title_lowercase %} navlink--highlight{% endif %}">
+                <span class="navtext">{{ link_title }}</span>
+              </a>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+</div>

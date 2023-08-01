@@ -1,0 +1,39 @@
+{% comment %}
+  * Common srcset values
+
+  *  image {object} - the image object (not a url)
+  *  widths {аrray} - An array of the image widths for srcset
+
+  {% render 'image-srcset', image: img_object %}
+{% endcomment %}
+
+{%- comment -%} image.preview_image.width handles the 3D models because they lack the image.width property {%- endcomment -%}
+{%- assign image_width = image.width | default: image.preview_image.width -%}
+
+{%- if image_width != blank -%}
+  {%- liquid
+    assign widths = widths | default: '180, 360, 400, 540, 560, 590, 606, 670, 720, 738, 770, 814, 900, 1024, 1080, 1296, 1410, 1512, 1524, 1728, 1950, 2100, 2260, 2450, 2700, 2870, 3000, 3350, 3750, 4100' | split: ', '
+    assign srcs = ''
+
+    for string_width in widths
+      assign width = string_width | times: 1
+
+      if image_width >= width
+        capture src
+          echo image | image_url: width: width | append: ' '
+          echo width | append: 'w'
+        endcapture
+
+        assign srcs = srcs | append: src | append: ', '
+      endif
+    endfor
+
+    capture default_src
+      echo image | image_url: width: image_width | append: ' '
+      echo image_width | append: 'w'
+    endcapture
+  -%}
+  {{- srcs | append: default_src -}}
+{%- else -%}
+  {{- image -}}
+{%- endif -%}

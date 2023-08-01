@@ -1,0 +1,64 @@
+{%- if settings.social_facebook_link != blank or settings.social_twitter_link != blank or settings.social_pinterest_link != blank or settings.social_instagram_link != blank or settings.social_youtube_link != blank or settings.social_tiktok_link != blank or settings.social_snapchat_link != blank or settings.social_tumblr_link != blank or settings.social_rss_link != blank or show_follow_on_shop -%}
+  <div class="social-sharing-wrapper">
+
+    {%- if settings.social_instagram_link != blank -%}
+      <a class="social-sharing-icon instagram" rel="noopener" href = "{{ settings.social_instagram_link }}" title="{{ 'footer.socials.title' | t: social: 'Instagram', shop_name: shop.name }}">
+        {%- render 'icon-instagram' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_tiktok_link != blank -%}
+      <a class="social-sharing-icon tiktok" rel="noopener" href = "{{ settings.social_tiktok_link }}" title="{{ 'footer.socials.title' | t: social: 'Tiktok', shop_name: shop.name }}">
+        {%- render 'icon-tiktok' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_facebook_link != blank -%}
+      <a class="social-sharing-icon facebook" rel="noopener" href = "{{ settings.social_facebook_link }}" title="{{ 'footer.socials.title' | t: social: 'Facebook', shop_name: shop.name }}">
+        {%- render 'icon-facebook' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_twitter_link != blank -%}
+      <a class="social-sharing-icon twitter" rel="noopener" href = "{{ settings.social_twitter_link }}" title="{{ 'footer.socials.title' | t: social: 'Twitter', shop_name: shop.name }}">
+        {%- render 'icon-twitter' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_snapchat_link != blank -%}
+      <a class="social-sharing-icon snapchat" rel="noopener" href = "{{ settings.social_snapchat_link }}" title="{{ 'footer.socials.title' | t: social: 'Snapchat', shop_name: shop.name }}">
+        {%- render 'icon-snapchat' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_pinterest_link != blank -%}
+      <a class="social-sharing-icon pinterest" rel="noopener" href = "{{ settings.social_pinterest_link }}" title="{{ 'footer.socials.title' | t: social: 'Pinterest', shop_name: shop.name }}">
+        {%- render 'icon-pinterest' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_tumblr_link != blank -%}
+    <a class="social-sharing-icon tumblr" rel="noopener" href = "{{ settings.social_tumblr_link }}" title="{{ 'footer.socials.title' | t: social: 'Tumblr', shop_name: shop.name }}">
+      {%- render 'icon-tumblr' -%}
+    </a>
+    {%- endif -%}
+
+    {%- if settings.social_youtube_link != blank -%}
+      <a class="social-sharing-icon youtube" rel="noopener" href = "{{ settings.social_youtube_link }}" title="{{ 'footer.socials.title' | t: social: 'Youtube', shop_name: shop.name }}">
+        {%- render 'icon-youtube' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if settings.social_rss_link != blank -%}
+      <a class="social-sharing-icon rss" rel="noopener" href = "{{ settings.social_rss_link }}" title="{{ 'footer.socials.rss' | t }}">
+        {%- render 'icon-rss-feed' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if show_follow_on_shop -%}
+      <div class="social-sharing-icon follow-on-shop">
+        {{ shop | login_button: action: 'follow' }}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}

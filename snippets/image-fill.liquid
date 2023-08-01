@@ -1,0 +1,118 @@
+{% comment %}
+  * Renders a cropped image that fills the container width using `background-size: cover`.
+  * Height is defined by the optional aspect ratio. If aspect ratio is `false` or `nil`
+  * the image will use natural height and will not be cropped.
+  * Additionally, the container can be omitted by passing `is_background: true`, but doing this means that the image would rely on its parent container having a `position: relative`, so that the image can fill it
+
+  *  img_object {object} - The Image that would be used
+  *  aspect_ratio {float} - The aspect ratio of the image in the format {ratio}:1 (Optional)
+  *  is_background {boolean} - Defines whether the `.image-fill` wrapper would be used or not (Optional)
+  *  classes {string} - Classes and modifiers that would be used for the image and image-placeholder containers (Optional)
+  *  image_attributes {string} - Data attributes necessary for the image container (Optional)
+  *  alt {string} - Overrides image alt value (Optional)
+  *  styles {string} - Additional styles that can be added to the image or image container (Optional)
+  *  placeholder_svg {string} - SVG placeholder name (https://shopify.dev/api/liquid/filters#placeholder_svg_tag) (Optional)
+
+  {% render 'image-fill', img_object: section.settings.image, aspect_ratio: section.settings.aspect_ratio, placeholder_svg: 'lifestyle-1' %}
+{% endcomment %}
+
+{%- liquid
+  assign default_image = 'blank.svg' | asset_url
+  assign image = img_object | default: default_image
+  assign aspect_ratio = aspect_ratio | default: ''
+  assign classes = classes | default: ''
+  assign image_classes = 'background-size-cover'
+  assign no_js_classes = 'no-js-image'
+  assign image_styles = ''
+  assign styles = styles | default: ''
+  assign image_attributes = image_attributes | default: ''
+  assign placeholder_svg = placeholder_svg | default: 'image'
+  assign has_image = true
+  assign is_background = is_background | default: false
+  assign alt = alt | default: image.alt | default: image | split: "/" | last
+  assign alt = alt | strip_html | escape
+
+  if image == blank or image contains 'blank.svg'
+    assign has_image = false
+    assign image_classes = image_classes | append: ' ' | append: 'placeholder-svg--overlayed'
+  else
+    assign image_classes = image_classes | append: ' ' | append: 'lazyload'
+  endif
+
+  assign focal = image.presentation.focal_point | default: '50.0% 50.0%'
+  if focal == '50.0% 50.0%'
+    assign focal = nil
+  endif
+  assign bg_position_setting = bg_position | replace: '-', ' ' | default: 'center-center'
+  assign focal_or_setting =  focal | default: bg_position_setting
+
+  capture bg_position_style
+    assign focal_or_setting = focal_or_setting | replace: '-', ' '
+    echo 'background-position: ' | append: focal_or_setting | append: ';'
+  endcapture
+
+  capture padding_top_styles
+    assign percentage = 100
+
+    if has_image == false
+      echo 'padding-top: ' | append: percentage | append: '%; filter: brightness(.95);'
+    elsif aspect_ratio != ''
+      assign percentage = aspect_ratio | times: 100 | round: 2
+      echo 'padding-top: ' | append: percentage | append: '%;'
+    else
+      assign percentage = 1 | divided_by: image.aspect_ratio | times: 100 | round: 2
+      echo 'padding-top: ' | append: percentage | append: '%;'
+    endif
+  endcapture
+
+  if classes != '' and is_background
+    assign image_classes = image_classes | append: ' ' | append: classes
+    assign no_js_classes = no_js_classes | append: ' ' | append: classes
+  endif
+
+  assign image_fill_classes = 'image-fill fade-in-image' | append: ' ' | append: classes
+  assign image_fill_styles = padding_top_styles | append: ' ' | append: styles
+
+  if styles != '' and is_background
+    assign image_styles = styles
+  endif
+-%}
+
+{%- unless is_background -%}
+  <div class="{{ image_fill_classes }}" style="{{ image_fill_styles }}">
+{%- endunless -%}
+
+  {%- if has_image -%}
+    <div class="{{ image_classes }}"
+      style="{{ bg_position_style }}{{ image_styles }}"
+      role="img"
+      aria-label="{{ alt }}"
+      data-bgset="{% render 'bgset', image: image %}"
+      {% if is_background %}
+        data-aspectratio="{{ image.aspect_ratio }}"
+        data-sizes="auto"
+      {% endif %}
+      {{ image_attributes }}>
+    </div>
+
+    <noscript>
+      <div class="{{ no_js_classes }}"
+        {% if image_styles != '' %}
+          style="{{ image_styles }}"
+        {% endif %}>
+        {{- image | image_url: width: image.width | image_tag: class: 'img-object-cover', alt: alt -}}
+      </div>
+    </noscript>
+  {%- else -%}
+    <div class="{{ image_classes }}"
+      {% if image_styles != '' %}
+        style="{{ image_styles }}"
+      {% endif %}
+      {{ image_attributes }}>
+      {{- placeholder_svg | placeholder_svg_tag: 'placeholder-svg-filled' -}}
+    </div>
+  {%- endif -%}
+
+{%- unless is_background -%}
+  </div>
+{%- endunless -%}

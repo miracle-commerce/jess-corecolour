@@ -1,0 +1,263 @@
+{%- comment -%} /sections/newsletter.liquid {%- endcomment -%}
+{%- liquid
+  assign unique = section.id
+  assign section_width = section.settings.width
+  assign title = section.settings.title
+  assign text = section.settings.text
+  assign bg_color = section.settings.bg_color
+  assign image = section.settings.image
+  assign overlay_opacity = section.settings.overlay_opacity | times: 0.01
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#Newsletter--' | append: section.id
+  assign animation_delay = 150
+-%}
+{%- style -%}
+  #Newsletter--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    {%- if bg_color != 'rgba(0,0,0,0)' and bg_color != '' -%}
+      --bg: {{ bg_color }};
+      background: {{ bg_color }};
+    {%- endif -%}
+      --overlay-opacity: {{ overlay_opacity }};
+    }
+{%- endstyle -%}
+
+<section
+  class="section-padding newsletter-section{% if image %} {{ section.settings.image_height }}{% endif %} {{ section.settings.text_color }}"
+  id="Newsletter--{{ unique }}"
+  data-section-id="{{ unique }}"
+  data-section-type="newsletter">
+  {%- if image -%}
+    {%- capture image_attributes -%}
+      {%- if animations_enabled -%}
+        data-aos="fade"
+        data-aos-anchor="{{ animation_anchor }}"
+        data-aos-delay="{{ animation_delay }}"
+        {%- assign animation_delay = animation_delay | plus: 150 -%}
+      {%- endif -%}
+    {%- endcapture -%}
+
+    {%- render 'image-fill',
+      is_background: true,
+      img_object: image,
+      image_attributes: image_attributes,
+      classes: 'newsletter-section__bg' -%}
+
+    <div class="overlay"></div>
+  {%- endif -%}
+
+  <div class="{{ section_width }}">
+    <div class="newsletter-section__content__wrapper {{ section.settings.flex_align }}">
+      <div class="newsletter-section__content">
+        <div class="newsletter-section__entry">
+          {%- if title != blank -%}
+            <h2
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {{- title | escape -}}
+            </h2>
+          {%- endif -%}
+
+          {%- if text != blank -%}
+            <div
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {{- text -}}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="newsletter"
+          {% if animations_enabled %}
+            data-aos="fade-up"
+            data-aos-anchor="{{ animation_anchor }}"
+            data-aos-delay="{{ animation_delay }}"
+          {% endif %}>
+          {%- render 'newsletter-form',
+            unique: unique,
+            extra_fields: section.settings.extra_fields,
+            button_text: section.settings.button_text -%}
+        </div>
+
+        {%- for block in section.blocks -%}
+          {%- render block -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Newsletter",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layout"
+      },
+      {
+        "type": "select",
+        "id": "flex_align",
+        "label": "Position",
+        "default": "align--middle-left",
+        "options": [
+          { "value": "align--middle-left", "label": "Left" },
+          { "value": "align--middle-center", "label": "Center" },
+          { "value": "align--middle-right", "label": "Right" },
+          { "value": "align--middle-split", "label": "Split" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Text"
+      },
+      {
+        "type": "select",
+        "id": "text_color",
+        "label": "Color",
+        "default": "text-dark",
+        "options": [
+          {
+            "value": "text-light",
+            "label": "Light"
+          },
+          {
+            "value": "text-dark",
+            "label": "Dark"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Newsletter"
+      },
+      {
+        "type": "richtext",
+        "id": "text",
+        "label": "Text",
+        "default": "<p>Sign up for exclusive deals and early access to new products.</p>"
+      },
+      {
+        "type": "paragraph",
+        "content": "Subscribers are under 'Accepts Marketing' in your [customer admin](/admin/customers)."
+      },
+      {
+        "type": "header",
+        "content": "Additional field"
+      },
+      {
+        "type": "select",
+        "id": "extra_fields",
+        "label": "Additional fields",
+        "default": "",
+        "options": [
+          { "value": "", "label": "None" },
+          { "value": "name", "label": "Name" },
+          { "value": "first-last-name", "label": "First and last name" }
+        ]
+      },
+      {
+        "type": "text",
+        "id": "button_text",
+        "label": "Button text"
+      },
+      {
+        "type": "header",
+        "content": "Background"
+      },
+      {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Color"
+      },
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Image"
+      },
+      {
+        "type": "select",
+        "id": "image_height",
+        "label": "Height",
+        "default": "three-fifty-height",
+        "options": [
+          { "value": "full-height", "label": "Full screen" },
+          { "value": "five-fifty-height", "label": "550px" },
+          { "value": "four-fifty-height", "label": "450px" },
+          { "value": "three-fifty-height", "label": "350px" },
+          { "value": "two-fifty-height", "label": "250px" }
+        ]
+      },
+      {
+        "type": "header",
+        "content": "Overlay"
+      },
+      {
+        "type": "range",
+        "id": "overlay_opacity",
+        "label": "Text contrast",
+        "info": "Improves readability of text",
+        "min": 0,
+        "max": 95,
+        "step": 5,
+        "unit": "%",
+        "default": 10
+      },
+      {
+        "type": "header",
+        "content": "Section spacing"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "label": "Width",
+        "default": "wrapper",
+        "options": [
+          { "value": "wrapper--full-padded", "label": "Full width padded" },
+          { "value": "wrapper", "label": "Page width" },
+          { "value": "wrapper--narrow", "label": "Page width narrow" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding top",
+        "default": 60
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "min": 0,
+        "max": 100,
+        "step": 2,
+        "unit": "px",
+        "label": "Padding bottom",
+        "default": 60
+      }
+    ],
+    "presets": [
+      {
+        "name": "Newsletter",
+        "category": "Text"
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header","aside"]
+    }
+  }
+{% endschema %}

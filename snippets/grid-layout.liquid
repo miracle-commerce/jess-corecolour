@@ -1,0 +1,289 @@
+{%- liquid
+  assign section_width = section.settings.width
+  assign bg_color_secondary = section.settings.bg_color_secondary
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign button_1_style = section.settings.button_1_style
+  assign button_1_color = section.settings.button_1_color
+  assign button_1_size = section.settings.button_1_size
+  assign button_2_style = section.settings.button_2_style
+  assign button_2_color = section.settings.button_2_color
+  assign button_2_size = section.settings.button_2_size
+  assign add_gutter = section.settings.add_gutter
+  assign block_count = section.blocks.size
+  assign currency_code_enable = settings.currency_code_enable
+  assign animations_enabled = settings.animations_enabled
+  assign section_id = 'SectionMosaicGrid--' | append: section.id
+  assign section_selector_id = '#' | append: section_id
+  assign animation_anchor = section_selector_id
+  assign animation_delay = 150
+
+  assign section_class = ''
+
+  if add_gutter
+    assign section_class = section_class | append: ' mosaic--spacing'
+  else
+    assign section_class = section_class | append: ' mosaic--no-spacing'
+  endif
+
+  if section.settings.enable_slider_mobile
+    assign section_class = section_class | append: ' mosaic--mobile-slider'
+  else
+    assign section_class = section_class | append: ' mosaic--mobile-grid'
+  endif
+
+  if block_count == 1
+    assign section_class = section_class | append: ' mosaic--single-block'
+  elsif block_count > 1
+    assign section_class = section_class | append: ' mosaic--multiple-blocks'
+  endif
+
+  case section.settings.height
+    when 'fullscreen'
+      assign section_height_class = 'full-height'
+    when '750'
+      assign section_height_class = 'seven-fifty-height'
+    when '650'
+      assign section_height_class = 'six-fifty-height'
+    when '550'
+      assign section_height_class = 'five-fifty-height'
+    when '450'
+      assign section_height_class = 'four-fifty-height'
+    when '350'
+      assign section_height_class = 'three-fifty-height'
+    when '250'
+      assign section_height_class = 'two-fifty-height'
+    when 'auto'
+      assign section_height_class = 'original-height'
+  endcase
+-%}
+
+{%- style -%}
+  {{ section_selector_id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    {%- unless add_gutter -%}
+      --grid-gutter: 0px;
+    {%- endunless -%}
+  }
+
+  {{ section_selector_id }} .mosaic__item__heading {
+    --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }});
+  }
+{%- endstyle -%}
+
+<section id="{{ section_id }}"
+  class="mosaic{{ section_class }} section-padding{% if bg_color_secondary %} bg-secondary{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-section-type="mosaic">
+  <div class="mosaic__wrapper {{ section_width }}{% if section_width != 'wrapper--full' %} wrapper--no-full{% endif %}">
+    {%- if block_count > 0 -%}
+      <div class="mosaic__grid" data-grid>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign image = ''
+            assign block_width = block.settings.width
+            assign text_position = block.settings.text_position
+            assign subheading = block.settings.subheading
+            assign heading = block.settings.title
+            assign show_description = block.settings.show_description
+            assign show_price = block.settings.show_price
+            assign price = ''
+            assign text = block.settings.text
+            assign has_block_link = false
+            assign button_1_link = block.settings.button_1_link
+            assign button_1_text = block.settings.button_1_text
+            assign button_2_text = block.settings.button_2_text
+            assign button_2_link = block.settings.button_2_link | default: '#!'
+            assign text_color = block.settings.text_color
+            assign bg_color = block.settings.bg_color
+            assign overlay_opacity = block.settings.overlay_opacity | times: 0.01
+            assign animation_delay = forloop.index
+            assign block_id = 'MosaicItem--' | append: block.id
+            assign block_selector_id = '#' | append: block_id
+
+            case text_position
+              when 'left'
+                assign text_position_class = 'mosaic__item__content--left'
+              when 'center'
+                assign text_position_class = 'mosaic__item__content--center'
+              when 'right'
+                assign text_position_class = 'mosaic__item__content--right'
+              when 'bottom-left'
+                assign text_position_class = 'mosaic__item__content--bottom-left'
+              when 'bottom-right'
+                assign text_position_class = 'mosaic__item__content--bottom-right'
+              when 'top-left'
+                assign text_position_class = 'mosaic__item__content--top-left'
+              when 'top-right'
+                assign text_position_class = 'mosaic__item__content--top-right'
+            endcase
+
+            assign has_image = true
+            if block.type == 'text'
+              assign has_image = false
+            endif
+
+            case block.type
+              when 'product'
+                assign product = block.settings.product
+                assign button_1_link = product.url | default: '#!'
+                if product != blank
+                  assign image = product.featured_media.preview_image
+                  assign heading = product.title | strip_html
+                  if product.price == 0
+                    assign price = 'products.product.free' | t
+                  elsif currency_code_enable
+                    assign price = product.price | money_with_currency
+                  else
+                    assign price = product.price | money
+                  endif
+                else
+                  assign heading = 'homepage.onboarding.product_title' | t
+                  if currency_code_enable
+                    assign price = 10000 | money_with_currency
+                  else
+                    assign price = 10000 | money
+                  endif
+                endif
+
+                unless show_price
+                  assign price = ''
+                endunless
+
+              when 'collection'
+                assign collection = block.settings.collection
+                assign button_1_link = collection.url | default: '#!'
+                if collection != blank
+                  assign image = block.settings.image | default: collection.image | default: collection.products[0].featured_media.preview_image
+                  assign heading = collection.title | strip_html
+                  assign text = collection.description | strip_html
+                else
+                  assign image = block.settings.image | default: ''
+                  assign heading = 'homepage.onboarding.collection_title' | t
+                  assign text = 'homepage.onboarding.single_collection_description' | t
+                endif
+
+                unless show_description
+                  assign text = ''
+                endunless
+
+              when 'image'
+                assign image = block.settings.image
+            endcase
+
+            if button_1_link != blank and button_2_text == blank
+              assign has_block_link = true
+            endif
+
+            capture block_styles
+              if bg_color != 'rgba(0,0,0,0)' and bg_color != blank
+                echo '--bg: ' | append: bg_color | append: ';'
+              endif
+              if overlay_opacity != blank
+                echo '--overlay-opacity: ' | append: overlay_opacity | append: ';'
+              endif
+            endcapture
+          -%}
+
+          {%- style -%}
+            {{ block_selector_id }} {
+              --block-width: {{ block_width }}%;
+              --image-ratio: {{ 1 | divided_by: image.aspect_ratio | times: 100 | round: 2 | append: '%' }};
+            }
+          {%- endstyle -%}
+
+          {%- capture item_attributes -%}
+            id="{{ block_id }}"
+            class="mosaic__item mosaic__item--{{ forloop.index }} {{ text_color }}{% if has_block_link %} mosaic__item--block-link{% endif %} {{ section_height_class }}"
+            data-item
+            {% if animations_enabled %}
+              data-aos="fade"
+              data-aos-anchor="{{ animation_anchor }}"
+              data-aos-delay="{{ animation_delay | times: 150 }}"
+            {% endif %}
+            {% if block_styles != blank %}
+              style="{{ block_styles }}"
+            {% endif %}
+            {{ block.shopify_attributes }}
+          {%- endcapture -%}
+
+          {%- capture item_image -%}
+            <div class="mosaic__item__image">
+              {%- if image != blank -%}
+                {%- render 'image-fill', is_background: true, img_object: image -%}
+              {%- else -%}
+                <div class="svg-placeholder{% if block.type == 'image' %} svg-placeholder--image{% endif %}">
+                  {%- case block.type -%}
+                    {%- when 'product' -%}
+                      {%- capture index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
+                      {{ 'product-' | append: index | placeholder_svg_tag: 'placeholder-svg-filled' }}
+                    {%- when 'collection' -%}
+                      {%- capture index -%}{% cycle 1, 2 %}{%- endcapture -%}
+                      {{ 'collection-' | append: index | placeholder_svg_tag: 'placeholder-svg-filled' }}
+                    {%- when 'image' -%}
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg-filled' }}
+                  {%- endcase -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endcapture -%}
+
+          <div {{ item_attributes }}>
+            <div class="mosaic__item__inner">
+              {%- if has_block_link -%}
+                <a href="{{ button_1_link }}" class="mosaic__item__image__link">
+              {%- endif -%}
+
+              {%- if has_image -%}
+                {{ item_image }}
+              {%- endif -%}
+
+              <div class="mosaic__item__content {{ text_position_class }}{% if button_1_link == blank %} mosaic__item__content--nolink{% endif %}">
+
+                {%- if subheading != blank -%}
+                  <p class="mosaic__item__subheading subheading-text">{{ subheading }}</p>
+                {%- endif -%}
+
+                {%- if heading != blank -%}
+                  <h3 class="mosaic__item__heading{% if has_block_link %} mosaic__item__heading--underline{% endif %} h2">{{ heading }}</h3>
+                {%- endif -%}
+
+                {%- if text != blank -%}
+                  <div class="mosaic__item__text p">
+                    {{- text -}}
+                  </div>
+                {%- endif -%}
+
+                {%- if price != blank -%}
+                  <div class="mosaic__item__price p">
+                    {{- price -}}
+                  </div>
+                {%- endif -%}
+
+                {%- if button_1_text != blank or button_2_text != blank -%}
+                  <div class="mosaic__item__buttons">
+                    {%- if button_1_text != blank and has_block_link == false -%}
+                      <a href="{{ button_1_link }}" class="mosaic__item__btn btn {{ button_1_style }} {{ button_1_size }} {{ button_1_color }}">{{ button_1_text }}</a>
+                    {%- elsif button_1_text != blank -%}
+                      <span class="mosaic__item__btn btn {{ button_1_style }} {{ button_1_size }} {{ button_1_color }}">{{ button_1_text }}</span>
+                    {%- endif -%}
+
+                    {%- if button_2_text != blank -%}
+                      <a href="{{ button_2_link }}" class="mosaic__item__btn btn {{ button_2_style }} {{ button_2_size }} {{ button_2_color }}">{{ button_2_text }}</a>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- if has_block_link -%}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      {%- render 'no-blocks' -%}
+    {%- endif -%}
+  </div>
+</section>

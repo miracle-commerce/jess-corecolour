@@ -1,0 +1,35 @@
+{%- comment -%}
+  Renders share button for featured product section, product page and article page
+
+  Accepts:
+  - text: {String} Share button text. Default: "Share"
+  - link: {String} URL that will be shared (Optional)
+  - animation_anchor: {String} link the animation to an ID,
+  - animation_delay: {Number} sets the animation delay
+
+  Usage:
+  {%- render 'share-button', text: text, link: link
+  -%}
+{%- endcomment -%}
+{%- assign animations_enabled = settings.animations_enabled -%}
+
+<div class="share-button"
+  {% if animations_enabled %}
+    data-aos="fade-up"
+    data-aos-anchor="{{ animation_anchor }}"
+    data-aos-delay="{{ animation_delay }}"
+  {% endif %}>
+  <button class="btn btn--text share-link"{% if link != blank %} data-share-link="{{ link }}"{% endif %} data-share-button>
+    {%- render 'icon-share' -%}
+    {{- text -}}
+  </button>
+
+  <div class="tooltip-default" data-share-button-tooltip>
+    <div class="tooltip-default__inner">
+      <div class="tooltip-default__arrow" data-tooltip-arrow></div>
+      <div class="tooltip-default__text">
+        {{- 'general.accessibility.link_copied' | t -}}
+      </div>
+    </div>
+  </div>
+</div>

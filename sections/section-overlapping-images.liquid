@@ -1,0 +1,525 @@
+{% comment %} Overlapping images {% endcomment %}
+
+{%- liquid
+  assign unique = section.id
+
+  comment
+    Layout
+  endcomment
+  assign section_width = section.settings.width
+  assign text_position = section.settings.text_position
+  assign text_alignment = section.settings.text_alignment
+  assign animations_enabled = settings.animations_enabled
+  assign animation_anchor = '#OverlappingImages--' | append: section.id
+  assign animation_delay = 150
+
+  comment
+    Text
+  endcomment
+  assign heading = section.settings.heading
+  assign heading_size = section.settings.heading_size | times: 0.01
+  assign description = section.settings.description
+
+  comment
+    Button
+  endcomment
+  assign button_text = section.settings.button_text
+  assign button_link = section.settings.button_link | default: '#!'
+  assign button_style = section.settings.button_style
+  assign button_color = section.settings.button_color
+  assign button_size = section.settings.button_size
+
+  comment
+    Images
+  endcomment
+  assign image_1 = section.settings.image_1
+  assign image_2 = section.settings.image_2
+  assign image_link_1 = section.settings.image_link_1
+  assign image_link_2 = section.settings.image_link_2
+  assign hide_image_2 = section.settings.hide_image_2
+  assign images_width = section.settings.images_width
+  assign images_offset = section.settings.images_offset
+  assign single_image = false
+  if image_1 != blank and image_2 == blank
+    assign single_image = true
+  elsif image_1 == blank and image_2 != blank
+    assign single_image = true
+  endif
+
+  if image_1 == blank and image_2 != blank
+    assign hide_image_2 = true
+  elsif image_1 != blank and image_2 == blank
+    assign hide_image_2 = true
+  endif
+
+  comment
+    Video
+  endcomment
+  assign video_text = section.settings.video_text
+  assign video_link = section.settings.video_link
+
+  comment
+    Colors
+  endcomment
+  assign bg_color_secondary = section.settings.bg_color_secondary
+-%}
+
+{%- style -%}
+  #OverlappingImages--{{ section.id }} {
+    --PT: {{ section.settings.padding_top }}px;
+    --PB: {{ section.settings.padding_bottom }}px;
+    --image-offset: {{ images_offset }}px;
+  }
+  #OverlappingImages--{{ section.id }} .main-heading { --adjust-heading: calc(var(--FONT-ADJUST-HEADING) * {{ heading_size }}); }
+{%- endstyle -%}
+
+<section id="OverlappingImages--{{ section.id }}" class="section-padding overlapping-images{% if bg_color_secondary %} bg-secondary{% endif %}{%- render 'button-fallback-classes', primary_color: button_color, bg_color_secondary: bg_color_secondary -%}" data-section-id="{{ section.id }}" data-section-type="overlapping-images">
+  <div class="{{ section_width }}">
+    <div class="overlapping-images__block{% if text_position == 'left' %} overlapping-images__block--reverse{% endif %}">
+      <div class="overlapping-images__images{% if hide_image_2 %} overlapping-images__images--single-mobile{% endif %}" style="max-width: {{ images_width }}px;">
+        <div class="overlapping-images__images-inner{% if single_image %} overlapping-images__images-inner--single{% endif %}">
+          {%- unless image_1 == blank -%}
+            {%- capture image_bg -%}
+              {%- render 'image-fill', img_object: image_1, classes: 'overlapping-images__image-bg' -%}
+            {%- endcapture -%}
+
+            <div class="overlapping-images__image{% if image_2 != blank %} overlapping-images__image--primary{% endif %} lazy-image"
+              {% if animations_enabled %}
+                {% if single_image %}
+                  data-aos="fade-up"
+                {% else %}
+                  data-aos="fade-right"
+                {% endif %}
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              style="background-image: url({{ image_1 | img_url: '1x1' }});">
+              {%- if image_link_1 != blank -%}
+                <a href="{{ image_link_1 }}" aria-label="{{ image_1.alt | strip_html | escape }}">
+                  {{- image_bg -}}
+                </a>
+              {%- else -%}
+                {{- image_bg -}}
+              {%- endif -%}
+            </div>
+          {%- endunless -%}
+
+          {%- unless image_2 == blank -%}
+            {%- capture image_bg -%}
+              {%- render 'image-fill', img_object: image_2, classes: 'overlapping-images__image-bg' -%}
+            {%- endcapture -%}
+
+            <div class="overlapping-images__image{% if image_1 != blank %} overlapping-images__image--secondary{% endif %} lazy-image"
+              {% if animations_enabled %}
+                {% if single_image %}
+                  data-aos="fade-up"
+                {% else %}
+                  data-aos="fade-left"
+                {% endif %}
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}
+              style="background-image: url({{ image_2 | img_url: '1x1' }});">
+              {%- if image_link_2 != blank -%}
+                <a href="{{ image_link_2 }}" aria-label="{{ image_2.alt | strip_html | escape }}">
+                  {{- image_bg -}}
+                </a>
+              {%- else -%}
+                {{- image_bg -}}
+              {%- endif -%}
+            </div>
+          {%- endunless -%}
+
+          {%- if image_1 == blank and image_2 == blank -%}
+            {%- capture image_placeholder -%}
+              {%- render 'image-fill',
+                img_object: '',
+                classes: 'overlapping-images__image-bg' -%}
+            {%- endcapture -%}
+
+            <div class="overlapping-images__image overlapping-images__image--primary"
+              {% if animations_enabled %}
+                {% if single_image %}
+                  data-aos="fade-up"
+                {% else %}
+                  data-aos="fade-right"
+                {% endif %}
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {%- if image_link_1 != blank -%}
+                <a href="{{ image_link_1 }}">{{ image_placeholder }}</a>
+              {%- else -%}
+                {{- image_placeholder -}}
+              {%- endif -%}
+            </div>
+
+            <div class="overlapping-images__image overlapping-images__image--secondary"
+              {% if animations_enabled %}
+                {% if single_image %}
+                  data-aos="fade-up"
+                {% else %}
+                  data-aos="fade-left"
+                {% endif %}
+                data-aos-anchor="{{ animation_anchor }}"
+                data-aos-delay="{{ animation_delay }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              {%- if image_link_2 != blank -%}
+                <a href="{{ image_link_2 }}">{{ image_placeholder }}</a>
+              {%- else -%}
+                {{- image_placeholder -}}
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="overlapping-images__content text-{{ text_alignment }}">
+        {%- if video_text != blank or video_link != blank -%}
+          <div class="overlapping-images__buttons main-buttons main-buttons--video">{%- liquid
+  assign video_link_downcase = video_link | downcase
+  assign video_type = ''
+  assign video_id = ''
+  assign video_parent_id = 'item-video-' | append: unique
+
+  if video_link contains "vimeo.com"
+    assign video_type = "vimeo"
+  elsif video_link contains "youtube.com"
+    assign video_type = "youtube"
+  elsif video_link contains "youtu.be"
+    assign video_type = "youtube"
+    assign youtubeShortlink = true
+  elsif video_link_downcase contains ".mp4"
+    assign video_type = "native"
+  endif
+
+  assign link_array = video_link | split: '/'
+  assign id_with_params = link_array | last
+
+  if video_type == "vimeo" or youtubeShortlink
+  comment
+    https://vimeo.com/[ID]?foo=bar&baz=boo
+    https://youtu.be/[ID]?foo=bar&baz=boo
+  endcomment
+    assign starts_with_id = id_with_params | split: '?'
+    assign video_id = starts_with_id | first
+  elsif video_type == "youtube" 
+  comment
+    https://youtube.com/watch?v=[ID]?foo=bar&baz=boo
+  endcomment
+    assign first_param = id_with_params | split: '&' | first
+    assign watch_then_id = first_param | split: '?'
+    assign equals_id = watch_then_id[1]
+    assign ends_with_id = equals_id | split: '='
+    assign video_id = ends_with_id | last
+  endif
+
+  if video_type == 'youtube'
+    capture video_link
+      echo 'https://www.youtube.com/watch?v=' | append: video_id
+    endcapture
+  elsif video_type == 'vimeo'
+    capture video_link
+      echo 'https://vimeo.com/' | append: video_id
+    endcapture
+  endif
+-%}<div class="main-buttons__item"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-delay="{{ animation_delay }}"
+                data-aos-anchor="{{ animation_anchor }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              <a class="video-text-link" href="{{ video_link | default: '#!' }}"
+                {% unless video_link == blank %}
+                  data-video-play="{%- render 'photoswipe-video-html' item_link: video_link , item_link_type: video_type, item_link_id: video_id, item_id: video_parent_id -%}"
+                {% endunless %}
+              >
+                {%- render 'icon-play' -%}
+
+                {%- if video_text != blank -%}
+                  <span>{{ video_text }}</span>
+                {%- endif -%}
+              </a>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if heading != blank -%}
+          <h2 class="overlapping-images__heading main-heading"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-delay="{{ animation_delay }}"
+              data-aos-anchor="{{ animation_anchor }}"
+            {% endif %}>{{ heading | escape }}</h2>
+          {%- assign animation_delay = animation_delay | plus: 150 -%}
+
+          {%- if settings.show_spacer_lines -%}
+            <hr{% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-delay="{{ animation_delay }}"
+              data-aos-anchor="{{ animation_anchor }}"
+            {% endif %}>
+            {%- assign animation_delay = animation_delay | plus: 150 -%}
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if description != blank -%}
+          <div class="overlapping-images__text main-text rte"
+            {% if animations_enabled %}
+              data-aos="fade-up"
+              data-aos-delay="{{ animation_delay }}"
+              data-aos-anchor="{{ animation_anchor }}"
+              {%- assign animation_delay = animation_delay | plus: 150 -%}
+            {% endif %}>
+            {{- description -}}
+          </div>
+        {%- endif -%}
+
+        {%- if button_text != blank -%}
+          <div class="overlapping-images__buttons main-buttons">
+            <div class="main-buttons__item"
+              {% if animations_enabled %}
+                data-aos="fade-up"
+                data-aos-delay="{{ animation_delay }}"
+                data-aos-anchor="{{ animation_anchor }}"
+                {%- assign animation_delay = animation_delay | plus: 150 -%}
+              {% endif %}>
+              <a href="{{ button_link }}" class="btn {{ button_style }} {{ button_size }} {{ button_color }}">{{ button_text }}</a>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Overlapping images",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "default": "right",
+      "options": [
+        { "label": "Left", "value": "left" },
+        { "label": "Right", "value": "right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        { "label": "Center", "value": "center" },
+        { "label": "Left", "value": "left" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "range",
+      "id": "images_width",
+      "label": "Width",
+      "min": 200,
+      "max": 750,
+      "step": 10,
+      "unit": "px",
+      "default": 750
+    },
+    {
+      "type": "range",
+      "id": "images_offset",
+      "label": "Offset",
+      "min": 30,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "image_link_1",
+      "label": "Image link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Second image"
+    },
+    {
+      "type": "url",
+      "id": "image_link_2",
+      "label": "Second image link"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_image_2",
+      "label": "Hide second image on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Story, Our Promise"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Use this text to describe a product, promotion, or your company.</p>"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": 100,
+      "min": 70,
+      "max": 200,
+      "step": 10,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link"
+    },
+    {
+      "type": "select",
+      "id": "button_color",
+      "label": "Color",
+      "default": "btn--black",
+      "options": [
+        { "label": "Primary", "value": "btn--primary" },
+        { "label": "Secondary", "value": "btn--secondary" },
+        { "label": "White", "value": "btn--white" },
+        { "label": "Black", "value": "btn--black" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "default": "btn--solid",
+      "options": [
+        { "label": "Solid", "value": "btn--solid" },
+        { "label": "Outline", "value": "btn--outline" },
+        { "label": "Solid with border", "value": "btn--solid-border" },
+        { "label": "Text", "value": "btn--text" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Size",
+      "default": "btn--small",
+      "options": [
+        { "label": "Large", "value": "btn--large" },
+        { "label": "Medium", "value": "btn--medium" },
+        { "label": "Small", "value": "btn--small" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Video button"
+    },
+    {
+      "type": "text",
+      "id": "video_text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "video_link",
+      "label": "Video popup link",
+      "info": "Video links from YouTube, Vimeo or MP4 video link from [files](/admin/content/files?selectedView=all&media_type=VIDEO)"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_color_secondary",
+      "label": "Background",
+      "info": "Use secondary background color",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wrapper--full-padded",
+      "options": [
+        { "value": "wrapper--full-padded", "label": "Full width padded" },
+        { "value": "wrapper", "label": "Page width" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Overlapping images",
+      "category": "Image"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header","aside","footer"]
+  }
+}
+{% endschema %}

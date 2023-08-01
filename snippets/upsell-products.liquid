@@ -1,0 +1,120 @@
+{%- liquid
+  assign upsell_products = upsell_products | strip_newlines | split: ','
+  assign upsell_form_id = "UpsellForm--" | append: unique
+  assign upsell_button_id = "UpsellButton--" | append: unique
+-%}
+
+{%- for product_handle in upsell_products -%}
+  {%- liquid
+    assign upsell_product = all_products[product_handle]
+    assign upsell_link = upsell_product.url | default: '#!'
+    assign upsell_variant = upsell_product.selected_or_first_available_variant
+    assign upsell_variant_image = upsell_variant.featured_media | default: upsell_product.media[0]
+
+    if settings.currency_code_enable
+      assign upsell_variant_price = upsell_variant.price | money_with_currency
+    else
+      assign upsell_variant_price = upsell_variant.price | money
+    endif
+
+    if upsell_product.title == '' or upsell_variant == nil
+      assign upsell_error = true
+    endif
+  -%}
+
+  {%- unless upsell_error -%}
+    <div class="product-upsell__holder product-upsell__holder--cart" data-upsell-holder>
+      <div class="product-upsell">
+        <div class="product-upsell__content">
+          <p class="product-upsell__subtitle">{{ 'general.upsell.pair_products' | t }}</p>
+
+          <p class="product-upsell__title h3">
+            <a href="{{ upsell_link }}">{{ upsell_product.title | strip_html | escape }}</a>
+          </p>
+
+          {%- if upsell_product.variants.size == 1 and upsell_product.selling_plan_groups.size == 0 -%}
+            {%- form 'product', upsell_product, data-product-form: '', id: upsell_form_id -%}
+              <input type="hidden" name="id" value="{{ upsell_product.first_available_variant.id }}">
+
+              <button type="button" name="add"
+                class="product-upsell__btn btn btn--secondary btn--solid-border"
+                id="{{ upsell_button_id }}"
+                data-add-to-cart
+                data-upsell-btn
+                data-handle="{{ upsell_product.handle }}">
+                <span class="product-upsell__btn-hidden" data-upsell-btn-text>
+                  {{ 'general.upsell.add_to_cart' | t }}
+                </span>
+
+                <span class="product-upsell__btn-text">
+                  {{ 'general.upsell.add_to_cart' | t }}
+                </span>
+
+                <span class="product-upsell__btn-price">&nbsp;-&nbsp;
+                  {%- liquid
+                    if upsell_variant.price == 0
+                      echo 'products.product.free' | t
+                    else
+                      echo upsell_variant_price
+                    endif
+                  -%}
+                </span>
+
+                <span class="product-upsell__btn-progress">
+                  <svg height="18" width="18" class="svg-loader">
+                    <circle r="7" cx="9" cy="9" />
+                    <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                  </svg>
+                </span>
+
+                <span class="product-upsell__btn-check">&nbsp;</span>
+              </button>
+            {%- endform -%}
+          {%- else -%}
+            <a class="product-upsell__btn btn btn--secondary btn--solid-border"
+              href="{{ upsell_link }}"
+              data-handle="{{ upsell_product.handle }}"
+              data-button-quick-view
+            >
+              <span class="product-upsell__btn-text">{{ 'general.upsell.quick_view' | t }}</span>
+              <span class="product-upsell__btn-progress">
+                <svg height="18" width="18" class="svg-loader">
+                  <circle r="7" cx="9" cy="9" />
+                  <circle stroke-dasharray="87.96459430051421 87.96459430051421" r="7" cx="9" cy="9" />
+                </svg>
+              </span>
+
+              <span class="product-upsell__btn-check">&nbsp;</span>
+            </a>
+          {%- endif -%}
+
+          <div data-cart-errors-container role="alert" class="product-upsell__errors"></div>
+        </div>
+
+        <div class="product-upsell__image">
+          <a class="product-upsell__image__link" href="{{ upsell_link }}" aria-label="{{ upsell_product.title | strip_html | escape }}">
+            {%- liquid
+              assign image = upsell_variant_image
+              assign image_url_pattern = image | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+              assign image_widths = "[100, 200, 300, 400]"
+            -%}
+
+            <img src="{{ 'blank.gif' | asset_img_url: '1x1' }}"
+                class="product-upsell__image__thumb lazyload"
+                data-src="{{ image_url_pattern }}"
+                data-widths= "{{ image_widths }}"
+                data-aspectratio="{{ image.aspect_ratio }}"
+                data-sizes="auto"
+                width="100"
+                height="100"
+                data-object-fit="cover"
+                alt="{{ image.alt | escape }}">
+            <noscript>
+              <img src="{{ image.src | img_url: '100x' }}" alt="{{ image.alt | escape }}" class="product-upsell__image__thumb">
+            </noscript>
+          </a>
+        </div>
+      </div>
+    </div>
+  {%- endunless -%}
+{%- endfor -%}
