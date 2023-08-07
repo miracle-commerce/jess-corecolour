@@ -46,7 +46,8 @@
     "cart_type": "drawer",
     "cart_icon": "shopping_cart",
     "enable_cart_animation": true,
-    "enable_cart_notes": true,
+    "enable_cart_notes": false,
+    "enable_gift_notes": false,
     "enable_additional_buttons": false,
     "show_empty_cart_buttons": true,
     "empty_cart_buttons": "search-menu",
@@ -54,6 +55,8 @@
     "free_shipping_limit": "55",
     "cart_custom_message_color": "text-dark",
     "enable_accept_terms": false,
+    "discount_popup_content": "<h3>My Voucher Wallet<\/h3><p>Save Big on CORECOLOUR Products with Exclusive Discount Code<\/p>",
+    "discount_invalid_text": "<h3>Invalid Promo\/Voucher Code<\/h3><p>Promo code is not applicable to your shopping cart.<\/p><p>Please Contact Us to assist if in doubt.<\/p>",
     "show_spacer_lines": false,
     "arrow_style": "chevron",
     "show_rounded_corners": true,
@@ -131,12 +134,6 @@
         "settings": {
         }
       },
-      "14952540001915115444": {
-        "type": "shopify:\/\/apps\/upcart-cart-drawer\/blocks\/app-embed\/af3da5fb-f5f7-40ec-8273-41bf50059d4b",
-        "disabled": false,
-        "settings": {
-        }
-      },
       "18228966181090706294": {
         "type": "shopify:\/\/apps\/upsell-cross-sell-selleasy\/blocks\/app-embed\/790c1a03-a71f-4bc1-9869-00dad526d3c2",
         "disabled": false,
@@ -146,6 +143,12 @@
       "1173261918193615741": {
         "type": "shopify:\/\/apps\/geo-pro-geolocation-redirects\/blocks\/geopro\/16fc5313-7aee-4e90-ac95-f50fc7c8b657",
         "disabled": false,
+        "settings": {
+        }
+      },
+      "14952540001915115444": {
+        "type": "shopify:\/\/apps\/upcart-cart-drawer\/blocks\/app-embed\/af3da5fb-f5f7-40ec-8273-41bf50059d4b",
+        "disabled": true,
         "settings": {
         }
       }

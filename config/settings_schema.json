@@ -918,6 +918,54 @@
         "id": "accept_terms_text",
         "label": "Checkbox label",
         "default": "<p>I agree to the terms and conditions<\/p>"
+      },
+      {
+        "type":"header", 
+        "content":"Cart Discount Box"
+      },
+      {
+        "type":"checkbox",
+        "id":"show_discount_box", 
+        "label":"Show Discount Box",
+        "default":true
+      },
+      {
+        "type":"text", 
+        "id":"discount_box_title",
+        "label":"Discount box title",
+        "default":"Apply Voucher, Promo Code or Gift Card"
+      },
+      {
+        "type":"text", 
+        "id":"discount_box_placeholder",
+        "label":"Discount box placeholder",
+        "default":"Apply Voucher / Gift Card"
+      },
+      {
+        "type":"paragraph",
+        "content":"Cart Discount Popup"
+      },
+      {
+        "type":"text",
+        "id":"discount_popup_title",
+        "label":"Discount Popup Title",
+        "default":"Voucher Code / Gift Card"
+      },
+      {
+        "type":"textarea",
+        "id":"discount_popup_subtitle",
+        "label":"Discount Popup Content",
+        "default":"Limit one voucher and allow multiple gift cards per order"
+      },
+      {
+        "type":"richtext",
+        "id":"discount_popup_content", 
+        "label":"Discount Box Content"
+      },
+      {
+        "type":"richtext", 
+        "id":"discount_invalid_text", 
+        "label":"Discount Invalid Text"
       }
     ]
   },

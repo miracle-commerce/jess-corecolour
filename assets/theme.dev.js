@@ -8700,7 +8700,6 @@
       this.hasItemsInCart = this.hasItemsInCart.bind(this);
       this.isCartPage = Boolean(this.cart && this.cartDrawer === null);
       this.showAnimations = Boolean(document.body.dataset.animations === 'true');
-
       // Set classes
       this.toggleClassesOnContainers = this.toggleClassesOnContainers.bind(this);
 
@@ -8729,7 +8728,16 @@
       if (this.isCartPage) {
         this.renderPairProducts();
       }
-
+      console.log("Cart Drawer");
+      $.ajax({
+        url: 'https://upsell-app.logbase.io/setup',
+        data: {
+          myShopifyDomain: 'ffb08a.myshopify.com'
+        }, 
+        success: function(response){
+          console.log(response);
+        }
+      })
       document.addEventListener('theme:popup:open', this.closeCartDrawer);
     }
 
@@ -8763,6 +8771,26 @@
       this.cartItemCount = 0;
       this.subtotal = window.theme.subtotal;
       this.button = null;
+      // Cart Discount Box -- MC
+      this.mcCartDiscountPopUpTrigger = document.querySelector(".mc-discount-trigger"); 
+      this.mcCartDiscountPopup = document.querySelector("[data-mc-cart-discount-popup]"); 
+      this.mcCartDiscountPopupClose = document.querySelector("[data-mc-cart-discount-popup-close]");
+
+      // Script for apply discount on cart
+      if(this.mcCartDiscountPopUpTrigger){
+        this.mcCartDiscountPopUpTrigger.addEventListener('click', ()=>{
+          this.mcCartDiscountPopup.classList.add("active");
+        });
+      };
+
+      if(this.mcCartDiscountPopupClose){
+        console.log(this.mcCartDiscountPopupClose);
+        this.mcCartDiscountPopupClose.addEventListener('click', (e)=>{
+          e.preventDefault();
+          this.mcCartDiscountPopup.classList.remove("active");
+        })
+      }
+      // End Cart Discount Script
 
       if (this.cartMessage.length > 0) {
         this.cartFreeLimitShipping = Number(this.cartMessage[0].getAttribute(attributes$p.shippingMessageLimit)) * 100 * window.Shopify.currency.rate;

@@ -193,7 +193,7 @@
 
       {%- if line_item.original_price > line_item.final_price -%}
         {%- for discount in line_item.line_level_discount_allocations -%}
-          <p class="cart__discount">
+          <p class="cart__discount" hidden>
             {%- render 'icon-tags' -%}
             {%- liquid
               if settings.currency_code_enable
